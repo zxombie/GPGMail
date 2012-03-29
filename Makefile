@@ -1,3 +1,9 @@
+PROJECT = GPGMail
+TARGET = GPGMail
+CONFIG = Release
+
+include Dependencies/GPGTools_Core/make/default
+
 all: compile
 
 update:
