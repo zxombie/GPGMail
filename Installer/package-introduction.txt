@@ -1,8 +1,0 @@
-GPGMail
-Version: 1.4
-
-It includes a plugin for Apple Mail to sign, encrypt and decrypt pgp-messages.
-
-For additional information please visit the official Homepage:
-
-https://www.gpgtools.org/gpgmail/
