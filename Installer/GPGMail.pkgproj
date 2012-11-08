@@ -848,7 +848,7 @@
 							<key>SECONDARY_VALUE</key>
 							<string></string>
 							<key>VALUE</key>
-							<string>This version of GPGMail is vor OS X 10.6 (Snow Leopard) only.</string>
+							<string>This version of GPGMail is for OS X 10.6 (Snow Leopard) only.</string>
 						</dict>
 					</array>
 					<key>NAME</key>
@@ -1039,7 +1039,7 @@
 				</dict>
 			</array>
 			<key>NAME</key>
-			<string>GPGMail_10.6</string>
+			<string>GPGMail-1.4.1</string>
 		</dict>
 	</dict>
 	<key>TYPE</key>
