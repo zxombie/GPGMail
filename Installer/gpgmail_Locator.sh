@@ -7,6 +7,7 @@ linkPath="${2%/*}"
 sysdir="/Library/Mail/Bundles"
 netdir="/Network/Library/Mail/Bundles"
 homedir="$HOME/Library/Mail/Bundles"
+bundle="GPGMail.mailbundle"
 ################################################################################
 
 # determine where to install the bundle to #####################################
