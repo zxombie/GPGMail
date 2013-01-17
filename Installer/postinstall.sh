@@ -1,130 +1,102 @@
 #!/bin/bash
+# This is a package post-install script for GPGMail.
 
 
 # config #######################################################################
-tempdir="/private/tmp/GPGMail_Installation"
-sysdir="/Library/Mail/Bundles/"
-netdir="/Network/Library/Mail/Bundles/"
-homedir="$HOME/Library/Mail/Bundles/"
-bundle="GPGMail.mailbundle";
+sysdir="/Library/Mail/Bundles"
+netdir="/Network/Library/Mail/Bundles"
+homedir="$HOME/Library/Mail/Bundles"
+bundle="GPGMail.mailbundle"
+USER=${USER:-$(id -un)}
 ################################################################################
 
 
-# determine where to install the bundle to #####################################
-if ( test -e "$netdir/$bundle" ) then
-    _target="$netdir";
-elif ( test -e "$sysdir/$bundle" ) then
-    _target="$sysdir";
+# Find real target #############################################################
+dir="$PWD"
+cd "$(readlink "$2")"
+target="$(pwd -P)"
+
+if cd "$netdir" && [[ "$target" == "$(pwd -P)" ]] ;then
+	target="$netdir"
+elif cd "$homedir" && [[ "$target" == "$(pwd -P)" ]] ;then
+	target="$homedir"
 else
-    _target="$homedir";
+	target="$sysdir"
 fi
+################################################################################
+
+
+# Check if GPGMail is correct installed ########################################
+if [[ ! -e "$target/$bundle" ]] ;then
+	echo "[gpgmail] Can't find '$bundle'.  Aborting." >&2
+	exit 1
+fi
+################################################################################
+
+
+# Quit Apple Mail ##############################################################
+echo "[gpgmail] Quitting Mail..."
+osascript -e "quit app \"Mail\""
 ################################################################################
 
 
 # Cleanup ######################################################################
-if [ ! -e "$tempdir/$bundle" ]; then
-    echo "Installation failed. GPGMail was not found at $tempdir/$bundle";
-    exit 1;
-fi
-# remove old versions of the bundle
-rm -rf "$netdir/$bundle"
-rm -rf "$sysdir/$bundle"
-rm -rf "$homedir/$bundle"
-################################################################################
-
-
-# Install ######################################################################
-mkdir -p "$_target"
-mv "$tempdir/$bundle" "$_target"
-
-if [ ! "`diff -r $tempdir/$bundle $_target/$bundle`" == "" ]; then
-    echo "Installation failed. GPGMail bundle was not installed or updated at $_target";
-    rm -fr "$tempdir/$bundle"
-    exit 1;
-fi
+echo "[gpgmail] Removing duplicates of the bundle..."
+[[ "$target" != "$netdir" ]] && rm -rf "$netdir/$bundle"
+[[ "$target" != "$sysdir" ]] && rm -rf "$sysdir/$bundle"
+[[ "$target" != "$homedir" ]] && rm -rf "$homedir/$bundle"
 ################################################################################
 
 
 # Permissions ##################################################################
 # see http://gpgtools.lighthouseapp.com/projects/65764-gpgmail/tickets/134
 # see http://gpgtools.lighthouseapp.com/projects/65764-gpgmail/tickets/169
-if [ "$_target" == "$homedir" ]; then
-    sudo chown $USER:Staff "$HOME/Library/Mail"
-    sudo chown -R $USER:Staff "$homedir"
+echo "[gpgmail] Fixing permissions..."
+if [ "$target" == "$homedir" ]; then
+    chown "$USER:staff" "$HOME/Library/Mail"
+    chown -R "$USER:staff" "$homedir"
 fi
-sudo chmod 755 "$_target"
+chmod -R 755 "$target"
 ################################################################################
 
 
-# Cleanup ######################################################################
-rm -fr "$tempdir/GPGMail.mailbundle"
-# cleanup tempdir "rm -d" deletes the temporary installation dir only if empty.
-# that is correct because if eg. /tmp is you install dir, there can be other stuff
-# in there that should not be deleted
-rm -d "$tempdir"
-################################################################################
-
-
+# TODO: Update for Mountain Lion!
 # enable bundles in Mail #######################################################
+echo "[gpgmail] Enabling bundle..."
 ######
-# Note that we are running sudo'd, so these defaults will be written to
-# /Library/Preferences/com.apple.mail.plist
-#
 # Mail must NOT be running by the time this script executes
 ######
-if [ `whoami` == root ] ; then
-    #defaults acts funky when asked to write to the root domain but seems to work with a full path
-	domain=/Library/Preferences/com.apple.mail
-else
-    domain=com.apple.mail
-fi
 
-defaults write "$domain" EnableBundles -bool YES
-defaults write "$domain" BundleCompatibilityVersion -int 3
+case "$(sw_vers -productVersion | cut -d . -f 2)" in
+	7) bundleCompVer=5 ;;
+	6) bundleCompVer=4 ;;
+	*) bundleCompVer=3 ;;
+esac
+
+defaults write "/Library/Preferences/com.apple.mail" EnableBundles -bool YES
+defaults write "/Library/Preferences/com.apple.mail" BundleCompatibilityVersion -int $bundleCompVer
 ################################################################################
 
 
-################################################################################
-# To auto-fix GPGMail after an OS update.
-# Copied from GPGPreferences. This should be avoided:
-# http://gpgtools.lighthouseapp.com/projects/65162/tickets/30
-################################################################################
+# Add the PluginCompatibilityUUIDs #############################################
+echo "[gpgmail] Adding PluginCompatibilityUUIDs..."
+plistBundle="$target/$bundle/Contents/Info"
+plistMail="/Applications/Mail.app/Contents/Info"
+plistFramework="/System/Library/Frameworks/Message.framework/Resources/Info"
 
-_bundleId="gpgmail";
-_bundleName="$bundle";
-_bundleRootPath="$_target";
-_bundlePath="$_bundleRootPath/$_bundleName";
-_plistBundle="$_bundlePath/Contents/Info";
-_plistMail="/Applications/Mail.app/Contents/Info";
-_plistFramework="/System/Library/Frameworks/Message.framework/Resources/Info";
+uuid1=$(defaults read "$plistMail" "PluginCompatibilityUUID")
+uuid2=$(defaults read "$plistFramework" "PluginCompatibilityUUID")
 
-isInstalled=`if [ -d "$_bundlePath" ]; then echo "1"; else echo "0"; fi`
-
-if [ "1" == "$isInstalled" ]; then
-  echo "[$_bundleId] is installed";
+if [[ -z "$uuid1" || -z "$uuid2" ]] ;then
+    echo "No UUIDs found."
 else
-  foundDisabled=`find "$_bundleRootPath ("* -type d -name "$_bundleName"|head -n1`
-  if [ "" != "$foundDisabled" ]; then
-    mkdir -p "$_bundleRootPath";
-    mv "$foundDisabled" "$_bundleRootPath";
-  else
-    echo "[$_bundleId] not found";
-  fi
-    echo "[$_bundleId] was reinstalled";
+	if ! grep -q $uuid1 "${plistBundle}.plist" || ! grep -q $uuid2 "${plistBundle}.plist" ;then
+		defaults write "$plistBundle" "SupportedPluginCompatibilityUUIDs" -array-add "$uuid1"
+		defaults write "$plistBundle" "SupportedPluginCompatibilityUUIDs" -array-add "$uuid2"
+		plutil -convert xml1 "$plistBundle.plist"
+		echo "GPGMail successfully patched."
+	fi
 fi
-
-uuid1=`defaults read "$_plistMail" "PluginCompatibilityUUID"`
-uuid2=`defaults read "$_plistFramework" "PluginCompatibilityUUID"`
-isPatched1=`grep $uuid1 "$_bundlePath/Contents/Info.plist" 2>/dev/null`
-isPatched2=`grep $uuid2 "$_bundlePath/Contents/Info.plist" 2>/dev/null`
-
-if [ "" != "$isPatched1" ] && [ "" != "$isPatched2" ] ; then
-  echo "[$_bundleId] already patched";
-else
-  defaults write "$_plistBundle" "SupportedPluginCompatibilityUUIDs" -array-add "$uuid1"
-  defaults write "$_plistBundle" "SupportedPluginCompatibilityUUIDs" -array-add "$uuid2"
-  plutil -convert xml1 "$_plistBundle.plist"
-  echo "[$_bundleId] successfully patched";
-fi
+################################################################################
 
 exit 0

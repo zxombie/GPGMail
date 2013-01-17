@@ -1,41 +1,28 @@
 PROJECT = GPGMail
 TARGET = GPGMail
-CONFIG = Release
+PRODUCT = GPGMail.mailbundle
 
-include Dependencies/GPGTools_Core/make/default
+include Dependencies/GPGTools_Core/newBuildSystem/Makefile.default
 
-all: compile
-
-update:
-	@git submodule foreach git pull origin master
-	@git pull
-
-compile:
-	INSTALL_GPGMAIL=0 xcodebuild -project GPGMail.xcodeproj -target GPGMail -configuration Release build
-
-install: install
-	INSTALL_GPGMAIL=1 xcodebuild -project GPGMail.xcodeproj -target GPGMail -configuration Release build
-
-dmg: compile
-	@./Utilities/create_sparkle.sh
-	@./Dependencies/GPGTools_Core/scripts/create_dmg.sh
 
 clean-gpgme:
 	rm -rf Dependencies/MacGPGME/build/dist
 
-clean-gpgmail:
-	xcodebuild -project GPGMail.xcodeproj -target GPGMail -configuration Release clean > /dev/null
-	xcodebuild -project GPGMail.xcodeproj -target GPGMail -configuration Debug clean > /dev/null
+clean-all:: clean-gpgme
 
-clean: clean-gpgme clean-gpgmail
+$(PRODUCT): Source/* Resources/* Resources/*/* GPGMail.xcodeproj
+	@xcodebuild -project $(PROJECT).xcodeproj -target $(TARGET) -configuration $(CONFIG) build $(XCCONFIG)
 
-check-all-warnings: clean-gpgmail
+
+# TODO: Check the following targets!
+
+check-all-warnings: clean
 	make | grep "warning: "
 
-check-warnings: clean-gpgmail
+check-warnings: clean
 	make | grep "warning: "|grep -v "#warning"
 
-check: clean-gpgmail
+check: clean
 	@if [ "`which scan-build`" == "" ]; then echo 'usage: PATH=$$PATH:path_to_scan_build make check'; echo "see: http://clang-analyzer.llvm.org/"; exit; fi
 	@echo "";
 	@echo "Have a closer look at these warnings:";
