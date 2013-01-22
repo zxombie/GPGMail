@@ -5,11 +5,6 @@ PRODUCT = GPGMail.mailbundle
 include Dependencies/GPGTools_Core/newBuildSystem/Makefile.default
 
 
-clean-gpgme:
-	rm -rf Dependencies/MacGPGME/build/dist
-
-clean-all: clean-gpgme
-
 $(PRODUCT): Source/* Resources/* Resources/*/* GPGMail.xcodeproj
 	@xcodebuild -project $(PROJECT).xcodeproj -target $(TARGET) -configuration $(CONFIG) build $(XCCONFIG)
 
