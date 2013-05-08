@@ -39,7 +39,7 @@
 			ZW50LVN0eWxlLVR5cGUiIGNvbnRlbnQ9InRleHQvY3NzIj4KPHRp
 			dGxlPjwvdGl0bGU+CjxtZXRhIG5hbWU9IkdlbmVyYXRvciIgY29u
 			dGVudD0iQ29jb2EgSFRNTCBXcml0ZXIiPgo8bWV0YSBuYW1lPSJD
-			b2NvYVZlcnNpb24iIGNvbnRlbnQ9IjExODcuMzQiPgo8c3R5bGUg
+			b2NvYVZlcnNpb24iIGNvbnRlbnQ9IjExODcuMzciPgo8c3R5bGUg
 			dHlwZT0idGV4dC9jc3MiPgo8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5
 			Pgo8L2JvZHk+CjwvaHRtbD4K
 			</data>
@@ -235,7 +235,9 @@
 						<key>IC_REQUIREMENT_JAVASCRIPT_FUNCTION</key>
 						<string>checkOS</string>
 						<key>IC_REQUIREMENT_JAVASCRIPT_PARAMETERS</key>
-						<array/>
+						<array>
+							<string>6</string>
+						</array>
 					</dict>
 					<key>IC_REQUIREMENT_CHECK_TYPE</key>
 					<integer>0</integer>
@@ -455,9 +457,8 @@
 	<key>SHARED_GLOBAL_DATA</key>
 	<dict>
 		<key>IC_REQUIREMENT_JAVASCRIPT_SHARED_SOURCE_CODE</key>
-		<string>function checkOS() {
-  var version = system.version.ProductVersion;
-  return system.compareVersions(version, "10.6") + system.compareVersions(version, "10.7") == 0;
+		<string>function checkOS(version) {
+	return system.version.ProductVersion.substr(0, 4) == ("10." + version);
 }</string>
 	</dict>
 	<key>TYPE</key>
