@@ -32,6 +32,8 @@
 		1B51232514093795004D0818 /* NSBezierPath_KBAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B51232314093795004D0818 /* NSBezierPath_KBAdditions.m */; };
 		1B51232614093795004D0818 /* NSBezierPath+StrokeExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B51232414093795004D0818 /* NSBezierPath+StrokeExtensions.m */; };
 		1B56ECA916175AA8004A3ABE /* GPGMail-Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1B56ECA816175AA8004A3ABE /* GPGMail-Entitlements.plist */; };
+		1B5B576E1A66E5A900A17A4A /* XPCLoadTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B5B576D1A66E5A900A17A4A /* XPCLoadTest.m */; };
+		1B5B57751A66E6EE00A17A4A /* Libmacgpg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1B0626AA1746998D00E51308 /* Libmacgpg.framework */; };
 		1B7E4DB714EEEAD90069E69C /* JRLPSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B7E4DB614EEEAD90069E69C /* JRLPSwizzle.m */; };
 		1B8289FB13FD62880007E6A2 /* Message+GPGMail.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B8289FA13FD62880007E6A2 /* Message+GPGMail.m */; };
 		1B8437661404AB9C00968293 /* NSData+GPGMail.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B8437651404AB9C00968293 /* NSData+GPGMail.m */; };
@@ -244,6 +246,7 @@
 		1B512328140937C1004D0818 /* NSBezierPath_KBAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSBezierPath_KBAdditions.h; sourceTree = "<group>"; };
 		1B512329140937C1004D0818 /* NSBezierPath+StrokeExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSBezierPath+StrokeExtensions.h"; sourceTree = "<group>"; };
 		1B56ECA816175AA8004A3ABE /* GPGMail-Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GPGMail-Entitlements.plist"; sourceTree = "<group>"; };
+		1B5B576D1A66E5A900A17A4A /* XPCLoadTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XPCLoadTest.m; sourceTree = "<group>"; };
 		1B637BC313E39FDF00196286 /* GPGMail TODOs */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "GPGMail TODOs"; sourceTree = "<group>"; };
 		1B64F62013E38E9200C5B4C9 /* GPG related notes */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "GPG related notes"; sourceTree = "<group>"; };
 		1B7E4DB514EEEACE0069E69C /* JRLPSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JRLPSwizzle.h; sourceTree = "<group>"; };
@@ -3466,6 +3469,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B5B57751A66E6EE00A17A4A /* Libmacgpg.framework in Frameworks */,
 				1B87639F17862BD700B24BBC /* AppKit.framework in Frameworks */,
 				1B87639B178628FD00B24BBC /* XCTest.framework in Frameworks */,
 			);
@@ -3588,6 +3592,7 @@
 				1B8763631786020A00B24BBC /* Supporting Files */,
 				1B22C46517B13A250073DF81 /* TestHelpers.h */,
 				1B22C46617B13A250073DF81 /* TestHelpers.m */,
+				1B5B576D1A66E5A900A17A4A /* XPCLoadTest.m */,
 			);
 			path = "Unit Tests";
 			sourceTree = "<group>";
@@ -6935,11 +6940,6 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0500;
-				TargetAttributes = {
-					1B87635E1786020900B24BBC = {
-						TestTargetID = 8D5B49AC048680CD000E48DA;
-					};
-				};
 			};
 			buildConfigurationList = 55541F56085AE6B100548474 /* Build configuration list for PBXProject "GPGMail" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -7243,6 +7243,7 @@
 				1B8763981786035300B24BBC /* NSData+GPGMailTest.m in Sources */,
 				1B22C46717B13A250073DF81 /* TestHelpers.m in Sources */,
 				1B22C46417B138890073DF81 /* IntegrationHooks.m in Sources */,
+				1B5B576E1A66E5A900A17A4A /* XPCLoadTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -7686,6 +7687,7 @@
 				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
+				DEPLOYMENT_POSTPROCESSING = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
