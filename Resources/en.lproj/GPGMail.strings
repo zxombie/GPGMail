@@ -236,8 +236,8 @@ NO_DEFAULTS_MESSAGE = "GPGMail is not working as expected.\n\nPlease download an
 "UNENCRYPTED_REPLY_TO_ENCRYPTED_MESSAGE_BUTTON_CANCEL" = "Cancel";
 
 /* GPGMail 2.5 on El Capitan */
-UPDATE_ELCAPITAN_TITLE = "This version of GPGMail isn't compatible with OS X 10.11 El Capitan";
-UPDATE_ELCAPITAN_MESSAGE = "GPGMail will be disabled until you install a new verion.\nDo you want to search for a new El Capitan compatible version of GPGMail?";
+UPDATE_ELCAPITAN_TITLE = "This version of GPGMail is not compatible with OS X 10.11 El Capitan";
+UPDATE_ELCAPITAN_MESSAGE = "GPGMail will be disabled until you install a new verion.\nDo you want to search for a compatible version of GPGMail?";
 UPDATE_ELCAPITAN_YES = "Search for a new version";
-UPDATE_ELCAPITAN_NO = "Only disable GPGMail";
+UPDATE_ELCAPITAN_NO = "Disable GPGMail";
 
