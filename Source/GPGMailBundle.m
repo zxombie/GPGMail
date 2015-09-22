@@ -186,7 +186,7 @@ static BOOL gpgMailWorks = NO;
         
         
         // Show update dialog for OS X 10.11
-        if ([[NSProcessInfo processInfo] operatingSystemVersion].minorVersion == 11) {
+        if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_9 && [[NSProcessInfo processInfo] operatingSystemVersion].minorVersion == 11) {
             if (![options boolForKey:@"DoNotSearchElCapitanUpdate"]) {
                 // Quest the user if we should check for a new GPGMail for El Capitan.
                 NSAlert *elcapitanAlert = [NSAlert new];
