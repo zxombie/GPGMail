@@ -6914,6 +6914,7 @@
 				1B49BC7B1A98C21B000440E9 /* Copy "How to get the source code" into Resources */,
 				30F151E21500BE8D00980642 /* Install GPGMail */,
 				1BC07F3517466697004263BB /* Copy Libmacgpg into the sandbox container */,
+				30E05DD41BF3663E00E7272F /* Link languages */,
 			);
 			buildRules = (
 			);
@@ -7171,6 +7172,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "[[ \"$LOCALIZE\" == \"NO\" ]] && exit 0\n [[ -d \"$DEPLOY_RESOURCES_DIR\" ]] || exit 0\n \n alias localizeXIB=\"$DEPLOY_RESOURCES_DIR/bin/localizeXIB\"\n ignore=\"$DEPLOY_RESOURCES_DIR/config/l10n_ignored_strings.txt\"\n langs=\"ca cs da de es et fi fr gl id_ID it nb nl_NL pl pt_BR pt_PT ru sk sv tr_TR zh_CN\"\n sourceDir=Resources/en.lproj\n \n localizeXIB -i \"$ignore\" $sourceDir/GPGMailPreferences.xib $langs || exit 1\n localizeXIB -i \"$ignore\" $sourceDir/GPGSignatureView.xib   $langs || exit 1\n localizeXIB -i \"$ignore\" $sourceDir/GPGAttachments.xib     $langs || exit 1\n";
+			showEnvVarsInLog = 0;
+		};
+		30E05DD41BF3663E00E7272F /* Link languages */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Link languages";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ln -s pt_BR.lproj \"$BUILT_PRODUCTS_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/pt.lproj\"";
 			showEnvVarsInLog = 0;
 		};
 		30F151C51500BD4500980642 /* Fill Info.plist */ = {
