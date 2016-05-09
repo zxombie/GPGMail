@@ -198,13 +198,9 @@ static BOOL gpgMailWorks = NO;
                 NSInteger result = [elcapitanAlert runModal];
                 
                 if (result == NSAlertFirstButtonReturn) { // Users said yes.
+                    [GPGUpdateController sharedInstance].downloadBetaUpdates = YES;
+                    [[GPGUpdateController sharedInstance] checkForUpdates:nil];
                     // Switch to the prerelease channel.
-                    [options setValueInStandardDefaults:@"prerelease" forKey:@"UpdateSource"];
-                    [options saveStandardDefaults];
-                    
-                    // Search for updates.
-                    NSString *updaterPath = @"/Library/Application Support/GPGTools/GPGMail_Updater.app/Contents/MacOS/GPGMail_Updater";
-                    [GPGTask launchGeneralTask:updaterPath withArguments:@[@"checkNow"]];
                 } else {
                     // The user disabled GPGMail.
                     // Never show the message again.
