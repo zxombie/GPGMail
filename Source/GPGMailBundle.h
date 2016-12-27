@@ -31,6 +31,14 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <Libmacgpg/Libmacgpg.h>
 
+
+#if !__has_feature(nullability)
+#define nullable
+#endif
+
+
+
+
 extern NSString *GPGMailKeyringUpdatedNotification;
 extern NSString *gpgErrorIdentifier; // This identifier is used to set and find GPGErrorCodes in NSData.
 
