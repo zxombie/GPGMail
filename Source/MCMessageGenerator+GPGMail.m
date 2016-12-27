@@ -34,7 +34,7 @@
 #import "MCMimePart.h"
 #import "NSObject+LPDynamicIvars.h"
 
-#import "GPGKey.h"
+//#import "GPGKey.h"
 #import "EAEmailAddressParser.h"
 #import "MCMutableMessageHeaders.h"
 #import "MCActivityMonitor.h"

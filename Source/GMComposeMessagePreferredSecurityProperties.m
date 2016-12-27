@@ -11,7 +11,7 @@
 #import "CCLog.h"
 #import "NSString+GPGMail.h"
 
-#import "GPGKey.h"
+//#import "GPGKey.h"
 
 #import "GPGMailBundle.h"
 

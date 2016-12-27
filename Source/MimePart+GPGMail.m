@@ -28,7 +28,6 @@
  */
 
 #import <Libmacgpg/Libmacgpg.h>
-#import <Libmacgpg/GPGKey.h>
 #define restrict
 #import <RegexKit/RegexKit.h>
 #undef restrict
