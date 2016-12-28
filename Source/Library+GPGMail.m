@@ -40,6 +40,7 @@
 
 #import "MCAttachment.h"
 #import "MFLibraryAttachmentDataSource.h"
+#import "MFLibraryMessage.h"
 
 #import "MimePart+GPGMail.h"
 
@@ -85,149 +86,150 @@ extern const NSString *kMimeBodyMessageKey;
 }
 
 + (NSData *)GMDataForMessage:(MCMessage *)message mimePart:(MCMimePart *)mimePart {
-    MCAttachment *attachment = (MCAttachment *)[[MCAttachment alloc] initWithMimePart:mimePart];
+    MCAttachment *attachment = [[MCAttachment alloc] initWithMimePart:mimePart];
     MFLibraryAttachmentDataSource* dataSource = [[MFLibraryAttachmentDataSource alloc] initWithMessage:message mimePartNumber:[mimePart partNumber] attachment:attachment remoteDataSource:nil];
-    [attachment setDataSource:dataSource];
     
-    return [attachment dataForAccessLevel:2];
+    __block dispatch_semaphore_t waiter = dispatch_semaphore_create(0);
+    __block NSData *attachmentData = nil;
+    [dataSource dataForAccessLevel:1 completionBlock:^(NSData *data){
+        attachmentData = data;
+        dispatch_semaphore_signal(waiter);
+    }];
+    dispatch_semaphore_wait(waiter, DISPATCH_TIME_FOREVER);
+    
+    return attachmentData;
+}
+
++ (NSData *)localMessageDataForMessage:(MCMessage *)message mimeBody:(MCMimeBody *)mimeBody error:(__autoreleasing NSError **)error {
+    NSMutableData *messageData = [NSMutableData new];
+
+    NSData *NL = [@"\n" dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *boundaryDelimiter = [@"--" dataUsingEncoding:NSUTF8StringEncoding];
+    MCMimePart *topLevelPart = [mimeBody topLevelPart];
+    __block NSError *partError = nil;
+    
+    void (^addDataForMimePart)(MCMimePart *mimePart, NSString *boundary) = ^(MCMimePart *mimePart, NSString *boundary) {
+        if(boundary) {
+            [messageData appendData:boundaryDelimiter];
+            [messageData appendData:[boundary dataUsingEncoding:NSUTF8StringEncoding]];
+            [messageData appendData:NL];
+        }
+        [messageData appendData:[mimePart headerData]];
+        NSData *partData = nil;
+        if([mimePart isAttachment]) {
+            partData = [[self class] GMDataForMessage:message mimePart:mimePart];
+            if(!partData) {
+                // If the data of an attachment is missing, abort. This means that the attachment
+                // or for now the entire message has to be re-fetched.
+                partError = [NSError errorWithDomain:@"GMAttachmentMissingError" code:201000 userInfo:nil];
+                return;
+            }
+            if([mimePart.contentTransferEncoding isEqualToString:@"base64"]) {
+                partData = [partData base64EncodedDataWithOptions:0];
+            }
+        }
+        else {
+            // For partial emlx files, the top level part encodedBodyDay returns the entire
+            // mime tree. Using decodedData, it's possible to check, if the part really contains data.
+            // Only in that case, the encodedBodyData is added to the message data.
+            partData = [mimePart decodedData];
+            if(partData) {
+                partData = [mimePart encodedBodyData];
+            }
+        }
+        if(partData) {
+            [messageData appendData:partData];
+        }
+        [messageData appendData:NL];
+        [messageData appendData:NL];
+        [messageData appendData:NL];
+    };
+    __block void (__weak ^_processSubParts)(MCMimePart *mimePart, NSString *boundary);
+    void (^__block processSubParts)(MCMimePart *mimePart, NSString *boundary) = ^(MCMimePart *mimePart, NSString *boundary) {
+        addDataForMimePart(mimePart, boundary);
+        
+        MCMimePart *currentMimePart = nil;
+        for(currentMimePart in [mimePart subparts]) {
+            if([currentMimePart subparts]) {
+                boundary = [mimePart bodyParameterForKey:@"boundary"];
+                _processSubParts(currentMimePart, boundary);
+            }
+            else {
+                boundary = [mimePart bodyParameterForKey:@"boundary"];
+                addDataForMimePart(currentMimePart, boundary);
+            }
+        }
+        [messageData appendData:boundaryDelimiter];
+        [messageData appendData:[[mimePart bodyParameterForKey:@"boundary"] dataUsingEncoding:NSUTF8StringEncoding]];
+        [messageData appendData:boundaryDelimiter];
+        [messageData appendData:NL];
+    };
+    _processSubParts = processSubParts;
+    
+    processSubParts(topLevelPart, nil);
+    
+    if(partError) {
+        *error = partError;
+        return nil;
+    }
+    
+    return messageData;
+}
+
++ (NSData *)forceFetchMessageDataForMessage:(MCMessage *)message {
+    return [message messageDataIncludingFromSpace:YES newDocumentID:nil fetchIfNotAvailable:YES];
 }
 
 + (MCMimeBody *)MAMimeBodyForMessage:(MCMessage *)currentMessage {
-    // If the user didn't actively select this message, it doesn't matter
-    // if this method returns a partial or not.
-    // TODO: Check what happens for a thread. Does each message have the UserSelectedMessage flag set?
+    BOOL isMCLibraryMessage = [currentMessage isKindOfClass:[MFLibraryMessage class]];
+    BOOL userDidSelectMessage = [[currentMessage getIvar:@"UserSelectedMessage"] boolValue];
+    BOOL isCompleteMessageDataAvailable = [MFLibrary _messageDataAtPath:[MFLibrary _dataPathForMessage:currentMessage type:0]] != nil;
+    BOOL isFullMessageDataAvailableAfterFetching = [currentMessage ivarExists:@"FullBodyDataAvailable"] && [currentMessage getIvar:@"FullBodyData"] != nil;
+    BOOL isFetchingMessageData = [currentMessage ivarExists:@"BodyFetchingInProgress"];
     
-    if(![[currentMessage getIvar:@"UserSelectedMessage"] boolValue]) {
-        return [self MAMimeBodyForMessage:currentMessage];
-    }
-    
-    // Check if the complete data available is already available.
-    if([MFLibrary _messageDataAtPath:[MFLibrary _dataPathForMessage:currentMessage type:0]] != nil) {
-        MCMimeBody *mimeBody = [self MAMimeBodyForMessage:currentMessage];
-        [mimeBody setIvar:kMimeBodyMessageKey value:currentMessage];
+    // Let Mail generate the mime body from the partial emlx file.
+    // Even if only the partial emlx is available, it will be necessary to re-create the message from attachments.
+    MCMimeBody *mimeBody = [self MAMimeBodyForMessage:currentMessage];
+    if(!isMCLibraryMessage || !userDidSelectMessage || isCompleteMessageDataAvailable || isFetchingMessageData) {
+        if(userDidSelectMessage) {
+            [mimeBody setIvar:kMimeBodyMessageKey value:currentMessage];
+        }
         return mimeBody;
     }
-    MCMimeBody *mimeBody = nil;
-    NSMutableData *rawMessageData = nil;
-//    BOOL fetchingBody = [currentMessage ivarExists:@"BodyFetchingInProgress"];
-//    BOOL hasFullBodyData = [currentMessage ivarExists:@"FullBodyDataAvailable"];
-//    if(!fetchingBody && !hasFullBodyData) {
-//        // Check if the data is available in locally cached attachment files.
-//        [currentMessage setIvar:@"BodyFetchingInProgress" value:@YES];
-//        MCMimeBody *mimeBody = [self MAMimeBodyForMessage:currentMessage];
-//        rawMessageData = [NSMutableData new];
-//        NSData *NL = [@"\n" dataUsingEncoding:NSUTF8StringEncoding];
-//        NSData *boundaryDelimiter = [@"--" dataUsingEncoding:NSUTF8StringEncoding];
-//        __block NSString *currentBoundary = nil;
-//        MCMimePart *topLevelPart = [mimeBody topLevelPart];
-//        NSString *topBoundary = [topLevelPart bodyParameterForKey:@"boundary"];
-//        [(MimePart_GPGMail *)topLevelPart enumerateSubpartsWithBlock:^(MCMimePart *mimePart) {
-//            if([[mimePart bodyParameterKeys] containsObject:@"boundary"]) {
-//                currentBoundary = [mimePart bodyParameterForKey:@"boundary"];
-//            }
-//            else {
-//                [rawMessageData appendData:boundaryDelimiter];
-//                [rawMessageData appendData:[currentBoundary dataUsingEncoding:NSUTF8StringEncoding]];
-//                [rawMessageData appendData:NL];
-//            }
-//            [rawMessageData appendData:[mimePart headerData]];
-//            [rawMessageData appendData:[[self class] GMDataForMessage:currentMessage mimePart:mimePart]];
-//            [rawMessageData appendData:NL];
-//        }];
-//        [rawMessageData appendData:boundaryDelimiter];
-//        [rawMessageData appendData:[currentBoundary dataUsingEncoding:NSUTF8StringEncoding]];
-//        [rawMessageData appendData:boundaryDelimiter];
-//        
-//        [currentMessage setIvar:@"FullBodyDataAvailable" value:@YES];
-//        [currentMessage setIvar:@"FullBodyData" value:rawMessageData];
-//        [currentMessage removeIvar:@"BodyFetchingInProgress"];
-//    }
-//    else if(!hasFullBodyData && fetchingBody) {
-//        mimeBody = [self MAMimeBodyForMessage:currentMessage];
-//        [mimeBody setIvar:kMimeBodyMessageKey value:currentMessage];
-//        return mimeBody;
-//    }
-//    else {
-//        rawMessageData = [currentMessage getIvar:@"FullBodyData"];
-//        DebugLog(@"Full body data already available: %lu", (unsigned long)[rawMessageData length]);
-//    }
-//
-//    NSLog(@"Fetched data: %lu", (unsigned long)[rawMessageData length]);
-//    MCMimePart *mimePart = [[MCMimePart alloc] initWithEncodedData:rawMessageData];
-//    mimeBody = [MCMimeBody new];
-//    [mimeBody setTopLevelPart:mimePart];
-//    [mimePart setMimeBody:mimeBody];
-//    [mimePart parse];
-//    [mimeBody setIvar:kMimeBodyMessageKey value:currentMessage];
-//    return mimeBody;
     
-    // Fetch the entire message. This might be optimized based on some data learned from the
-    // mime part structure. For example, only fetch the entire message, if a PGP/MIME structure is
-    // detected.
-    BOOL fetchingBody = [currentMessage ivarExists:@"BodyFetchingInProgress"];
-    BOOL hasFullBodyData = [currentMessage ivarExists:@"FullBodyDataAvailable"];
-    NSData *messageData = nil;
-    if(!fetchingBody && !hasFullBodyData) {
-        [currentMessage setIvar:@"BodyFetchingInProgress" value:@YES];
+    NSError *error = nil;
+    // 1.) Check if cached data is available.
+    NSData *messageData = [currentMessage getIvar:@"FullBodyData"];
+    if(!messageData) {
+        [currentMessage setIvar:@"BodyFetchingInProgress" value:@(YES)];
         [currentMessage setIvar:@"FakeContentNotAvailable" value:@YES];
-        messageData = [currentMessage messageDataIncludingFromSpace:YES newDocumentID:nil fetchIfNotAvailable:YES];
-        [currentMessage setIvar:@"FullBodyData" value:messageData];
-        [currentMessage setIvar:@"FullBodyDataAvailable" value:@YES];
+        // 2.) Check if message data can be re-created from already downloaded attachments.
+        messageData = [self localMessageDataForMessage:currentMessage mimeBody:mimeBody error:&error];
+        if(!messageData && error) {
+            // 3.) Building message data from downloaded attachments failed, now fetch the data from the server.
+            messageData = [self forceFetchMessageDataForMessage:currentMessage];
+        }
         [currentMessage removeIvar:@"BodyFetchingInProgress"];
-    }
-    else if(!hasFullBodyData && fetchingBody) {
-        mimeBody = [self MAMimeBodyForMessage:currentMessage];
-        [mimeBody setIvar:kMimeBodyMessageKey value:currentMessage];
-        return mimeBody;
+        [currentMessage setIvar:@"FullBodyDataAvailable" value:@YES];
+        [currentMessage setIvar:@"FullBodyData" value:messageData];
     }
     else {
-        messageData = [currentMessage getIvar:@"FullBodyData"];
         DebugLog(@"Full body data already available: %lu", (unsigned long)[messageData length]);
     }
-
+    
+    if(!messageData) {
+        [mimeBody setIvar:kMimeBodyMessageKey value:currentMessage];
+        return mimeBody;
+    }
+    
+    NSLog(@"Fetched data: %lu", (unsigned long)[messageData length]);
     MCMimePart *mimePart = [[MCMimePart alloc] initWithEncodedData:messageData];
     mimeBody = [MCMimeBody new];
     [mimeBody setTopLevelPart:mimePart];
     [mimePart setMimeBody:mimeBody];
     [mimePart parse];
     [mimeBody setIvar:kMimeBodyMessageKey value:currentMessage];
-    
     return mimeBody;
-    
-    
-//    // Check the structure. If this looks like an interesting.
-//    NSMutableData *messageData = nil;
-//    BOOL fetchingBody = [currentMessage ivarExists:@"BodyFetchingInProgress"];
-//    BOOL hasFullBodyData = [currentMessage ivarExists:@"FullBodyDataAvailable"];
-//    if(!hasFullBodyData && !fetchingBody) {
-//        [currentMessage setIvar:@"BodyFetchingInProgress" value:@YES];
-//        [currentMessage setIvar:@"FakeContentNotAvailable" value:@YES];
-//        NSData *headerData = [currentMessage headerDataFetchIfNotAvailable:YES allowPartial:NO];
-//        NSData *bodyData = [currentMessage bodyDataFetchIfNotAvailable:YES allowPartial:NO];
-//        messageData = [[NSMutableData alloc] initWithData:headerData];
-//        [messageData appendData:bodyData];
-//        [currentMessage setIvar:@"FullBodyDataAvailable" value:@YES];
-//        [currentMessage setIvar:@"FullBodyData" value:messageData];
-//        [currentMessage removeIvar:@"BodyFetchingInProgress"];
-//        DebugLog(@"Full body data now available: %lu", (unsigned long)[messageData length]);
-//    }
-//    else if(!hasFullBodyData && fetchingBody) {
-//        MCMimeBody *mimeBody = [self MAMimeBodyForMessage:currentMessage];
-//        [mimeBody setIvar:kMimeBodyMessageKey value:currentMessage];
-//        return mimeBody;
-//    }
-//    else {
-//        messageData = [currentMessage getIvar:@"FullBodyData"];
-//        DebugLog(@"Full body data already available: %lu", (unsigned long)[messageData length]);
-//    }
-//    
-//    MCMimePart *mimePart = [[MCMimePart alloc] initWithEncodedData:messageData];
-//    MCMimeBody *mimeBody = [MCMimeBody new];
-//    [mimeBody setTopLevelPart:mimePart];
-//    [mimePart setMimeBody:mimeBody];
-//    [mimePart parse];
-//    [mimeBody setIvar:kMimeBodyMessageKey value:currentMessage];
-//    return mimeBody;
 }
 
 + (id)MAParsedMessageForMessage:(id)message {

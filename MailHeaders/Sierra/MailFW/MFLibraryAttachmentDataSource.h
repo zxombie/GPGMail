@@ -41,7 +41,7 @@
 - (void)_dataFromRemoteDataSourceWithAccessLevel:(long long)arg1 completionBlock:(CDUnknownBlockType)arg2;	// IMP=0x0000000000143b13
 - (id)_dataFromStore:(id *)arg1;	// IMP=0x00000000001436f0
 - (id)_dataFromBinaryAttachmentFile:(id *)arg1;	// IMP=0x0000000000142cd1
-- (void)dataForAccessLevel:(long long)arg1 completionBlock:(CDUnknownBlockType)arg2;	// IMP=0x0000000000142a77
+- (void)dataForAccessLevel:(long long)arg1 completionBlock:(void (^)(NSData *data))arg2;	// IMP=0x0000000000142a77
 @property(readonly, copy) NSString *debugDescription;
 @property(readonly, copy) NSString *description;
 - (void)dealloc;	// IMP=0x0000000000142691
