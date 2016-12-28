@@ -321,7 +321,7 @@ static BOOL gpgMailWorks = NO;
         // Configure the logging level.
         GPGMailLoggingLevel = (int)[[GPGOptions sharedOptions] integerForKey:@"DebugLog"];
         DebugLog(@"Debug Log enabled: %@", [[GPGOptions sharedOptions] integerForKey:@"DebugLog"] > 0 ? @"YES" : @"NO");
-        GPGMailLoggingLevel = 1;
+        
         _keyManager = [[GMKeyManager alloc] init];
         
         // Initiate the Message Rules Applier.
