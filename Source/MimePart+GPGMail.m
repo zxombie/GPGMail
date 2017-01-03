@@ -482,6 +482,13 @@ extern const NSString *kMimeBodyMessageKey;
     NSData *partData = [MAIL_SELF(self) decodedData];
     NSData *decryptedData = nil;
     
+    // rangeOfString on nil returns a NSRange with {location=0, length=0} which
+    // leads to GPGMail thinking the data might contain encrypted or signed data markers.
+    // So in that case, simply return nil.
+    if(!partData) {
+        return nil;
+    }
+
     NSRange encryptedRange = [partData rangeOfPGPInlineEncryptedData];
     NSRange signatureRange = [partData rangeOfPGPInlineSignatures];
     
