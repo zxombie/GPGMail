@@ -247,7 +247,8 @@
 					 @"selectors": @[
 							 @"_newDataForMimePart:withPartData:",
                              @"_newOutgoingMessageFromTopLevelMimePart:topLevelHeaders:withPartData:",
-                             @"setSigningIdentity:"
+                             @"setSigningIdentity:",
+                             @"_appendHeadersForMimePart:toHeaders:"
 					 ]
 			}
 	};
@@ -446,6 +447,11 @@
              @"MFLibraryAttachmentDataSource": @{
                      @"selectors": @[
                              @"initWithMessage:mimePartNumber:attachment:remoteDataSource:"
+                             ]
+                     },
+             @"MCMutableMessageHeaders": @{
+                     @"selectors": @[
+                             @"encodedHeadersIncludingFromSpace:"
                              ]
                      },
              };

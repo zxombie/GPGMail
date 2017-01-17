@@ -126,7 +126,7 @@ extern const NSString *kMimeBodyMessageKey;
                 return;
             }
             if([mimePart.contentTransferEncoding isEqualToString:@"base64"]) {
-                partBodyData = [partBodyData base64EncodedDataWithOptions:0];
+                partBodyData = [partBodyData base64EncodedDataWithOptions:NSDataBase64Encoding76CharacterLineLength];
             }
         }
         else {
