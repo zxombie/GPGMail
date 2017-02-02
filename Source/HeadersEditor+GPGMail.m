@@ -200,7 +200,7 @@ const NSString *kHeadersEditorFromControlParentItemKey = @"HeadersEditorFromCont
         NSUInteger i = 0;
         for(id account in accounts) {
             NSDictionary *attributes = normalAttributes;
-            if([AddressAttachmentClass addressIsExternal:account])
+            if([NSClassFromString(@"MUITokenAddress") addressIsExternal:account])
                 attributes = externalAttributes;
             NSAttributedString *title = [[NSAttributedString alloc] initWithString:account attributes:attributes];
             [[fromPopup itemAtIndex:i] setAttributedTitle:title];
