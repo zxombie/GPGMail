@@ -79,12 +79,18 @@ extern const NSString *kComposeBackEndPreferredSecurityPropertiesKey = @"Preferr
 	if(![sender respondsToSelector:@selector(setValue:forFlag:)])
 		return [self MASender];
 	
-	// Now emulate what -[ComposeBackEnd sender] does internally.
-	// At least part of it.
-	MFMailAccount *account = [MFMailAccount accountContainingEmailAddress:sender];
-	// Not sure what to do in this case, so let's fall back.
-	if(!account)
-		return [self MASender];
+    // On Sierra from 10.12.4b1, Mail calls senderWithValidation in -[ComposeBackEnd sender]
+    if([self respondsToSelector:@selector(senderWithValidation:)]) {
+        sender = [MAIL_SELF senderWithValidation:NO];
+    }
+    else {
+        // Now emulate what -[ComposeBackEnd sender] does internally.
+        // At least part of it.
+        MFMailAccount *account = [MFMailAccount accountContainingEmailAddress:sender];
+        // Not sure what to do in this case, so let's fall back.
+        if(!account)
+            return [self MASender];
+    }
 	// IF we're still in here, return the flagged sender.
 	return sender;
 }
@@ -948,8 +954,13 @@ extern const NSString *kComposeBackEndPreferredSecurityPropertiesKey = @"Preferr
         [self MAUpdateSMIMEStatus:onComplete];
         return;
     }
-    
-    NSString *sender = [MAIL_SELF sender];
+    NSString *sender = nil;
+    if([MAIL_SELF respondsToSelector:@selector(senderWithValidation:)]) {
+        sender = [MAIL_SELF senderWithValidation:YES];
+    }
+    else {
+        sender = [MAIL_SELF sender];
+    }
     NSArray *recipients = [MAIL_SELF allRecipients];
     
     if(sender) {
