@@ -163,11 +163,11 @@ extern const NSString *kComposeWindowControllerAllowWindowTearDown;
 
 
 	ComposeBackEnd *backEnd = (ComposeBackEnd *)[MAIL_SELF(self) backEnd];
-	NSDictionary *securityProperties = [(ComposeBackEnd_GPGMail *)backEnd securityProperties];
+	GMComposeMessagePreferredSecurityProperties *securityProperties = [(ComposeBackEnd_GPGMail *)backEnd preferredSecurityProperties];
 
 	BOOL isReply = [(ComposeBackEnd_GPGMail *)backEnd messageIsBeingReplied];
 	BOOL originalMessageIsEncrypted = [[((Message_GPGMail *)[backEnd originalMessage]) securityFeatures] PGPEncrypted];
-	BOOL replyShouldBeEncrypted = [(ComposeBackEnd_GPGMail *)[MAIL_SELF(self) backEnd] GMEncryptIfPossible] && [securityProperties[@"shouldEncrypt"] boolValue];
+    BOOL replyShouldBeEncrypted = securityProperties.shouldEncryptMessage;
 
 	// If checklist contains the unencryptedReplyToEncryptedMessage item, it means
 	// that the user decided to send the message regardless of our warning.
@@ -250,10 +250,10 @@ extern const NSString *kComposeWindowControllerAllowWindowTearDown;
     // to the user and simply return. The message won't be sent until the checklist is cleared.
 	// Otherwise call sendMessageAfterChecking so that Mail.app can perform its internal checks.
     // TODO: Fix for Sierra.
-    //	if([self isUnencryptedReplyToEncryptedMessageWithChecklist:checklist]) {
-//		[self displayWarningForUnencryptedReplyToEncryptedMessageUpdatingChecklist:checklist];
-//		return;
-//	}
+    if([self isUnencryptedReplyToEncryptedMessageWithChecklist:checklist]) {
+		[self displayWarningForUnencryptedReplyToEncryptedMessageUpdatingChecklist:checklist];
+        return;
+    }
 
 	[self MASendMessageAfterChecking:checklist];
 }
