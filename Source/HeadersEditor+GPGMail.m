@@ -709,17 +709,11 @@ const NSString *kHeadersEditorFromControlParentItemKey = @"HeadersEditorFromCont
 		DebugLog(@"%@: not called on main thread? What the fuck?!", NSStringFromSelector(_cmd));
 		return;
 	}
-	
+
 	ComposeBackEnd *backEnd = [GPGMailBundle backEndFromObject:self];
-	GPGMAIL_SECURITY_METHOD securityMethod = ((ComposeBackEnd_GPGMail *)backEnd).guessedSecurityMethod;
-    if(((ComposeBackEnd_GPGMail *)backEnd).securityMethod)
-        securityMethod = ((ComposeBackEnd_GPGMail *)backEnd).securityMethod;
-	// It seems calling updateSecurityControls at this point is most reliable.
-    if([GPGMailBundle isYosemite]) {
+	GPGMAIL_SECURITY_METHOD securityMethod = ((ComposeBackEnd_GPGMail *)backEnd).preferredSecurityProperties.securityMethod;
+    if(securityMethod == GPGMAIL_SECURITY_METHOD_OPENPGP) {
         [self _updateSecurityControls];
-    }
-    else {
-        [self updateSecurityControls];
     }
 }
 
@@ -773,11 +767,11 @@ const NSString *kHeadersEditorFromControlParentItemKey = @"HeadersEditorFromCont
 
 - (NSString *)encryptButtonToolTip {
     ComposeBackEnd_GPGMail *backEnd = [GPGMailBundle backEndFromObject:self];
-    NSDictionary *securityProperties = ((ComposeBackEnd_GPGMail *)backEnd).securityProperties;
+    GMComposeMessagePreferredSecurityProperties *securityProperties = ((ComposeBackEnd_GPGMail *)backEnd).preferredSecurityProperties;
     
     NSString *toolTip = @"";
     
-    if(![securityProperties[@"EncryptIsPossible"] boolValue]) {
+    if(!securityProperties.canEncrypt) {
         NSArray *nonEligibleRecipients = [(ComposeBackEnd *)backEnd recipientsThatHaveNoKeyForEncryption];
         if(![nonEligibleRecipients count])
             toolTip = GMLocalizedString(@"COMPOSE_WINDOW_TOOLTIP_CAN_NOT_PGP_ENCRYPT_NO_RECIPIENTS");
@@ -792,11 +786,11 @@ const NSString *kHeadersEditorFromControlParentItemKey = @"HeadersEditorFromCont
 
 - (NSString *)signButtonToolTip {
     ComposeBackEnd_GPGMail *backEnd = [GPGMailBundle backEndFromObject:self];
-    NSDictionary *securityProperties = ((ComposeBackEnd_GPGMail *)backEnd).securityProperties;
+    GMComposeMessagePreferredSecurityProperties *securityProperties = ((ComposeBackEnd_GPGMail *)backEnd).preferredSecurityProperties;
     
     NSString *toolTip = @"";
     
-    if(![securityProperties[@"SignIsPossible"] boolValue]) {
+    if(!securityProperties.canSign) {
         NSPopUpButton *button = [self valueForKey:@"_fromPopup"];
         NSString *sender = ![GPGMailBundle isYosemite] ? [button.selectedItem.title gpgNormalizedEmail] : [button.selectedItem.representedObject gpgNormalizedEmail];
         

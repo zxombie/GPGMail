@@ -899,17 +899,17 @@ extern const NSString *kComposeBackEndPreferredSecurityPropertiesKey = @"Preferr
     if(![((ComposeBackEnd *)self) delegate])
 		return [NSArray array];
 	
-	GPGMAIL_SECURITY_METHOD securityMethod = self.guessedSecurityMethod;
-    if(self.securityMethod)
-        securityMethod = self.securityMethod;
+	GPGMAIL_SECURITY_METHOD securityMethod = self.preferredSecurityProperties.securityMethod;
     
     if(securityMethod == GPGMAIL_SECURITY_METHOD_SMIME)
         return [self MARecipientsThatHaveNoKeyForEncryption];
 
     NSMutableArray *nonEligibleRecipients = [NSMutableArray array];
-    for(NSString *recipient in [((ComposeBackEnd *)self) allRecipients]) {
-        if(![[GPGMailBundle sharedInstance] canEncryptMessagesToAddress:[recipient gpgNormalizedEmail]])
-            [nonEligibleRecipients addObject:[recipient gpgNormalizedEmail]];
+    @synchronized ([self valueForKey:@"_smimeLock"]) {
+        for(NSString *recipient in [((ComposeBackEnd *)self) allRecipients]) {
+            if(![[GPGMailBundle sharedInstance] canEncryptMessagesToAddress:[recipient gpgNormalizedEmail]])
+                [nonEligibleRecipients addObject:[recipient gpgNormalizedEmail]];
+        }
     }
 
     return nonEligibleRecipients;
@@ -938,11 +938,17 @@ extern const NSString *kComposeBackEndPreferredSecurityPropertiesKey = @"Preferr
 }
 
 - (GMComposeMessagePreferredSecurityProperties *)preferredSecurityProperties {
-    return [self getIvar:kComposeBackEndPreferredSecurityPropertiesKey];
+    GMComposeMessagePreferredSecurityProperties *securityProperties = nil;
+    @synchronized ([self valueForKey:@"_smimeLock"]) {
+        securityProperties = [self getIvar:kComposeBackEndPreferredSecurityPropertiesKey];
+    }
+    return securityProperties;
 }
 
 - (void)setPreferredSecurityProperties:(GMComposeMessagePreferredSecurityProperties *)preferredSecurityProperties {
-    [self setIvar:kComposeBackEndPreferredSecurityPropertiesKey value:preferredSecurityProperties];
+    @synchronized ([self valueForKey:@"_smimeLock"]) {
+        [self setIvar:kComposeBackEndPreferredSecurityPropertiesKey value:preferredSecurityProperties];
+    }
 }
 
 // TODO: Possibly remove later. only for testing

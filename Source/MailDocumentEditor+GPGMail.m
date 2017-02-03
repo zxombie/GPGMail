@@ -103,14 +103,13 @@ extern const NSString *kComposeWindowControllerAllowWindowTearDown;
 	// Setup security method hint accessory view in top right corner of the window.
 	[self setupSecurityMethodHintAccessoryView];
 
-    GPGMAIL_SECURITY_METHOD securityMethod = ((ComposeBackEnd_GPGMail *)MAIL_SELF(self).backEnd).preferredSecurityProperties.securityMethod;
-//	GPGMAIL_SECURITY_METHOD securityMethod = ((ComposeBackEnd_GPGMail *)(MAIL_SELF(self)).backEnd).guessedSecurityMethod;
-//    if(((ComposeBackEnd_GPGMail *)(MAIL_SELF(self)).backEnd).securityMethod)
-//        securityMethod = ((ComposeBackEnd_GPGMail *)(MAIL_SELF(self)).backEnd).securityMethod;
-    [self updateSecurityMethod:securityMethod];
+    ComposeBackEnd *backEnd = MAIL_SELF(self).backEnd;
+    @synchronized ([backEnd valueForKey:@"_smimeLock"]) {
+        GPGMAIL_SECURITY_METHOD securityMethod = ((ComposeBackEnd_GPGMail *)MAIL_SELF(self).backEnd).preferredSecurityProperties.securityMethod;
+        [self updateSecurityMethod:securityMethod];
+    }
+
     [self MABackEndDidLoadInitialContent:content];
-    // Set backend was initialized, so securityMethod changes will start to send notifications.
-    ((ComposeBackEnd_GPGMail *)(MAIL_SELF(self)).backEnd).wasInitialized = YES;
 }
 
 - (void)setupSecurityMethodHintAccessoryView {
@@ -128,9 +127,12 @@ extern const NSString *kComposeWindowControllerAllowWindowTearDown;
 }
 
 - (void)securityMethodAccessoryView:(GMSecurityMethodAccessoryView *)accessoryView didChangeSecurityMethod:(GPGMAIL_SECURITY_METHOD)securityMethod {
-    ((ComposeBackEnd_GPGMail *)(MAIL_SELF(self)).backEnd).preferredSecurityProperties.securityMethod = securityMethod;
-    [(HeadersEditor_GPGMail *)[MAIL_SELF(self) headersEditor] updateFromAndAddSecretKeysIfNecessary:@(securityMethod == GPGMAIL_SECURITY_METHOD_OPENPGP ? YES : NO)];
-    [[MAIL_SELF(self) headersEditor] _updateSecurityControls];
+    ComposeBackEnd *backEnd = MAIL_SELF(self).backEnd;
+    @synchronized ([backEnd valueForKey:@"_smimeLock"]) {
+        ((ComposeBackEnd_GPGMail *)(MAIL_SELF(self)).backEnd).preferredSecurityProperties.securityMethod = securityMethod;
+        [(HeadersEditor_GPGMail *)[MAIL_SELF(self) headersEditor] updateFromAndAddSecretKeysIfNecessary:@(securityMethod == GPGMAIL_SECURITY_METHOD_OPENPGP ? YES : NO)];
+        [[MAIL_SELF(self) headersEditor] _updateSecurityControls];
+    }
 }
 
 - (void)MADealloc {
