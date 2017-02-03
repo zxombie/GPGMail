@@ -53,21 +53,6 @@
 extern NSString *MCDescriptionForMessageFlags(int arg0);
 extern const NSString *kMimeBodyMessageKey;
 
-//@interface Library_GPGMail (NotImplemented)
-//
-//- (id)dataSource;
-//- (id)fullBodyDataForMessage:(id)arg1 andHeaderDataIfReadilyAvailable:(BOOL)arg2 fetchIfNotAvailable:(BOOL)arg3;
-//- (id)bodyDataFetchIfNotAvailable:(BOOL)arg1 allowPartial:(BOOL)arg2;
-//- (id)headerDataFetchIfNotAvailable:(BOOL)arg1 allowPartial:(BOOL)arg2;
-//- (id)initWithEncodedData:(id)arg1;
-//- (void)setTopLevelPart:(id)arg1;
-//- (void)setMimeBody:(id)arg1;
-//+ (id)_messageDataAtPath:(id)arg1;
-//+ (id)_dataPathForMessage:(id)arg1 type:(long long)arg2;
-//
-//
-//@end
-
 @implementation Library_GPGMail
 
 /** ONLY FOR Mavericks and then on MFLibrary. */
@@ -91,7 +76,7 @@ extern const NSString *kMimeBodyMessageKey;
 
 + (NSData *)GMDataForMessage:(MCMessage *)message mimePart:(MCMimePart *)mimePart {
     MCAttachment *attachment = [[MCAttachment alloc] initWithMimePart:mimePart];
-    MFLibraryAttachmentDataSource* dataSource = [[MFLibraryAttachmentDataSource alloc] initWithMessage:message mimePartNumber:[mimePart partNumber] attachment:attachment remoteDataSource:nil];
+    MFLibraryAttachmentDataSource *dataSource = [[MFLibraryAttachmentDataSource alloc] initWithMessage:message mimePartNumber:[mimePart partNumber] attachment:attachment remoteDataSource:nil];
     
     __block dispatch_semaphore_t waiter = dispatch_semaphore_create(0);
     __block NSData *attachmentData = nil;
