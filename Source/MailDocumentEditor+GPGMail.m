@@ -50,6 +50,7 @@
 #import "GMComposeMessagePreferredSecurityProperties.h"
 
 static const NSString *kUnencryptedReplyToEncryptedMessage = @"unencryptedReplyToEncryptedMessage";
+extern const NSString *kComposeWindowControllerAllowWindowTearDown;
 
 #define MAIL_SELF(object) ((ComposeViewController *)(object))
 
@@ -305,9 +306,9 @@ static const NSString *kUnencryptedReplyToEncryptedMessage = @"unencryptedReplyT
 	// Unfortunately, if let it do that at the point of the send animation, there's no way we could
 	// display an error.
 	if(result == 3) {
-		[self setIvar:@"GMAllowReleaseOfTabBarViewItem" value:@(YES)];
-		[[self delegate] composeViewControllerDidSend:self];
-		[self removeIvar:@"GMAllowReleaseOfTabBarViewItem"];
+		[self setIvar:kComposeWindowControllerAllowWindowTearDown value:@(YES)];
+		[(ComposeWindowController *)[self delegate] composeViewControllerDidSend:self];
+		[self removeIvar:kComposeWindowControllerAllowWindowTearDown];
 	}
 }
 
