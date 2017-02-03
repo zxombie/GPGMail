@@ -377,6 +377,19 @@
 		302FF189175CAEC400DB03EB /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/GPGAttachments.strings; sourceTree = "<group>"; };
 		302FF18A175CAEC500DB03EB /* sk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sk; path = sk.lproj/GPGAttachments.strings; sourceTree = "<group>"; };
 		302FF18B175CAEC600DB03EB /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/GPGAttachments.strings; sourceTree = "<group>"; };
+		303308A31E449269004F6DAF /* el */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = el; path = el.lproj/GPGAttachment.strings; sourceTree = "<group>"; };
+		303308A41E449269004F6DAF /* el */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = el; path = el.lproj/GPGMail.strings; sourceTree = "<group>"; };
+		303308A51E449269004F6DAF /* el */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = el; path = el.lproj/SignatureView.strings; sourceTree = "<group>"; };
+		303308AB1E449272004F6DAF /* fa_IR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fa_IR; path = fa_IR.lproj/GPGAttachment.strings; sourceTree = "<group>"; };
+		303308AC1E449272004F6DAF /* fa_IR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fa_IR; path = fa_IR.lproj/GPGMail.strings; sourceTree = "<group>"; };
+		303308AD1E449272004F6DAF /* fa_IR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fa_IR; path = fa_IR.lproj/SignatureView.strings; sourceTree = "<group>"; };
+		303308AF1E44927B004F6DAF /* fa_IR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fa_IR"; path = "fa_IR.lproj/GPGSignatureView.strings"; sourceTree = "<group>"; };
+		303308B01E44927D004F6DAF /* el */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = el; path = el.lproj/GPGSignatureView.strings; sourceTree = "<group>"; };
+		303308B11E449284004F6DAF /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/GPGAttachments.strings; sourceTree = "<group>"; };
+		303308B21E449286004F6DAF /* el */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = el; path = el.lproj/GPGAttachments.strings; sourceTree = "<group>"; };
+		303308B41E449287004F6DAF /* fa_IR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fa_IR"; path = "fa_IR.lproj/GPGAttachments.strings"; sourceTree = "<group>"; };
+		303308B61E44928C004F6DAF /* fa_IR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fa_IR"; path = "fa_IR.lproj/GPGMailPreferences.strings"; sourceTree = "<group>"; };
+		303308B71E44928E004F6DAF /* el */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = el; path = el.lproj/GPGMailPreferences.strings; sourceTree = "<group>"; };
 		3044C6E01D33A03400F500B8 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/GPGAttachment.strings; sourceTree = "<group>"; };
 		3044C6E31D33A03400F500B8 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/GPGMail.strings; sourceTree = "<group>"; };
 		3044C6E81D33A03400F500B8 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/SignatureView.strings; sourceTree = "<group>"; };
@@ -415,7 +428,6 @@
 		3082A8AE1D2BA89300AB864A /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/GPGAttachment.strings; sourceTree = "<group>"; };
 		3082A8B01D2BA89300AB864A /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/GPGMail.strings; sourceTree = "<group>"; };
 		3082A8B31D2BA89300AB864A /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/SignatureView.strings; sourceTree = "<group>"; };
-		3082A8B41D2BA89A00AB864A /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/GPGAttachments.strings; sourceTree = "<group>"; };
 		3082A8B51D2BA89A00AB864A /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/GPGMailPreferences.strings; sourceTree = "<group>"; };
 		3082A8B61D2BA89A00AB864A /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/GPGSignatureView.strings; sourceTree = "<group>"; };
 		308DE1ED14FFFB920090F6F7 /* VERSIONING */ = {isa = PBXFileReference; lastKnownFileType = text; path = VERSIONING; sourceTree = "<group>"; };
@@ -1018,6 +1030,8 @@
 				vi,
 				Base,
 				nl,
+				el,
+				fa_IR,
 			);
 			mainGroup = 089C166AFE841209C02AAC07 /* GPGMail */;
 			projectDirPath = "";
@@ -1364,6 +1378,8 @@
 				3082A8A71D2BA87A00AB864A /* oc */,
 				3082A8B01D2BA89300AB864A /* vi */,
 				3044C6E31D33A03400F500B8 /* nl */,
+				303308A41E449269004F6DAF /* el */,
+				303308AC1E449272004F6DAF /* fa_IR */,
 			);
 			name = GPGMail.strings;
 			sourceTree = "<group>";
@@ -1403,6 +1419,8 @@
 				3082A8AD1D2BA88100AB864A /* oc */,
 				3082A8B61D2BA89A00AB864A /* vi */,
 				3044C6EC1D33A04700F500B8 /* nl */,
+				303308AF1E44927B004F6DAF /* fa_IR */,
+				303308B01E44927D004F6DAF /* el */,
 			);
 			name = GPGSignatureView.xib;
 			sourceTree = "<group>";
@@ -1434,6 +1452,8 @@
 				3082A8A51D2BA87A00AB864A /* oc */,
 				3082A8AE1D2BA89300AB864A /* vi */,
 				3044C6E01D33A03400F500B8 /* nl */,
+				303308A31E449269004F6DAF /* el */,
+				303308AB1E449272004F6DAF /* fa_IR */,
 			);
 			name = GPGAttachment.strings;
 			sourceTree = "<group>";
@@ -1463,8 +1483,10 @@
 				302FF18B175CAEC600DB03EB /* sv */,
 				3082A8A21D2BA86700AB864A /* ko */,
 				3082A8AB1D2BA88100AB864A /* oc */,
-				3082A8B41D2BA89A00AB864A /* vi */,
 				3044C6EE1D33A05000F500B8 /* nl */,
+				303308B11E449284004F6DAF /* vi */,
+				303308B21E449286004F6DAF /* el */,
+				303308B41E449287004F6DAF /* fa_IR */,
 			);
 			name = GPGAttachments.xib;
 			path = Resources;
@@ -1497,6 +1519,8 @@
 				3082A8AA1D2BA87A00AB864A /* oc */,
 				3082A8B31D2BA89300AB864A /* vi */,
 				3044C6E81D33A03400F500B8 /* nl */,
+				303308A51E449269004F6DAF /* el */,
+				303308AD1E449272004F6DAF /* fa_IR */,
 			);
 			name = SignatureView.strings;
 			sourceTree = "<group>";
@@ -1536,6 +1560,8 @@
 				3082A8AC1D2BA88100AB864A /* oc */,
 				3082A8B51D2BA89A00AB864A /* vi */,
 				3044C6ED1D33A04B00F500B8 /* nl */,
+				303308B61E44928C004F6DAF /* fa_IR */,
+				303308B71E44928E004F6DAF /* el */,
 			);
 			name = GPGMailPreferences.xib;
 			sourceTree = "<group>";
