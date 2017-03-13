@@ -158,6 +158,10 @@ extern const NSString *kMimeBodyMessageKey;
     __block BOOL isFullMessageDataAvailableAfterFetching = NO;
     __block BOOL isFetchingMessageData = NO;
     __block NSData *messageData = nil;
+    // If mimeBodyForMessage is called from setData:forMessage: under no circumstances a new fetch of the
+    // body is allowed to be triggered.
+    __block BOOL noFetchBodyData = [[[[NSThread currentThread] threadDictionary] objectForKey:@"MFLibraryNoRecreateBody"] boolValue];
+    [[[NSThread currentThread] threadDictionary] removeObjectForKey:@"MFLibraryNoRecreateBody"];
     __block dispatch_semaphore_t waiter = dispatch_semaphore_create(0);
     __weak GPGMailBundle *bundle = [GPGMailBundle sharedInstance];
 
@@ -184,7 +188,7 @@ extern const NSString *kMimeBodyMessageKey;
     // Let Mail generate the mime body from the partial emlx file.
     // Even if only the partial emlx is available, it will be necessary to re-create the message from attachments.
     MCMimeBody *mimeBody = [self MAMimeBodyForMessage:currentMessage];
-    if(!isMCLibraryMessage || !userDidSelectMessage || isCompleteMessageDataAvailable || isFetchingMessageData) {
+    if(!isMCLibraryMessage || !userDidSelectMessage || isCompleteMessageDataAvailable || isFetchingMessageData || noFetchBodyData) {
         if(userDidSelectMessage) {
             [mimeBody setIvar:kMimeBodyMessageKey value:currentMessage];
         }
@@ -251,6 +255,12 @@ extern const NSString *kMimeBodyMessageKey;
         return NO;
     }
     return ret;
+}
+
++ (void)MASetData:(NSData *)data forMessage:(id)message isPartial:(BOOL)isPartial hasCompleteText:(BOOL)hasCompleteText {
+    [[[NSThread currentThread] threadDictionary] setObject:@(YES) forKey:@"MFLibraryNoRecreateBody"];
+    [self MASetData:data forMessage:message isPartial:isPartial hasCompleteText:hasCompleteText];
+    return;
 }
 
 @end
