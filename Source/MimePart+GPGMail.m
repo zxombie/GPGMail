@@ -2002,17 +2002,18 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     return [self MAIsEncrypted];
 }
 
-- (BOOL)MAIsMimeEncrypted {
-    BOOL ret = [self MAIsMimeEncrypted];
-    BOOL isPGPMimeEncrypted = [[[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] getIvar:@"MimeEncrypted"] boolValue];
-    return ret || isPGPMimeEncrypted;
-}
-
-- (BOOL)MAIsMimeSigned {
-    BOOL ret = [self MAIsMimeSigned];
-    BOOL isPGPMimeSigned = [[[self topPart] getIvar:@"MimeSigned"] boolValue];
-    return ret || isPGPMimeSigned;
-}
+// TODO: Remove - should no longer be necessary.
+//- (BOOL)MAIsMimeEncrypted {
+//    BOOL ret = [self MAIsMimeEncrypted];
+//    BOOL isPGPMimeEncrypted = [[[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] getIvar:@"MimeEncrypted"] boolValue];
+//    return ret || isPGPMimeEncrypted;
+//}
+//
+//- (BOOL)MAIsMimeSigned {
+//    BOOL ret = [self MAIsMimeSigned];
+//    BOOL isPGPMimeSigned = [[[self topPart] getIvar:@"MimeSigned"] boolValue];
+//    return ret || isPGPMimeSigned;
+//}
 
 - (Message *)messageWithMessageData:(NSData *)messageData {
     MCMutableMessageHeaders *headers = [MCMutableMessageHeaders new];
