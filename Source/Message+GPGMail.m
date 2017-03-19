@@ -62,6 +62,7 @@
 
 const static NSString *kMessageSecurityFeaturesKey = @"MessageSecurityFeaturesKey";
 extern const NSString *kMimeBodyMessageKey;
+extern NSString * const kMimePartAllowPGPProcessingKey;
 
 @implementation Message_GPGMail
 
@@ -255,6 +256,7 @@ extern const NSString *kMimeBodyMessageKey;
         MCMimePart *topLevelPart = [[MCMimePart alloc] initWithEncodedData:messageData];
         MCMimeBody *body = [MCMimeBody new];
         [body setIvar:kMimeBodyMessageKey value:self];
+        [topLevelPart setIvar:kMimePartAllowPGPProcessingKey value:@(YES)];
         [topLevelPart setIvar:@"MimeBody" value:body];
         [body setTopLevelPart:topLevelPart];
         [(MCMimePart *)topLevelPart parse];

@@ -260,12 +260,6 @@
     // Should work better.
     GMMessageSecurityFeatures *decryptedMimeBodySecurityFeatures = [(MimeBody_GPGMail *)decryptedBody securityFeatures];
     
-    Message *decryptedMessage = nil;
-    if(decryptedBody)
-        decryptedMessage = [decryptedBody message];
-    
-#warning Fix up. The decryptedMessage should be replaced by a GMMessageSecurityParseResult for the decrypted message.
-    
     self.PGPEncrypted = isEncrypted || [decryptedMimeBodySecurityFeatures PGPEncrypted];
     self.PGPSigned = isSigned || [decryptedMimeBodySecurityFeatures PGPSigned];
     self.PGPPartlyEncrypted = isPartlyEncrypted || [decryptedMimeBodySecurityFeatures PGPPartlyEncrypted];
@@ -316,11 +310,11 @@
     }
     
     DebugLog(@"%@ Decrypted Message [%@]:\n\tisEncrypted: %@, isSigned: %@,\n\tisPartlyEncrypted: %@, isPartlySigned: %@\n\tsignatures: %@\n\terrors: %@",
-             [decryptedBody message], [(MCMessage *)[decryptedBody message] subject], [decryptedMimeBodySecurityFeatures PGPEncrypted] ? @"YES" : @"NO", [decryptedMimeBodySecurityFeatures PGPSigned] ? @"YES" : @"NO",
+             [decryptedBody GMMessage], [(MCMessage *)[decryptedBody GMMessage] subject], [decryptedMimeBodySecurityFeatures PGPEncrypted] ? @"YES" : @"NO", [decryptedMimeBodySecurityFeatures PGPSigned] ? @"YES" : @"NO",
              [decryptedMimeBodySecurityFeatures PGPPartlyEncrypted] ? @"YES" : @"NO", [decryptedMimeBodySecurityFeatures PGPPartlySigned] ? @"YES" : @"NO", [decryptedMimeBodySecurityFeatures PGPSignatures], [decryptedMimeBodySecurityFeatures PGPErrors]);
     
     DebugLog(@"%@ Message [%@]:\n\tisEncrypted: %@, isSigned: %@,\n\tisPartlyEncrypted: %@, isPartlySigned: %@\n\tsignatures: %@\n\terrors: %@\n\tattachments: %@",
-             [(MimeBody_GPGMail *)mimeBody message], [[(MimeBody_GPGMail *)mimeBody message] subject], self.PGPEncrypted ? @"YES" : @"NO", self.PGPSigned ? @"YES" : @"NO",
+             [(MimeBody_GPGMail *)mimeBody GMMessage], [[(MimeBody_GPGMail *)mimeBody GMMessage] subject], self.PGPEncrypted ? @"YES" : @"NO", self.PGPSigned ? @"YES" : @"NO",
              self.PGPPartlyEncrypted ? @"YES" : @"NO", self.PGPPartlySigned ? @"YES" : @"NO", self.PGPSignatures, self.PGPErrors, self.PGPAttachments);
     
     // Fix the number of attachments, this time for real!

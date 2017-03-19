@@ -84,14 +84,68 @@ const NSString *kMimeBodyMessageKey = @"MimeBodyMessageKey";
 - (BOOL)MA_isPossiblySignedOrEncrypted {
     // Check if message should be processed (-[Message shouldBePGPProcessed] - Snippet generation check)
     // otherwise out of here!
-    if(![(Message_GPGMail *)[self message] shouldBePGPProcessed])
+    if(![(MimePart_GPGMail *)[MAIL_SELF topLevelPart] shouldBePGPProcessed])
         return [self MA_isPossiblySignedOrEncrypted];
-    
-    return [self MA_isPossiblySignedOrEncrypted];
+
+    return [self MA_isPossiblySignedOrEncrypted] || [self mightContainPGPData];
 }
 
-// TODO: Fix this, since on older versions this will create a crash.
-- (id)message {
+- (BOOL)mightContainPGPData {
+    __block BOOL mightContainPGPData = NO;
+
+    NSArray *pgpExtensions = @[@"pgp", @"gpg", @"asc", @"sig"];
+
+    [(MimePart_GPGMail *)[MAIL_SELF topLevelPart] enumerateSubpartsWithBlock:^(MCMimePart *mimePart) {
+        if([mimePart isType:@"multipart" subtype:@"encrypted"] ||
+           [mimePart isType:@"multipart" subtype:@"signed"] ||
+           [mimePart isType:@"application" subtype:@"pgp-encrypted"] ||
+           [mimePart isType:@"application" subtype:@"pgp-signature"]) {
+            mightContainPGPData = YES;
+            return;
+        }
+
+        NSString *nameParameter = [[mimePart bodyParameterForKey:@"name"] lowercaseString];
+        NSString *filenameParameter = [[mimePart bodyParameterForKey:@"filename"] lowercaseString];
+
+        NSString *nameExt = [nameParameter pathExtension];
+        NSString *filenameExt = [filenameParameter pathExtension];
+
+        if([pgpExtensions containsObject:nameExt] || [pgpExtensions containsObject:filenameExt]) {
+            mightContainPGPData = YES;
+            return;
+        }
+
+        // Last but not least, check for winmail.dat files, which could contain
+        // signed or encrypted data, where the mime structure was altered by
+        // MS Exchange.
+        if([mimePart isType:@"application" subtype:@"ms-tnef"] ||
+           [nameParameter isEqualToString:@"winmail.dat"] ||
+           [nameParameter isEqualToString:@"win.dat"] ||
+           [filenameParameter isEqualToString:@"winmail.dat"] ||
+           [filenameParameter isEqualToString:@"win.dat"]) {
+            mightContainPGPData = YES;
+            return;
+        }
+
+        // And another special case seems to be fixed by rebuilding the message.
+        // If message/rfc822 mime part is included in the received message,
+        // Mail seems to fuck up the data source necessary to decode that message.
+        // As a result, only parts of the message are displayed.
+        // If however GPGMail rebuilds the message internally from cached data,
+        // the data source is properly setup and it's possible to decode the message.
+        // While the message might not contain PGP data, YES is still returned
+        // from this method, in order to instruct GPGMail to rebuild the message.
+        if([mimePart isType:@"message" subtype:@"rfc822"]) {
+            mightContainPGPData = YES;
+            return;
+        }
+
+    }];
+
+    return mightContainPGPData;
+}
+
+- (MCMessage *)GMMessage {
     return [self getIvar:kMimeBodyMessageKey];
 }
 

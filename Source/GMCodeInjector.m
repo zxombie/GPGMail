@@ -413,7 +413,8 @@
              @"ComposeBackEnd": @{
                      @"selectors": @{
                              @"added": @[
-                                     @"updateSMIMEStatus:"]
+                                     @"updateSMIMEStatus:",
+                                     @"_generateParsedMessageFromOriginalMessages"]
                              }
                      },
              @"IMAPMessageDownload": @{
@@ -468,6 +469,10 @@
              @"FullScreenWindowController": @{
                      @"selectors": @[
                              @"_closeModalWindow:"]
+                     },
+             @"RedundantContentIdentificationManager": @{
+                     @"selectors": @[
+                             @"redundantContentMarkupForMessage:inConversation:"]
                      }
              };
 }

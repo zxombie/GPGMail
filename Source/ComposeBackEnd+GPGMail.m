@@ -53,7 +53,8 @@
 
 #define MAIL_SELF ((ComposeBackEnd *)self)
 
-extern const NSString *kComposeBackEndPreferredSecurityPropertiesKey = @"PreferredSecurityPropertiesKey";
+const NSString *kComposeBackEndPreferredSecurityPropertiesKey = @"PreferredSecurityPropertiesKey";
+NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"ReturnCompleteBodyDataForComposeBackEnd";
 
 @implementation ComposeBackEnd_GPGMail
 
@@ -1080,6 +1081,14 @@ extern const NSString *kComposeBackEndPreferredSecurityPropertiesKey = @"Preferr
     // lldb$ register read $rflags & 0x40.
     // It can be manipulated by running:
     // lldb$ register write rflags `$rflags|0x40`
+}
+
+- (void)MA_generateParsedMessageFromOriginalMessages {
+    // It's necessary to tell GPGMal that the whole body is required in preparation
+    // for a reply and that its allowed to decrypt the content, if necessary.
+    [[[NSThread currentThread] threadDictionary] setObject:@(YES) forKey:kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey];
+    [self MA_generateParsedMessageFromOriginalMessages];
+    [[[NSThread currentThread] threadDictionary] removeObjectForKey:kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey];
 }
 
 @end

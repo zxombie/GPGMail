@@ -60,11 +60,13 @@
 - (void)setSecurityFeatures:(GMMessageSecurityFeatures *)securityFeatures;
 - (GMMessageSecurityFeatures *)securityFeatures;
 
+- (BOOL)mightContainPGPData;
+
 @end
 
 @interface MimeBody_GPGMail (MissingInSierra)
 
-- (MCMessage *)message;
+- (MCMessage *)GMMessage;
 
 @end
 

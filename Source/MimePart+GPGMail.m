@@ -59,6 +59,7 @@
 #define MAIL_SELF(self) ((MCMimePart *)(self))
 
 extern const NSString *kMimeBodyMessageKey;
+NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKey";
 
 @interface MimePart_GPGMail (NotImplemented2)
 
@@ -164,27 +165,7 @@ extern const NSString *kMimeBodyMessageKey;
 
 // TODO: Extend to find multiple signatures and encrypted data parts, if necessary.
 - (id)MADecode {
-    MCMessage *currentMessage = [(MimeBody_GPGMail *)[[self topPart] mimeBody] message];
-    
-    // _calculateSnippetForMessages doesn't attempt to decode
-    // attachments. That's a problem, because once a message is displayed
-    // the PGPInfoCollected flag is already set on the message,
-    // but attachment were never taken into account.
-    // Resetting PGPInfoCollected on each decoding might solve
-    // this issue. (doesn't completely fix it, read on, fixes it better, but might cause other problems.)
-    // If the message is already selected when Mail.app is opened, the message doesn't seem
-    // to be reparsed, but the info from _calculateSnippetForMessages is somehow reused. 
-    
-    // We collect the information now only once decode is done, in mimeBodyForMessage
-    // and when a message is decrypted.
-//    if(![self parentPart]) {
-//        [[[self mimeBody] message] setPGPInfoCollected:NO];
-////        ((MFMimeDecodeContext *)ctx).decodeTextPartsOnly = NO;
-//    }
-    
-    // Check if message should be processed (-[Message shouldBePGPProcessed])
-    // otherwise out of here!
-    if(![(Message_GPGMail *)currentMessage shouldBePGPProcessed]) {
+    if(![(MimePart_GPGMail *)[self topPart] shouldBePGPProcessed]) {
         return [self MADecode];
     }
     
@@ -253,20 +234,42 @@ extern const NSString *kMimeBodyMessageKey;
     if([content isKindOfClass:[GPGMailBundle resolveMailClassFromName:@"ParsedMessage"]]) {
         // If this is a PGP-Partitioned message, PGPPartitionedContent is set,
         // so return that.
-        if([[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] getIvar:@"PGPPartitionedContent"] && ![MAIL_SELF(self) parentPart]) {
-            NSMutableString *completeHTML = [NSMutableString stringWithString:[[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] getIvar:@"PGPPartitionedContent"]];
+        if([[self topPart] getIvar:@"PGPPartitionedContent"] && ![MAIL_SELF(self) parentPart]) {
+            NSMutableString *completeHTML = [NSMutableString stringWithString:[[self topPart] getIvar:@"PGPPartitionedContent"]];
             if([((MCParsedMessage *)content).html length])
                 [completeHTML appendString:((MCParsedMessage *)content).html];
             ((MCParsedMessage *)content).html = completeHTML;
         }
     
         if([[self signatureAttachmentScheduledForRemoval] count]) {
-            DebugLog(@"Parsed Message without objects: %@", [((MCParsedMessage *)content).html stringByDeletingAttachmentsWithNames:[[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] getIvar:@"PGPSignatureAttachmentsToRemove"]]);
+            DebugLog(@"Parsed Message without objects: %@", [((MCParsedMessage *)content).html stringByDeletingAttachmentsWithNames:[[self topPart] getIvar:@"PGPSignatureAttachmentsToRemove"]]);
             ((MCParsedMessage *)content).html = [((MCParsedMessage *)content).html stringByDeletingAttachmentsWithNames:[self signatureAttachmentScheduledForRemoval]];
         }
     }
     
     return content;
+}
+
+#pragma mark Methods that determine if PGP Processing is allowed.
+- (BOOL)shouldBePGPProcessed {
+    // Components are missing? What to do...
+    //    if([[GPGMailBundle sharedInstance] componentsMissing])
+    //        return NO;
+    BOOL allowPGPProcessing = [[[self topPart] getIvar:kMimePartAllowPGPProcessingKey] boolValue];
+    if(!allowPGPProcessing) {
+        return NO;
+    }
+
+    // OpenPGP is disabled for reading? Return false.
+    if(![[GPGOptions sharedOptions] boolForKey:@"UseOpenPGPForReading"]) {
+        allowPGPProcessing = NO;
+    }
+
+    // Snippet creation is no longer allowed. If it is to be re-introduced,
+    // a separate flag will be made available to determine, if the message
+    // is decoded in order to create the snippet, and only then, PGP processing
+    // is allowed.
+    return allowPGPProcessing;
 }
 
 #pragma mark TNEF/Winmail.dat Mime Part Helpers
@@ -405,7 +408,7 @@ extern const NSString *kMimeBodyMessageKey;
 	MCMessage *signedMessage = [GM_MAIL_CLASS(@"Message") messageWithRFC822Data:signedAttachment sanitizeData:YES];
     MCMimeBody *messageBody = [MCMimeBody new];
     MCMimePart *topLevelPart = [[MCMimePart alloc] initWithEncodedData:signedMessage];
-    [messageBody setTopLevelPart:messageBody];
+    [messageBody setTopLevelPart:topLevelPart];
     if(![topLevelPart parse])
         return nil;
 //    [signedMessage setMessageInfoFromMessage:[(MimeBody_GPGMail *)[self mimeBody] message]];
@@ -414,7 +417,7 @@ extern const NSString *kMimeBodyMessageKey;
 	
 	// It's necessary to temporarily store this message, so it's retained,
 	// otherwise it will be released to early.
-    [[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] setIvar:@"TNEFDecodedMessage" value:signedMessage];
+    [[self topPart] setIvar:@"TNEFDecodedMessage" value:signedMessage];
 	
 	return messageBody;
 }
@@ -461,7 +464,7 @@ extern const NSString *kMimeBodyMessageKey;
     // that they are never generated, unless the userDidActivelySelectMessage flag is set.
     // If that's not the case, we can be sure that snippets are currently generated and return the
     // ciphertext.
-    BOOL userDidSelectMessage = [(Message_GPGMail *)[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] userDidActivelySelectMessageCheckingMessageOnly:NO];
+    BOOL userDidSelectMessage = [(MimePart_GPGMail *)[self topPart] shouldBePGPProcessed];
     
     if(!userDidSelectMessage) {
         return nil;
@@ -543,7 +546,7 @@ extern const NSString *kMimeBodyMessageKey;
 - (id)contentForApplicationOctetStream {
     // Check if message should be processed (-[Message shouldBePGPProcessed] - Snippet generation check)
     // otherwise out of here!
-    if(![(Message_GPGMail *)[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] shouldBePGPProcessed])
+    if(![(MimePart_GPGMail *)[self topPart] shouldBePGPProcessed])
         return nil;
     
     // Check if the message is PGP/MIME encrypted and the PGP info was already collected.
@@ -564,13 +567,32 @@ extern const NSString *kMimeBodyMessageKey;
     
     if(mightBeEncrypted) {
         NSData *decryptedData = [self decodePGPEncryptedAttachment];
-        // Create a new MCAttachment for the decrypted data.
-        MCFileTypeInfo *fileType = [MCFileTypeInfo new];
-        [fileType setPathExtension:[[MAIL_SELF(self) attachmentFilename] pathExtension]];
-        MCAttachment *attachment = [[MCAttachment alloc] initWithMimePart:self];
-        MCDataAttachmentDataSource *attachmentDataSource = [[MCDataAttachmentDataSource alloc] initWithData:decryptedData];
-        [attachment setDataSource:attachmentDataSource];
-        [attachment setMimeType:[fileType mimeType]];
+        NSString *originalFilename = [MAIL_SELF(self) attachmentFilename];
+        NSString *filename = originalFilename;
+        NSData *attachmentData = decryptedData ? decryptedData : [MAIL_SELF(self) decodedData];
+        if(decryptedData) {
+            // TODO: Implement custom file name is one is avialable.
+            NSArray *pgpExtensions = @[@"pgp", @"gpg", @"asc"];
+            for(NSString *extension in pgpExtensions) {
+                if([[filename pathExtension] isEqualToString:extension]) {
+                    filename = [filename substringWithRange:NSMakeRange(0, [filename length] - ([extension length] + 1))];
+                    break;
+                }
+            }
+        }
+        MCAttachment *attachment = nil;
+        if([[filename pathExtension] length]) {
+            // Create a new MCAttachment for the decrypted data.
+            MCFileTypeInfo *fileType = [MCFileTypeInfo new];
+            [fileType setPathExtension:[filename pathExtension]];
+            attachment = [[MCAttachment alloc] initWithMimePart:self];
+            [attachment setFilename:filename];
+            MCDataAttachmentDataSource *attachmentDataSource = [[MCDataAttachmentDataSource alloc] initWithData:attachmentData];
+            [attachment setDataSource:attachmentDataSource];
+            if([fileType getTypeInfoForDesiredFields:1]) {
+                [attachment setMimeType:[fileType mimeType]];
+            }
+        }
         
         return attachment;
     }
@@ -607,8 +629,7 @@ extern const NSString *kMimeBodyMessageKey;
 	NSString *filename = [[MAIL_SELF(self) dispositionParameterForKey:@"filename"] lowercaseString];
 	if([decryptedData length] && [filename isEqualToString:@"pgpexch.htm"]) {
 		NSString *decryptedContent = [decryptedData stringByGuessingEncodingWithHint:[self bestStringEncoding]];
-		
-		[[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] setIvar:@"PGPPartitionedContent" value:decryptedContent];
+        [[self topPart] setIvar:@"PGPPartitionedContent" value:decryptedContent];
 		// Also reset PGPAttachment, so this is not treated as an attachment.
 		self.PGPAttachment = NO;
         // Since the paritioned content is encrypted, we have to correctly set the status
@@ -659,15 +680,15 @@ extern const NSString *kMimeBodyMessageKey;
 }
 
 - (void)scheduleSignatureAttachmentForRemoval:(NSString *)attachment {
-    MCMessage *message = [(MimeBody_GPGMail *)[[self topPart] mimeBody] message];
-    if(![message ivarExists:@"PGPSignatureAttachmentsToRemove"])
-        [message setIvar:@"PGPSignatureAttachmentsToRemove" value:[NSMutableArray array]];
+    if(![[self topPart] ivarExists:@"PGPSignatureAttachmentsToRemove"]) {
+        [[self topPart] setIvar:@"PGPSignatureAttachmentsToRemove" value:[NSMutableArray array]];
+    }
     
-    [[message getIvar:@"PGPSignatureAttachmentsToRemove"] addObject:attachment];
+    [[[self topPart] getIvar:@"PGPSignatureAttachmentsToRemove"] addObject:attachment];
 }
 
 - (NSArray *)signatureAttachmentScheduledForRemoval {
-    return [[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] getIvar:@"PGPSignatureAttachmentsToRemove"];
+    return [[self topPart] getIvar:@"PGPSignatureAttachmentsToRemove"];
 }
 
 - (void)attachmentMightBePGPEncrypted:(BOOL *)mightEnc orSigned:(BOOL *)mightSig {
@@ -828,9 +849,9 @@ extern const NSString *kMimeBodyMessageKey;
     // Decrypt data should not run if Mail.app is generating snippets
     // and NeverCreateSnippetPreviews is set or the passphrase is not in cache
     // and CreatePreviewSnippets is not set.
-    if(![(Message_GPGMail *)[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] shouldCreateSnippetWithData:encryptedData])
+    if(![(MimePart_GPGMail *)[self topPart] shouldBePGPProcessed]) {
         return nil;
-    
+    }
 	
 	NSData *deArmoredEncryptedData = nil;
     // De-armor the message and catch any CRC-Errors.
@@ -1266,6 +1287,7 @@ extern const NSString *kMimeBodyMessageKey;
     [decryptedMimeBody setIvar:kMimeBodyMessageKey value:decryptedMessage];
     id decryptedMimePart = [[MCMimePart alloc] initWithEncodedData:decryptedData];
     [decryptedMimePart setIvar:@"MimeBody" value:decryptedMimeBody];
+    [decryptedMimePart setIvar:kMimePartAllowPGPProcessingKey value:@(YES)];
     [decryptedMimeBody setTopLevelPart:decryptedMimePart];
     [decryptedMimePart parse];
     
@@ -1735,7 +1757,7 @@ extern const NSString *kMimeBodyMessageKey;
 	// shouldBePGPProcessed is ignored at this stage, since the mimeBody
 	// nor the message are yet available.
 	
-	if([(MimeBody_GPGMail *)[[self topPart] mimeBody] message] && ![(Message_GPGMail *)[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] shouldBePGPProcessed])
+	if(![(MimePart_GPGMail *)[self topPart] shouldBePGPProcessed])
         return [self MAUsesKnownSignatureProtocol];
     
     if([[[MAIL_SELF(self) bodyParameterForKey:@"protocol"] lowercaseString] isEqualToString:@"application/pgp-signature"])
@@ -1893,7 +1915,7 @@ extern const NSString *kMimeBodyMessageKey;
 - (BOOL)MAIsSigned {
     // Check if message should be processed (-[Message shouldBePGPProcessed])
     // otherwise out of here!
-    if(![(Message_GPGMail *)[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] shouldBePGPProcessed])
+    if(![(MimePart_GPGMail *)[self topPart] shouldBePGPProcessed])
         return [self MAIsSigned];
     
     BOOL ret = [self MAIsSigned];
@@ -1969,7 +1991,7 @@ extern const NSString *kMimeBodyMessageKey;
 - (BOOL)MAIsEncrypted {
     // Check if message should be processed (-[Message shouldBePGPProcessed])
     // otherwise out of here!
-    if(![(Message_GPGMail *)[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] shouldBePGPProcessed])
+    if(![(MimePart_GPGMail *)[self topPart] shouldBePGPProcessed])
         return [self MAIsEncrypted];
     
     if(self.PGPEncrypted)
@@ -2014,7 +2036,7 @@ extern const NSString *kMimeBodyMessageKey;
 - (void)MAClearCachedDecryptedMessageBody {
     // Check if message should be processed (-[Message shouldBePGPProcessed])
     // otherwise out of here!
-    if(![(Message_GPGMail *)[(MimeBody_GPGMail *)[[self topPart] mimeBody] message] shouldBePGPProcessed])
+    if(![(MimePart_GPGMail *)[self topPart] shouldBePGPProcessed])
         return [self MAClearCachedDecryptedMessageBody];
     
     /* The original method is called to clear PGP/MIME messages. */
