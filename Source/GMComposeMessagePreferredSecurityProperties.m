@@ -112,6 +112,17 @@
     self.message = [backEnd originalMessage];
 }
 
+- (GPGKey *)encryptionKeyForDraft {
+    // Check if a key for encrypting the draft is available matching the sender.
+    // Otherwise, return any key pair with encryption capabilities.
+    NSString *senderAddress = [self.sender gpgNormalizedEmail];
+    GPGKey *key = [self.PGPSigningKeys valueForKey:senderAddress];
+    if(!key.canAnyEncrypt) {
+        key = [[GPGMailBundle sharedInstance] anyPersonalPublicKeyWithPreferenceAddress:senderAddress];
+    }
+    return key;
+}
+
 - (void)computePreferredSecurityPropertiesForSecurityMethod:(GPGMAIL_SECURITY_METHOD)securityMethod {
     // Load signing identity and certificates for S/MIME.
     NSMutableDictionary *signingIdentities = [self.cachedSigningIdentities mutableCopy];
@@ -186,16 +197,17 @@
     
     //BOOL canEncrypt = [recipients count] ? YES : NO;
     for(id recipient in recipients) {
+        NSString *normalizedRecipient = [recipient gpgNormalizedEmail];
         // Only accept cached PGP encryption certificates, otherwise for a new check.
-        id key = encryptionKeys[recipient];
+        id key = encryptionKeys[normalizedRecipient];
         if(key && (![key isKindOfClass:[GPGKey class]] || key == [NSNull null])) {
             key = nil;
         }
         if(!key) {
-            NSArray *keyList = [[[GPGMailBundle sharedInstance] publicKeyListForAddresses:@[recipient]] allObjects];
-            encryptionKeys[recipient] = [keyList count] > 0 ? keyList[0] : [NSNull null];
+            NSArray *keyList = [[[GPGMailBundle sharedInstance] publicKeyListForAddresses:@[normalizedRecipient]] allObjects];
+            encryptionKeys[normalizedRecipient] = [keyList count] > 0 ? keyList[0] : [NSNull null];
         }
-        if(encryptionKeys[recipient] == [NSNull null]) {
+        if(encryptionKeys[normalizedRecipient] == [NSNull null]) {
             canPGPEncrypt = NO;
         }
     }

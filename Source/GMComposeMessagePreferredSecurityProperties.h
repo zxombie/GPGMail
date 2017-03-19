@@ -13,6 +13,8 @@
 #import "MCMessage.h"
 #import "ComposeBackEnd.h"
 
+@class GPGKey;
+
 typedef enum {
     ThreeStateBooleanFalse,
     ThreeStateBooleanTrue,
@@ -42,6 +44,7 @@ typedef enum {
 
 - (void)computePreferredSecurityPropertiesForSecurityMethod:(GPGMAIL_SECURITY_METHOD)securityMethod;
 
+- (GPGKey *)encryptionKeyForDraft;
 
 @property (nonatomic, readonly, assign) BOOL canPGPSign;
 @property (nonatomic, readonly, assign) BOOL canPGPEncrypt;

@@ -153,7 +153,7 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"
     [contents setIvar:@"ShouldSign" value:@(securityProperties.shouldSignMessage)];
     
     // TODO: Find out how to properly handle encryption of drafts in regards to available keys and stuff.
-    BOOL encryptDraft = YES;
+    BOOL encryptDraft = userWantsDraftsEncrypted;
     
     // On to creating the actual message.
     // Drafts and "normal" outgoing messages are handled a bit differently.
@@ -574,6 +574,24 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"
 		// In order for the MCMessageGenerator instance to know if a draft is being created,
 		// we add a flag to it.
 		[writer setIvar:@"IsDraft" value:@(YES)];
+
+        // If a draft is being created which should be encrypted, but not encryptionCertificates are setup
+        // on the writer, a fitting certificate is added at this point.
+        BOOL userWantsDraftsEncrypted = [[GPGOptions sharedOptions] boolForKey:@"OptionallyEncryptDrafts"];
+        id smimeLock = [self valueForKey:@"_smimeLock"];
+        GPGKey *encryptionKeyForDraft = nil;
+        @synchronized (smimeLock) {
+            NSMutableArray *keys = [NSMutableArray array];
+            if(userWantsDraftsEncrypted) {
+                encryptionKeyForDraft = [securityProperties encryptionKeyForDraft];
+                if(encryptionKeyForDraft) {
+                    [keys addObject:encryptionKeyForDraft];
+                }
+            }
+            // TODO: If userWantsDraftsEncrypted is enabled, but no appropriate key could be found
+            // warn the user that draft is not going to be encrypted.
+            [writer setEncryptionCertificates:[keys copy]];
+        }
 	}
 	else {
 		[headers removeHeaderForKey:@"x-should-pgp-encrypt"];
@@ -969,7 +987,10 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"
         sender = [MAIL_SELF sender];
     }
     NSArray *recipients = [MAIL_SELF allRecipients];
-    
+    // Mail doesn't perform this check, but if no recipients are available, the sender should still be added.
+    if(!recipients) {
+        recipients = [NSArray array];
+    }
     if(sender) {
         recipients = [recipients arrayByAddingObject:sender];
     }
