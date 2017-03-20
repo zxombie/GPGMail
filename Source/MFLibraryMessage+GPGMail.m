@@ -29,16 +29,19 @@
 
 #import "MFLibraryMessage+GPGMail.h"
 
+#import "NSObject+LPDynamicIvars.h"
+
 extern NSString * const kLibraryMessagePreventSnippingAttachmentDataKey;
-extern NSString * const kLibraryMessagePreventSnippingAttachmentDataForMessageKey;
 
 @implementation MFLibraryMessage_GPGMail
 
--(BOOL)MAShouldSnipAttachmentData {
-    BOOL preventSnipping = [[[[NSThread currentThread] threadDictionary] objectForKey:kLibraryMessagePreventSnippingAttachmentDataKey] boolValue] && [[[NSThread currentThread] threadDictionary] objectForKey:kLibraryMessagePreventSnippingAttachmentDataForMessageKey] == self;
+- (BOOL)MAShouldSnipAttachmentData {
+    // By returning NO here, Mail is prevented from creating a partial message and
+    // instead creates an .emlx file with the whole message.
+    // This is of utmost importance for PGP/MIME signed messages, since the body re-construction
+    // is very error prone for signed messages.
+    BOOL preventSnipping = [[self getIvar:kLibraryMessagePreventSnippingAttachmentDataKey] boolValue];
     if(preventSnipping) {
-        [[[NSThread currentThread] threadDictionary] removeObjectForKey:kLibraryMessagePreventSnippingAttachmentDataKey];
-        [[[NSThread currentThread] threadDictionary] removeObjectForKey:kLibraryMessagePreventSnippingAttachmentDataForMessageKey];
         return NO;
     }
     return [self MAShouldSnipAttachmentData];

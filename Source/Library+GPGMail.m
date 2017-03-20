@@ -74,7 +74,6 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForMessageKey = @"Library
 extern NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey;
 
 NSString * const kLibraryMessagePreventSnippingAttachmentDataKey = @"LibraryMessagePreventSnippingAttachmentDataKey";
-NSString * const kLibraryMessagePreventSnippingAttachmentDataForMessageKey = @"LibraryMessagePreventSnippingAttachmentDataForMessageKey";
 
 @implementation Library_GPGMail
 
@@ -311,21 +310,18 @@ NSString * const kLibraryMessagePreventSnippingAttachmentDataForMessageKey = @"L
     // by returning NO from -[MFLibraryMessage shouldSnipAttachmentData].
     // In -[MFLibraryMessage shouldSnipAttachmentData] the data is however not available, which is the reason
     // why it's necessary to instruct -[MFLibraryMessage shouldSnipAttachmentData] to return NO, if a multipart/signed message
-    // was found by abusing the thread dictionary once again.
+    // was found by setting an ivar on the message itself.
     MCMimePart *mimePart = [[MCMimePart alloc] initWithEncodedData:data];
     MCMimeBody *mimeBody = [MCMimeBody new];
     [mimeBody setTopLevelPart:mimePart];
     [mimePart setMimeBody:mimeBody];
     [mimePart parse];
-    // Might
+    // Check if the message contains a PGP/MIME signature.
     BOOL mightContainPGPData = [(MimeBody_GPGMail *)mimeBody mightContainPGPMIMESignedData];
     if(mightContainPGPData) {
-        [[[NSThread currentThread] threadDictionary] setObject:@(YES) forKey:kLibraryMessagePreventSnippingAttachmentDataKey];
-        [[[NSThread currentThread] threadDictionary] setObject:message forKey:kLibraryMessagePreventSnippingAttachmentDataForMessageKey];
+        [message setIvar:kLibraryMessagePreventSnippingAttachmentDataKey value:@(YES)];
     }
     [self MASetData:data forMessage:message isPartial:isPartial hasCompleteText:hasCompleteText];
-    [[[NSThread currentThread] threadDictionary] removeObjectForKey:kLibraryMessagePreventSnippingAttachmentDataKey];
-    [[[NSThread currentThread] threadDictionary] removeObjectForKey:kLibraryMessagePreventSnippingAttachmentDataForMessageKey];
 }
 
 @end
