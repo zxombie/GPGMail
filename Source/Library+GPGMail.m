@@ -137,7 +137,7 @@ NSString * const kLibraryMessagePreventSnippingAttachmentDataKey = @"LibraryMess
                 partError = [NSError errorWithDomain:@"GMAttachmentMissingError" code:201000 userInfo:nil];
                 return;
             }
-            if([mimePart.contentTransferEncoding isEqualToString:@"base64"]) {
+            if([[mimePart.contentTransferEncoding lowercaseString] isEqualToString:@"base64"]) {
                 partBodyData = [partBodyData base64EncodedDataWithOptions:NSDataBase64Encoding76CharacterLineLength];
             }
         }
