@@ -193,6 +193,9 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         
 #warning // TODO: Make sure to collect the security result here.
     }
+    else if([self _isPretendPGPMIME] && [self mightContainEncryptedData]) {
+        content = [self contentForApplicationOctetStream];
+    }
     // Check if this is a PGP/MIME encrypted message and process it.
     else if([self isPGPMimeEncrypted]) {
         MCMimeBody *decryptedBody = [self decodeMultipartEncryptedWithContext:nil];
@@ -689,6 +692,14 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 
 - (NSArray *)signatureAttachmentScheduledForRemoval {
     return [[self topPart] getIvar:@"PGPSignatureAttachmentsToRemove"];
+}
+
+- (BOOL)mightContainEncryptedData {
+    BOOL isEncrypted = NO;
+    BOOL isSigned = NO;
+    [self attachmentMightBePGPEncrypted:&isEncrypted orSigned:&isSigned];
+
+    return isEncrypted;
 }
 
 - (void)attachmentMightBePGPEncrypted:(BOOL *)mightEnc orSigned:(BOOL *)mightSig {
@@ -1931,14 +1942,39 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     NSArray *subparts = [MAIL_SELF(self) subparts];
     MCMimePart *applicationPGPEncrypted = nil;
     for(MCMimePart *part in subparts) {
-        if([part isType:@"application" subtype:@"pgp-encrypted"]) {
+        // There's a new kid on the block, which apparently sends messages which look exactly
+        // like an Exchange Modified message (multipart/mixed and application/pgp-encrypted part), but
+        // instead is a simple message with a pgp attachment with mime type application/pgp-encrypted.
+        // In order to be super-compatible to all kind of bullshit structures, the assumption is,
+        // that if the extension of the filename is .asc, this is a exchange server modified message
+        // otherwise not.
+        if([part isType:@"application" subtype:@"pgp-encrypted"] &&
+           [[[[part bodyParameterForKey:@"name"] pathExtension] lowercaseString] isEqualToString:@"asc"]) {
             applicationPGPEncrypted = part;
             break;
         }
     }
     // If such a part is found, the message is exchange modified, otherwise
     // not.
-    return applicationPGPEncrypted != nil;
+    return applicationPGPEncrypted != nil && ![self _isPretendPGPMIME];
+}
+
+- (BOOL)_isPretendPGPMIME {
+    // Pretend PGP MIME is a part that has the content-type application/pgp-encrypted,
+    // but as body data contains a simple PGP encrypted file and not a PGP encrypted file
+    // with an RFC message.
+    // To simplify the check, the filename is tested for an extension != .asc
+
+    __block MCMimePart *applicationPGPEncrypted = nil;
+    [(MimePart_GPGMail *)[self topPart] enumerateSubpartsWithBlock:^(MCMimePart *part) {
+        if([part isType:@"application" subtype:@"pgp-encrypted"] &&
+           ![[[[part bodyParameterForKey:@"name"] pathExtension] lowercaseString] isEqualToString:@"asc"]) {
+            applicationPGPEncrypted = part;
+            return;
+        }
+    }];
+
+    return applicationPGPEncrypted != nil && ![self _isExchangeServerModifiedPGPMimeEncrypted];
 }
 
 - (BOOL)isPGPMimeEncrypted {
@@ -1950,6 +1986,10 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     if(![MAIL_SELF(self) isType:@"multipart" subtype:@"encrypted"])
         return NO;
     
+    if([self _isPretendPGPMIME]) {
+        return NO;
+    }
+
     if([MAIL_SELF(self) bodyParameterForKey:@"protocol"] != nil && ![[[MAIL_SELF(self) bodyParameterForKey:@"protocol"] lowercaseString] isEqualToString:@"application/pgp-encrypted"])
         return NO;
     
