@@ -73,6 +73,9 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataKey = @"LibraryMimeBodyRe
 NSString * const kLibraryMimeBodyReturnCompleteBodyDataForMessageKey = @"LibraryMimeBodyReturnCompleteBodyDataForMessageKey";
 extern NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey;
 
+NSString * const kLibraryMessagePreventSnippingAttachmentDataKey = @"LibraryMessagePreventSnippingAttachmentDataKey";
+NSString * const kLibraryMessagePreventSnippingAttachmentDataForMessageKey = @"LibraryMessagePreventSnippingAttachmentDataForMessageKey";
+
 @implementation Library_GPGMail
 
 /** ONLY FOR Mavericks and then on MFLibrary. */
@@ -182,7 +185,11 @@ extern NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendK
         return mimeBody;
     }
 
-    BOOL shouldRebuildMessage = [(MimeBody_GPGMail *)mimeBody mightContainPGPData];
+    // It appears that if [MFLibraryMesage shouldSnipAttachmentData] returns NO,
+    // Mail in 10.12.4 does fetch the entire emlx again (in case the message is multipart/signed. So if the entire message is available,
+    // there's no need to rebuild it.
+    NSString *messagePath = [MFLibrary _dataPathForMessage:currentMessage type:0];
+    BOOL shouldRebuildMessage = [(MimeBody_GPGMail *)mimeBody mightContainPGPData] && ![MFLibrary _messageDataAtPath:messagePath];
     // Only if the message might contain PGP data, it's necessary for GPGMail to rebuild it
     // so the entire message is available for parsing.
     // The only case that should fall through for the moment is, if single parts of the message
@@ -199,7 +206,6 @@ extern NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendK
     __block dispatch_semaphore_t waiter = dispatch_semaphore_create(0);
     GPGMailBundle *bundle = [GPGMailBundle sharedInstance];
 
-    NSString *messagePath = [MFLibrary _dataPathForMessage:currentMessage type:0];
     __block NSLock *messageLock = nil;
     [[bundle messageBodyDataLoadingQueue] addOperationWithBlock:^{
         messageLock = [bundle.messageBodyDataLoadingCache objectForKey:messagePath];
@@ -298,6 +304,28 @@ extern NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendK
     }
 
     return parsedMessage;
+}
+
++ (void)MASetData:(id)data forMessage:(id)message isPartial:(BOOL)isPartial hasCompleteText:(BOOL)hasCompleteText {
+    // Since 10.12.4 it seems possible to force Mail to fetch the entire message body again for multipart/signed messages,
+    // by returning NO from -[MFLibraryMessage shouldSnipAttachmentData].
+    // In -[MFLibraryMessage shouldSnipAttachmentData] the data is however not available, which is the reason
+    // why it's necessary to instruct -[MFLibraryMessage shouldSnipAttachmentData] to return NO, if a multipart/signed message
+    // was found by abusing the thread dictionary once again.
+    MCMimePart *mimePart = [[MCMimePart alloc] initWithEncodedData:data];
+    MCMimeBody *mimeBody = [MCMimeBody new];
+    [mimeBody setTopLevelPart:mimePart];
+    [mimePart setMimeBody:mimeBody];
+    [mimePart parse];
+    // Might
+    BOOL mightContainPGPData = [(MimeBody_GPGMail *)mimeBody mightContainPGPMIMESignedData];
+    if(mightContainPGPData) {
+        [[[NSThread currentThread] threadDictionary] setObject:@(YES) forKey:kLibraryMessagePreventSnippingAttachmentDataKey];
+        [[[NSThread currentThread] threadDictionary] setObject:message forKey:kLibraryMessagePreventSnippingAttachmentDataForMessageKey];
+    }
+    [self MASetData:data forMessage:message isPartial:isPartial hasCompleteText:hasCompleteText];
+    [[[NSThread currentThread] threadDictionary] removeObjectForKey:kLibraryMessagePreventSnippingAttachmentDataKey];
+    [[[NSThread currentThread] threadDictionary] removeObjectForKey:kLibraryMessagePreventSnippingAttachmentDataForMessageKey];
 }
 
 @end

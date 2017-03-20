@@ -90,14 +90,39 @@ const NSString *kMimeBodyMessageKey = @"MimeBodyMessageKey";
     return [self MA_isPossiblySignedOrEncrypted] || [self mightContainPGPData];
 }
 
+- (BOOL)mightContainPGPMIMESignedData {
+    __block BOOL foundMIMESignedTopLevel = NO;
+    __block BOOL foundMIMESignature = NO;
+    [(MimePart_GPGMail *)[MAIL_SELF topLevelPart] enumerateSubpartsWithBlock:^(MCMimePart *mimePart) {
+        if([mimePart isType:@"multipart" subtype:@"signed"]) {
+            foundMIMESignedTopLevel = YES;
+        }
+        if([mimePart isType:@"application" subtype:@"pgp-signature"]) {
+            foundMIMESignature = YES;
+        }
+    }];
+
+    return foundMIMESignedTopLevel && foundMIMESignature;
+}
+
 - (BOOL)mightContainPGPData {
     __block BOOL mightContainPGPData = NO;
+    __block BOOL mightContainSMIMEData = NO;
 
     NSArray *pgpExtensions = @[@"pgp", @"gpg", @"asc", @"sig"];
-
+    NSArray *smimeExtensions = @[@"p7m", @"p7s", @"p7c", @"p7z"];
     [(MimePart_GPGMail *)[MAIL_SELF topLevelPart] enumerateSubpartsWithBlock:^(MCMimePart *mimePart) {
+        // Check for S/MIME hints.
+        if(([mimePart isType:@"multipart" subtype:@"signed"] && [[[mimePart bodyParameterForKey:@"protocol"] lowercaseString] isEqualToString:@"application/pkcs7-signature"]) ||
+           [smimeExtensions containsObject:[[[mimePart bodyParameterForKey:@"filename"] lowercaseString] pathExtension]] ||
+           [smimeExtensions containsObject:[[[mimePart bodyParameterForKey:@"name"] lowercaseString] pathExtension]] ||
+           [mimePart isType:@"application" subtype:@"pkcs7-mime"]) {
+            mightContainSMIMEData = YES;
+            return;
+        }
+        BOOL mimeSigned = [mimePart isType:@"multipart" subtype:@"signed"] && ![[[mimePart bodyParameterForKey:@"protocol"] lowercaseString] isEqualToString:@"application/pkcs7-signature"];
         if([mimePart isType:@"multipart" subtype:@"encrypted"] ||
-           [mimePart isType:@"multipart" subtype:@"signed"] ||
+           mimeSigned ||
            [mimePart isType:@"application" subtype:@"pgp-encrypted"] ||
            [mimePart isType:@"application" subtype:@"pgp-signature"]) {
             mightContainPGPData = YES;
@@ -142,7 +167,7 @@ const NSString *kMimeBodyMessageKey = @"MimeBodyMessageKey";
 
     }];
 
-    return mightContainPGPData;
+    return mightContainPGPData && !mightContainSMIMEData;
 }
 
 - (MCMessage *)GMMessage {

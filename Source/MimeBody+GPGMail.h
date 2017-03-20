@@ -61,7 +61,7 @@
 - (GMMessageSecurityFeatures *)securityFeatures;
 
 - (BOOL)mightContainPGPData;
-
+- (BOOL)mightContainPGPMIMESignedData;
 @end
 
 @interface MimeBody_GPGMail (MissingInSierra)

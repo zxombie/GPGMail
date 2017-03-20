@@ -473,6 +473,10 @@
              @"RedundantContentIdentificationManager": @{
                      @"selectors": @[
                              @"redundantContentMarkupForMessage:inConversation:"]
+                     },
+             @"MFLibraryMessage": @{
+                     @"selectors": @[
+                             @"shouldSnipAttachmentData"]
                      }
              };
 }
