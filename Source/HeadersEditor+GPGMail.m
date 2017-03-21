@@ -309,7 +309,7 @@ const NSString *kHeadersEditorFromControlParentItemKey = @"HeadersEditorFromCont
     BOOL messageIsToBeEncrypted = ![mailself messageIsToBeEncrypted];
     NSArray *recipientsWithNoKey = nil;
     
-    if([mailself messageIsToBeEncrypted]) {
+    if(messageIsToBeEncrypted) {
         recipientsWithNoKey = [backEnd recipientsThatHaveNoKeyForEncryption];
     }
     

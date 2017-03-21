@@ -918,16 +918,20 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"
     if(![((ComposeBackEnd *)self) delegate])
 		return [NSArray array];
 	
+    NSMutableArray *nonEligibleRecipients = [NSMutableArray array];
+
 	GPGMAIL_SECURITY_METHOD securityMethod = self.preferredSecurityProperties.securityMethod;
-    
+
     if(securityMethod == GPGMAIL_SECURITY_METHOD_SMIME)
         return [self MARecipientsThatHaveNoKeyForEncryption];
 
-    NSMutableArray *nonEligibleRecipients = [NSMutableArray array];
     @synchronized ([self valueForKey:@"_smimeLock"]) {
         for(NSString *recipient in [((ComposeBackEnd *)self) allRecipients]) {
-            if(![[GPGMailBundle sharedInstance] canEncryptMessagesToAddress:[recipient gpgNormalizedEmail]])
-                [nonEligibleRecipients addObject:[recipient gpgNormalizedEmail]];
+            NSString *recipientAddress = [recipient gpgNormalizedEmail];
+            NSDictionary *encryptionCertificates = [self valueForKey:@"_encryptionCertificates"];
+            if(!encryptionCertificates[recipientAddress] || encryptionCertificates[recipientAddress] == [NSNull null]) {
+                [nonEligibleRecipients addObject:recipient];
+            }
         }
     }
 
@@ -994,10 +998,6 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"
         sender = [MAIL_SELF sender];
     }
     NSArray *recipients = [MAIL_SELF allRecipients];
-    // Mail doesn't perform this check, but if no recipients are available, the sender should still be added.
-    if(!recipients) {
-        recipients = [NSArray array];
-    }
     if(sender) {
         recipients = [recipients arrayByAddingObject:sender];
     }

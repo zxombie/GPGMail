@@ -45,7 +45,7 @@
 					 @"_makeMessageWithContents:isDraft:shouldSign:shouldEncrypt:shouldSkipSignature:shouldBePlainText:",
 //					 @"canEncryptForRecipients:sender:",
 //					 @"canSignFromAddress:",
-//					 @"recipientsThatHaveNoKeyForEncryption",
+					 @"recipientsThatHaveNoKeyForEncryption",
 //					 @"setEncryptIfPossible:",
 //					 @"setSignIfPossible:",
 //					 @"_saveThreadShouldCancel",
