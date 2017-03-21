@@ -118,11 +118,11 @@
     // Check if a key for encrypting the draft is available matching the sender.
     // Otherwise, return any key pair with encryption capabilities.
     NSString *senderAddress = [self.sender gpgNormalizedEmail];
-    GPGKey *key = [self.PGPSigningKeys valueForKey:senderAddress];
-    if(!key.canAnyEncrypt) {
-        key = [[GPGMailBundle sharedInstance] anyPersonalPublicKeyWithPreferenceAddress:senderAddress];
+    id key = [self.PGPSigningKeys valueForKey:senderAddress];
+    if([key isKindOfClass:[GPGKey class]] && ((GPGKey *)key).canAnyEncrypt) {
+        return key;
     }
-    return key;
+    return [[GPGMailBundle sharedInstance] anyPersonalPublicKeyWithPreferenceAddress:senderAddress];
 }
 
 - (void)computePreferredSecurityPropertiesForSecurityMethod:(GPGMAIL_SECURITY_METHOD)securityMethod {
@@ -181,7 +181,7 @@
     NSString *senderAddress = [sender gpgNormalizedEmail];
     
     // Only accept cached PGP signing keys, otherwise run a new check.
-    id signingKey = signingKeys[sender];
+    id signingKey = signingKeys[senderAddress];
     if(sender) {
         if(signingKey && (![signingKey isKindOfClass:[GPGKey class]] || signingKey == [NSNull null])) {
             signingKey = nil;
@@ -189,9 +189,9 @@
         if(!signingKey) {
             NSArray *signingKeyList = [[[GPGMailBundle sharedInstance] signingKeyListForAddress:senderAddress] allObjects];
             // TODO: Consider pereferring the default key if one is configured.
-            signingKeys[sender] = [signingKeyList count] > 0 ? signingKeyList[0] : [NSNull null];
+            signingKeys[senderAddress] = [signingKeyList count] > 0 ? signingKeyList[0] : [NSNull null];
         }
-        canPGPSign = signingKeys[sender] && signingKeys[sender] != [NSNull null] ? YES : NO;
+        canPGPSign = signingKeys[senderAddress] && signingKeys[senderAddress] != [NSNull null] ? YES : NO;
     }
     else {
         canPGPSign = NO;
