@@ -207,8 +207,9 @@ extern const NSString *kComposeWindowControllerAllowWindowTearDown;
 	[explanation appendString:[GPGMailBundle localizedStringForKey:[NSString stringWithFormat:@"%@ENCRYPTED_MESSAGE_EXPLANATION", typePrefix]]];
 
 	NSMutableString *solutionProposals = [NSMutableString new];
-	[solutionProposals appendString:[GPGMailBundle localizedStringForKey:[NSString stringWithFormat:@"%@ENCRYPTED_MESSAGE_SOLUTION_REMOVE_PREVIOUS_CORRESPONDENCE", typePrefix]]];
-
+    if(!isForward) {
+        [solutionProposals appendString:[GPGMailBundle localizedStringForKey:[NSString stringWithFormat:@"%@ENCRYPTED_MESSAGE_SOLUTION_REMOVE_PREVIOUS_CORRESPONDENCE", typePrefix]]];
+    }
 	if([recipientsMissingCertificates count]) {
 		[solutionProposals appendString:@"\n"];
 		if([recipientsMissingCertificates count] == 1)

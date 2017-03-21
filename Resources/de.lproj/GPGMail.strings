@@ -235,14 +235,13 @@ NO_DEFAULTS_MESSAGE = "GPGMail funktioniert nicht wie erwartet.\n\nUm dieses Pro
 "UNENCRYPTED_REPLY_TO_ENCRYPTED_MESSAGE_BUTTON_SEND_ANYWAY" = "Trotzdem senden";
 "UNENCRYPTED_REPLY_TO_ENCRYPTED_MESSAGE_BUTTON_CANCEL" = "Abbrechen";
 
-"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_TITLE" = "Achtung: Sie sind im Begriff eine unverschlüsselte Version einer verschlüsselten Nachricht weiterzuleiten";
-"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_MISSING_KEYS_SINGULAR" = "Es ist nicht möglich die Nachricht die Sie im Begriff sind weiterzuleiten zu verschlüsseln, weil der öffentliche Schlüssel für den folgenden Empfänger fehlt:\n\n%@";
-"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_MISSING_KEYS" = "Es ist nicht möglich die Nachricht die Sie im Begriff sind weiterzuleiten zu verschlüsseln, weil die öffentlichen Schlüssel für die folgenden Empfänger fehlen:\n\n%@";
-"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_EXPLANATION" = "Wenn sie sich entscheiden fortzufahren, wird die Nachricht die Sie im Begriff sind weiterzuleiten unverschlüsselt gesendet. Dadurch könnten vertrauchliche Informationen preisgegeben und Sie und Ihre Empfänger einem Risiko ausgesetzt werden.";
-"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_SOLUTION_REMOVE_PREVIOUS_CORRESPONDENCE" = "\n\nWenn Sie diese Nachricht wirklich unverschlüsselt weiterleiten möchten, entfernen sie bitte vor dem Senden jegliche vorherige Korrespondenz die von der ursprünglichen Nachricht enthalten ist.";
-"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_SOLUTION_IMPORT_KEYS" = "Andernfalls, suchen und importieren sie den benötigten öffentlichen Schlüssel mit GPG Keychain um diese Nachricht verschlüsselt weiterleiten zu können.";
-"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_SOLUTION_IMPORT_KEYS_SINGULAR" = "Andernfalls, suchen und importieren sie den benötigten öffentlichen Schlüssel mit GPG Keychain, um diese Nachricht verschlüsselt weiterleiten zu können.";
-"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_BUTTON_SEND_ANYWAY" = "Trotzdem senden";
+"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_TITLE" = "Achtung: Du bist im Begriff eine unverschlüsselte Version einer verschlüsselten Nachricht weiterzuleiten";
+"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_MISSING_KEYS_SINGULAR" = "Es ist nicht möglich die Nachricht die du weiterzuleiten versuchst zu verschlüsseln, weil der öffentliche Schlüssel für den folgenden Empfänger fehlt:\n\n%@";
+"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_MISSING_KEYS" = "Es ist nicht möglich die Nachricht die du weiterzuleiten versuchst zu verschlüsseln, weil die öffentlichen Schlüssel für die folgenden Empfänger fehlen:\n\n%@";
+"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_EXPLANATION" = "Wenn du dich entscheidest fortzufahren, wird die Nachricht die du weiterzuleiten versuchst unverschlüsselt gesendet. Dadurch könnten vertrauchliche Informationen preisgegeben und du und deine Empfänger einem Risiko ausgesetzt werden.";
+"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_SOLUTION_IMPORT_KEYS" = "Andernfalls, suche und importiere den benötigten öffentlichen Schlüssel mit GPG Keychain, um diese Nachricht verschlüsselt weiterleiten zu können.";
+"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_SOLUTION_IMPORT_KEYS_SINGULAR" = "Andernfalls, suche und importiere den benötigten öffentlichen Schlüssel mit GPG Keychain, um diese Nachricht verschlüsselt weiterleiten zu können.";
+"UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_BUTTON_SEND_ANYWAY" = "Trotzdem weiterleiten";
 "UNENCRYPTED_FORWARD_OF_ENCRYPTED_MESSAGE_BUTTON_CANCEL" = "Abbrechen";
 
 
