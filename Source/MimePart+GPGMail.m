@@ -1970,7 +1970,8 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     NSArray *pgpEncryptedFileExtensions = @[@"pgp", @"gpg"];
     [(MimePart_GPGMail *)[self topPart] enumerateSubpartsWithBlock:^(MCMimePart *part) {
         if([part isType:@"application" subtype:@"pgp-encrypted"] &&
-           [pgpEncryptedFileExtensions containsObject:[[[part bodyParameterForKey:@"name"] pathExtension] lowercaseString]]) {
+           ([pgpEncryptedFileExtensions containsObject:[[[part bodyParameterForKey:@"name"] pathExtension] lowercaseString]] ||
+            [pgpEncryptedFileExtensions containsObject:[[[part attachmentFilename] pathExtension] lowercaseString]])) {
             applicationPGPEncrypted = part;
             return;
         }
