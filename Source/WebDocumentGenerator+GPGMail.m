@@ -49,9 +49,8 @@
         message = [(ConversationMember *)[(WebDocumentGenerator *)self valueForKey:@"_conversationMember"] originalMessage];
     }
     // Re-Implement using security features.
-    NSArray *errors = [[(Message_GPGMail *)message securityFeatures] PGPErrors];
-    if([errors count] > 0) {
-        NSError *error = [errors objectAtIndex:0];
+    NSError *error = [[(Message_GPGMail *)message securityFeatures] PGPMainError];
+    if(error) {
         [error setIvar:@"ParseErrorIsPGPError" value:@(YES)];
         [webDocument setParseError:error];
     }

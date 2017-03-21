@@ -301,12 +301,10 @@
         // On Mavericks the ActivityMonitor trick doesn't seem to work, since the currentMonitor
         // doesn't necessarily have to belong to the current message.
         // So we store the mainError on the message and it's later used by the CertificateBannerController thingy.
-        [self setIvar:@"PGPMainError" value:error];
+        self.PGPMainError = error;
     }
     else {
-        if([self getIvar:@"PGPMainError"]) {
-            [self removeIvar:@"PGPMainError"];
-        }
+        self.PGPMainError = nil;
     }
     
     DebugLog(@"%@ Decrypted Message [%@]:\n\tisEncrypted: %@, isSigned: %@,\n\tisPartlyEncrypted: %@, isPartlySigned: %@\n\tsignatures: %@\n\terrors: %@",
