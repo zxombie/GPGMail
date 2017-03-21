@@ -193,9 +193,6 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         
 #warning // TODO: Make sure to collect the security result here.
     }
-    else if([self _isPretendPGPMIME] && [self mightContainEncryptedData]) {
-        content = [self contentForApplicationOctetStream];
-    }
     // Check if this is a PGP/MIME encrypted message and process it.
     else if([self isPGPMimeEncrypted]) {
         MCMimeBody *decryptedBody = [self decodeMultipartEncryptedWithContext:nil];
@@ -206,7 +203,10 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         if(!content)
             content = [self MADecode];
     }
-	else if([MAIL_SELF(self) isType:@"application" subtype:@"pgp"]) {
+    else if([self _isPretendPGPMIME] && [self mightContainEncryptedData]) {
+        content = [self contentForApplicationOctetStream];
+    }
+    else if([MAIL_SELF(self) isType:@"application" subtype:@"pgp"]) {
 		// Special case application/pgp seems to be inline PGP with a weird content type.
 		// In order to handle it, it's treated like any other text/plain message.
 		content = [self contentForTextPlain];
@@ -1966,15 +1966,21 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     // To simplify the check, the filename is tested for an extension != .asc
 
     __block MCMimePart *applicationPGPEncrypted = nil;
+    __block BOOL hasMultipartEncryptedPart = NO;
+    NSArray *pgpEncryptedFileExtensions = @[@"pgp", @"gpg"];
     [(MimePart_GPGMail *)[self topPart] enumerateSubpartsWithBlock:^(MCMimePart *part) {
         if([part isType:@"application" subtype:@"pgp-encrypted"] &&
-           ![[[[part bodyParameterForKey:@"name"] pathExtension] lowercaseString] isEqualToString:@"asc"]) {
+           [pgpEncryptedFileExtensions containsObject:[[[part bodyParameterForKey:@"name"] pathExtension] lowercaseString]]) {
             applicationPGPEncrypted = part;
+            return;
+        }
+        if([part isType:@"multipart" subtype:@"encrypted"]) {
+            hasMultipartEncryptedPart = YES;
             return;
         }
     }];
 
-    return applicationPGPEncrypted != nil && ![self _isExchangeServerModifiedPGPMimeEncrypted];
+    return applicationPGPEncrypted != nil && ![self _isExchangeServerModifiedPGPMimeEncrypted] && !hasMultipartEncryptedPart;
 }
 
 - (BOOL)isPGPMimeEncrypted {
