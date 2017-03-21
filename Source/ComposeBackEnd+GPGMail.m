@@ -581,8 +581,11 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"
         id smimeLock = [self valueForKey:@"_smimeLock"];
         GPGKey *encryptionKeyForDraft = nil;
         @synchronized (smimeLock) {
-            NSMutableArray *keys = [NSMutableArray array];
+            // In case the user doesn't want drafts encrypted, -[MCMessageGenerator encryptionCertificates] has
+            // to be nil instead of an empty array.
+            NSMutableArray *keys = nil;
             if(userWantsDraftsEncrypted) {
+                keys = [NSMutableArray array];
                 encryptionKeyForDraft = [securityProperties encryptionKeyForDraft];
                 if(encryptionKeyForDraft) {
                     [keys addObject:encryptionKeyForDraft];
