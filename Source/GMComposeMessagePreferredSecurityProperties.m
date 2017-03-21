@@ -190,6 +190,11 @@
             NSArray *signingKeyList = [[[GPGMailBundle sharedInstance] signingKeyListForAddress:senderAddress] allObjects];
             // TODO: Consider pereferring the default key if one is configured.
             signingKeys[senderAddress] = [signingKeyList count] > 0 ? signingKeyList[0] : [NSNull null];
+            // In order to trick mail into accepting the key, it has to be added under the sender
+            // with email and full name as well. Otherwise, the last check before calling
+            // -[ComposeBackEnd _makeMessageWithContents:isDraft:shouldSign:shouldEncrypt:shouldSkipSignature:shouldBePlainText:]
+            // will disable signing, since no key for the full address can be found in the _signingIdentities dictionary.
+            signingKeys[sender] = signingKeys[senderAddress];
         }
         canPGPSign = signingKeys[senderAddress] && signingKeys[senderAddress] != [NSNull null] ? YES : NO;
     }
