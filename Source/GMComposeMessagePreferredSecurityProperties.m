@@ -47,6 +47,7 @@
         _cachedEncryptionCertificates = [[NSMutableDictionary alloc] init];
         _messageIsDraft = NO;
         _messageIsReply = NO;
+        _messageIsFowarded = NO;
         _userDidChooseSecurityMethod = NO;
         
         _userShouldSignMessage = ThreeStateBooleanUndetermined;
@@ -108,6 +109,7 @@
 - (void)addHintsFromBackEnd:(ComposeBackEnd *)backEnd {
     _messageIsReply = [(ComposeBackEnd_GPGMail *)backEnd messageIsBeingReplied];
     _messageIsDraft = [(ComposeBackEnd_GPGMail *)backEnd draftIsContinued];
+    _messageIsFowarded = [(ComposeBackEnd_GPGMail *)backEnd messageIsBeingForwarded];
     
     self.message = [backEnd originalMessage];
 }
@@ -232,7 +234,7 @@
     BOOL canSign = NO;
     
     if(securityMethod == GPGMAIL_SECURITY_METHOD_UNDETERMINDED) {
-        if(_messageIsReply) {
+        if(_messageIsReply || _messageIsFowarded) {
             MCMessage *originalMessage = self.message;
             securityOptions = [securityHistory bestSecurityOptionsForReplyToMessage:originalMessage signFlags:signFlags encryptFlags:encryptFlags];
         }
@@ -267,7 +269,7 @@
     else {
         canEncrypt = securityMethod == GPGMAIL_SECURITY_METHOD_OPENPGP ? canPGPEncrypt : canSMIMEEncrypt;
         canSign = securityMethod == GPGMAIL_SECURITY_METHOD_OPENPGP ? canPGPSign : canSMIMESign;
-        if(_messageIsReply) {
+        if(_messageIsReply || _messageIsFowarded) {
             MCMessage *originalMessage = self.message;
             securityOptions = [securityHistory bestSecurityOptionsForReplyToMessage:originalMessage signFlags:signFlags encryptFlags:encryptFlags];
         }

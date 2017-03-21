@@ -937,10 +937,17 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"
 - (BOOL)messageIsBeingReplied {
     // 1 = Reply
     // 2 = Reply to all.
+    // 3 = Forward.
     // 4 = Restored Reply window.
     NSInteger type = [(ComposeBackEnd *)self type];
     return (type == 1 || type == 2 || type == 4) && ![self draftIsContinued];
 }
+
+- (BOOL)messageIsBeingForwarded {
+    NSInteger type = [MAIL_SELF type];
+    return type == 3 && ![self draftIsContinued];
+}
+
 
 - (BOOL)draftIsContinued {
     MCMessageHeaders *headers = [MAIL_SELF originalMessageHeaders];

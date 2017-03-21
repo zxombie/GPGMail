@@ -24,6 +24,7 @@ typedef enum {
 @interface GMComposeMessagePreferredSecurityProperties : NSObject {
     BOOL _messageIsDraft;
     BOOL _messageIsReply;
+    BOOL _messageIsFowarded;
     
     NSDictionary *_SMIMESigningIdentities;
     NSDictionary *_SMIMEEncryptionCertificates;
