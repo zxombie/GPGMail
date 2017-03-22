@@ -100,16 +100,14 @@ const NSString *kHeadersEditorFromControlParentItemKey = @"HeadersEditorFromCont
     [[mailself encryptButton] unbind:@"toolTip"];
 
     NSView *optionalView = (NSView *)[[self valueForKey:@"_signButton"] superview];
-	GMComposeKeyEventHandler *handler = [[GMComposeKeyEventHandler alloc] initWithView:optionalView];
+    GMComposeKeyEventHandler *handler = [[GMComposeKeyEventHandler alloc] initWithView:optionalView];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wselector"
-	handler.eventsAndSelectors = [NSArray arrayWithObjects:
-		@{@"keyEquivalent": @"y", @"keyEquivalentModifierMask": @(NSCommandKeyMask | NSAlternateKeyMask), @"target": [mailself signButton], @"selector": [NSValue valueWithPointer:@selector(performClick:)]},
-		@{@"keyEquivalent": @"x", @"keyEquivalentModifierMask": @(NSCommandKeyMask | NSAlternateKeyMask), @"target": [mailself encryptButton], @"selector": [NSValue valueWithPointer:@selector(performClick:)]},
-	nil];
+    handler.eventsAndSelectors = [NSArray arrayWithObjects:
+                                  @{@"keyEquivalent": @"y", @"keyEquivalentModifierMask": @(NSCommandKeyMask | NSAlternateKeyMask), @"target": [mailself signButton], @"selector": [NSValue valueWithPointer:@selector(performClick:)]},
+                                  @{@"keyEquivalent": @"x", @"keyEquivalentModifierMask": @(NSCommandKeyMask | NSAlternateKeyMask), @"target": [mailself encryptButton], @"selector": [NSValue valueWithPointer:@selector(performClick:)]},
+                                  nil];
 #pragma clang diagnostic pop
-
-	
 }
 
 - (void)MA_updateFromControl {
