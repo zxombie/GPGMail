@@ -57,6 +57,7 @@
 #import "GMComposeMessagePreferredSecurityProperties.h"
 
 #define mailself ((HeadersEditor *)self)
+#define tomailself(obj) ((HeadersEditor *)obj)
 
 @interface HeadersEditor_GPGMail (NoImplementation)
 - (void)changeFromHeader:(NSPopUpButton *)sender;
@@ -204,8 +205,11 @@ const NSString *kHeadersEditorFromControlParentItemKey = @"HeadersEditorFromCont
     // Implementation of the block <arg1> passed to updateSMIMEStatus:
     // TODO: As Apple does, we should move this code to -[HeadersEditor _updateSecurityControls]
     // and pass it into updateSMIMEStatus. Choose the version that is more readable/easier to update.
+    __weak HeadersEditor_GPGMail *weakSelf = self;
+    
     [backEnd updateSMIMEStatus:^{
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            __strong HeadersEditor_GPGMail *strongSelf = weakSelf;
             BOOL canSign = [backEnd canSign];
             // Apple only sets canEncrypt if canSign is YES, since S/MIME requires a valid signature certificate
             // in order to perform encryptions. In OpenPGP we allow encryption, even if no key to sign a message
@@ -215,9 +219,9 @@ const NSString *kHeadersEditorFromControlParentItemKey = @"HeadersEditorFromCont
             // Apple only shows the buttons to toggle sign and encrypt if signing is possible.
             // OpenPGP does work if only sign or encrypt is available, so we'll also show the buttons
             // if sign is not is possible, but only encrypt.
-            [mailself _setVisibilityForEncryptionAndSigning:canSign || canEncrypt];
-            [mailself setCanSign:canSign];
-            [mailself setCanEncrypt:canEncrypt];
+            [tomailself(strongSelf) _setVisibilityForEncryptionAndSigning:canSign || canEncrypt];
+            [tomailself(strongSelf) setCanSign:canSign];
+            [tomailself(strongSelf) setCanEncrypt:canEncrypt];
             
             // For reference, the original Apple code follows below.
             // Apple uses standard defaults to remember the last set status of sign and encrypt.
@@ -233,15 +237,15 @@ const NSString *kHeadersEditorFromControlParentItemKey = @"HeadersEditorFromCont
             BOOL signIfPossible = preferredSecurityProperties.shouldSignMessage;
             BOOL encryptIfPossible = preferredSecurityProperties.shouldEncryptMessage;
             
-            [mailself setMessageIsToBeSigned:signIfPossible];
+            [tomailself(strongSelf) setMessageIsToBeSigned:signIfPossible];
             [backEnd setSignIfPossible:signIfPossible];
-            [mailself setMessageIsToBeEncrypted:encryptIfPossible];
+            [tomailself(strongSelf) setMessageIsToBeEncrypted:encryptIfPossible];
             [backEnd setEncryptIfPossible:encryptIfPossible];
             // Currently a no-op in Mail, for whatever reason.
-            [[mailself composeViewController] encryptionStatusDidChange];
+            [[tomailself(strongSelf) composeViewController] encryptionStatusDidChange];
             [strongSelf updateSecurityControlToolTips];
             // Last but not least, update the security accessory view.
-            [(MailDocumentEditor_GPGMail *)[mailself composeViewController] updateSecurityMethodAccessoryView];
+            [(MailDocumentEditor_GPGMail *)[tomailself(strongSelf) composeViewController] updateSecurityMethodAccessoryView];
         }];
     }];
     
