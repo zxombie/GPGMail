@@ -1941,6 +1941,7 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     // Find the application/pgp-encrypted subpart.
     NSArray *subparts = [MAIL_SELF(self) subparts];
     MCMimePart *applicationPGPEncrypted = nil;
+    MCMimePart *PGPDataPart = nil;
     for(MCMimePart *part in subparts) {
         // There's a new kid on the block, which apparently sends messages which look exactly
         // like an Exchange Modified message (multipart/mixed and application/pgp-encrypted part), but
@@ -1948,15 +1949,20 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         // In order to be super-compatible to all kind of bullshit structures, the assumption is,
         // that if the extension of the filename is .asc, this is a exchange server modified message
         // otherwise not.
-        if([part isType:@"application" subtype:@"pgp-encrypted"] &&
-           [[[[part bodyParameterForKey:@"name"] pathExtension] lowercaseString] isEqualToString:@"asc"]) {
+        if([part isType:@"application" subtype:@"pgp-encrypted"]) {
             applicationPGPEncrypted = part;
-            break;
+        }
+        BOOL partHasPGPFilename = [[[part attachmentFilename] lowercaseString] isEqualToString:@"encrypted.asc"] ||
+                                  [[[part bodyParameterForKey:@"name"] lowercaseString] isEqualToString:@"encrypted.asc"];
+        BOOL partHasPGPExtension = [[[[part attachmentFilename] pathExtension] lowercaseString] isEqualToString:@"asc"] ||
+                                   [[[part bodyParameterForKey:@"name"] pathExtension] lowercaseString];
+        if([part isType:@"application" subtype:@"octet-stream"] && (partHasPGPFilename || partHasPGPExtension)) {
+            PGPDataPart = part;
         }
     }
     // If such a part is found, the message is exchange modified, otherwise
     // not.
-    return applicationPGPEncrypted != nil && ![self _isPretendPGPMIME];
+    return applicationPGPEncrypted != nil && PGPDataPart != nil && ![self _isPretendPGPMIME];
 }
 
 - (BOOL)_isPretendPGPMIME {

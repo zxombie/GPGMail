@@ -194,7 +194,6 @@
     NSMutableArray *pgpAttachments = [NSMutableArray array];
     __block BOOL isDecrypted = NO;
     __block BOOL isVerified = NO;
-    __block NSUInteger numberOfAttachments = 0;
     
     MCMimeBody *mimeBody = [topPart mimeBody];
     id decryptedBody = [topPart decryptedMimeBody];
@@ -214,9 +213,11 @@
         // Otherwise those would display as signed/encrypted as well.
         // application/pgp is a special case since Mail.app identifies it as an attachment, while its
         // truly a text/plain part (legacy pgp format)
-        if([currentPart isAttachment] && ![currentPart isType:@"application" subtype:@"pgp"]) {
-            if([currentPart PGPAttachment])
+        if([currentPart isAttachment] && ![currentPart isType:@"application" subtype:@"pgp"] &&
+           ![currentPart isPGPMimeEncryptedAttachment] && ![currentPart isPGPMimeSignatureAttachment]) {
+            if([currentPart PGPAttachment]) {
                 [pgpAttachments addObject:currentPart];
+            }
         }
         else {
             isEncrypted |= [currentPart PGPEncrypted];
@@ -231,18 +232,6 @@
             // encrypted & signed & no error = verified.
             // not encrypted & signed & no error = verified.
             isVerified |= [currentPart PGPSigned];
-        }
-        
-        // Count the number of attachments, but ignore signature.asc
-        // and encrypted.asc files, since those are only PGP/MIME attachments
-        // and not actual attachments.
-        // We'll only see those attachments if the
-        if([currentPart isAttachment]) {
-            if([currentPart isPGPMimeEncryptedAttachment] || [currentPart isPGPMimeSignatureAttachment])
-                return;
-            else {
-                numberOfAttachments++;
-            }
         }
     }];
     
