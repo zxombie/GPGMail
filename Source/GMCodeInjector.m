@@ -59,7 +59,7 @@
 //					 @"_updateFromAndSignatureControls:",
 					 @"changeFromHeader:",
 //					 @"dealloc",
-//					 @"awakeFromNib",
+					 @"awakeFromNib",
 //					 @"_updateSignButtonTooltip",
 //					 @"_updateEncryptButtonTooltip",
 					 @"updateSecurityControls",
