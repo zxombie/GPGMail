@@ -221,10 +221,23 @@ NSString * const kLibraryMessagePreventSnippingAttachmentDataKey = @"LibraryMess
     NSData *messageData = nil;
     @try {
         [messageLock lock];
-        NSError *error = nil;
-        messageData = [self localMessageDataForMessage:currentMessage mimeBody:mimeBody error:&error];
-        if(!messageData && error) {
+        // Unfortunately the assumption that Mail always fetches the entire message in case
+        // of multipart/signed messages seems to be wrong. Not sure whether it was luck but
+        // in previous tests it worked reliably, now it does sometimes, sometimes not.
+        // So the next attempt is to force fetch the entire message, if the message might
+        // contain multipart/signed data.
+        // Since the workaround to not snip the attachment data should work, the fetch should only happen
+        // once, after that the entire .emlx file should be available.
+        BOOL mightContainPGPData = [(MimeBody_GPGMail *)mimeBody mightContainPGPMIMESignedData];
+        if(mightContainPGPData) {
             messageData = [self forceFetchMessageDataForMessage:currentMessage];
+        }
+        else {
+            NSError *error = nil;
+            messageData = [self localMessageDataForMessage:currentMessage mimeBody:mimeBody error:&error];
+            if(!messageData && error) {
+                messageData = [self forceFetchMessageDataForMessage:currentMessage];
+            }
         }
     }
     @catch(NSException *e) {}

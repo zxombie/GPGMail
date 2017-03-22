@@ -1650,9 +1650,9 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 - (void)MAVerifySignature {
     // Check if message should be processed (-[Message shouldBePGPProcessed])
     // otherwise out of here!
-    /*if(![[(MimeBody *)[self mimeBody] message] shouldBePGPProcessed])
+    if(![(MimePart_GPGMail *)[self topPart] shouldBePGPProcessed]) {
         return [self MAVerifySignature];
-    */
+    }
     // If this is a non GPG signed message, let's call the original method
     // and get out of here!    
     if(![[MAIL_SELF(self) bodyParameterForKey:@"protocol"] isEqualToString:@"application/pgp-signature"]) {
