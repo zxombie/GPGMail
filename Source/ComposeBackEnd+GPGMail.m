@@ -1025,7 +1025,8 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"
             // If there are already preferredSecurityProperties determined, copy the userShouldSignMessage and
             // userShouldEncryptMessage on to the new security properties.
             GMComposeMessagePreferredSecurityProperties *currentSecurityProperties = self.preferredSecurityProperties;
-            GMComposeMessagePreferredSecurityProperties *preferredSecurityProperties = [[GMComposeMessagePreferredSecurityProperties alloc] initWithSender:sender recipients:recipients userShouldSignMessage:currentSecurityProperties ? currentSecurityProperties.userShouldSignMessage : ThreeStateBooleanUndetermined userShouldEncryptMessage:currentSecurityProperties ? currentSecurityProperties.userShouldEncryptMessage : ThreeStateBooleanUndetermined];
+            GPGKey *signingKey = [currentSecurityProperties.signingSender isEqualToString:sender] ? currentSecurityProperties.signingKey : nil;
+            GMComposeMessagePreferredSecurityProperties *preferredSecurityProperties = [[GMComposeMessagePreferredSecurityProperties alloc] initWithSender:sender signingKey:signingKey recipients:recipients userShouldSignMessage:currentSecurityProperties ? currentSecurityProperties.userShouldSignMessage : ThreeStateBooleanUndetermined userShouldEncryptMessage:currentSecurityProperties ? currentSecurityProperties.userShouldEncryptMessage : ThreeStateBooleanUndetermined];
             preferredSecurityProperties.cachedSigningIdentities = [self valueForKey:@"_signingIdentities"];
             preferredSecurityProperties.cachedEncryptionCertificates = [self valueForKey:@"_encryptionCertificates"];
             
