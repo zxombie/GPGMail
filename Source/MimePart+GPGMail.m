@@ -2123,7 +2123,7 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 
 
 //- (id)MANewEncryptedPartWithData:(NSData *)data recipients:(id)recipients encryptedData:(NSData **)encryptedData NS_RETURNS_RETAINED {
-- (id)newEncryptedPartWithData:(NSData *)data certificates:(id)certificates partData:(__autoreleasing NSMapTable **)partData {
+- (id)newEncryptedPartWithData:(NSData *)data certificates:(NSArray *)certificates partData:(__autoreleasing NSMapTable **)partData {
     NSMapTable *encryptedPartData = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsStrongMemory valueOptions:NSPointerFunctionsStrongMemory capacity:0];
     
     BOOL isDraft = NO;
@@ -2136,7 +2136,19 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     NSMutableArray *normalRecipients = [NSMutableArray arrayWithCapacity:1];
     NSMutableArray *bccRecipients = [NSMutableArray arrayWithCapacity:1];
     
-    for (GPGKey *recipient in certificates) {
+    __block NSMutableArray *flattenedCertificates = [NSMutableArray array];
+    // In order to support gnupg groups, each certificate array entry is an array
+    // with one or more than one key. (#903)
+    [certificates enumerateObjectsUsingBlock:^(id  _Nonnull obj, __unused NSUInteger idx, __unused BOOL * _Nonnull stop) {
+        if(![obj isKindOfClass:[NSArray class]]) {
+            [flattenedCertificates addObject:obj];
+        }
+        else {
+            [flattenedCertificates addObjectsFromArray:obj];
+        }
+    }];
+
+    for (GPGKey *recipient in flattenedCertificates) {
         // TODO: Make sure no cert type is in recipients.
         if(![recipient isKindOfClass:[GPGKey class]]) {
             continue;

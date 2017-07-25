@@ -230,7 +230,10 @@
         }
         if(!key) {
             NSArray *keyList = [[[GPGMailBundle sharedInstance] publicKeyListForAddresses:@[normalizedRecipient]] allObjects];
-            encryptionKeys[normalizedRecipient] = [keyList count] > 0 ? keyList[0] : [NSNull null];
+            // In order to support gnupg groups, it's possible that a list of keys is returned, even if only
+            // one recipient is passed in. If more than one key is found, the list of keys is stored for that recipient,
+            // instead of only the first key. (#903)
+            encryptionKeys[normalizedRecipient] = [keyList count] > 0 ? keyList : [NSNull null];
         }
         if(encryptionKeys[normalizedRecipient] == [NSNull null]) {
             canPGPEncrypt = NO;
