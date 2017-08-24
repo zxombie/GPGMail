@@ -172,8 +172,11 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     // `content` will contain the result to be returned from MADecode.
     id content = nil;
     MCMimePart *tnefPart = nil;
-    
-    if([MAIL_SELF(self) isType:@"text" subtype:@"plain"] || [MAIL_SELF(self) isType:@"text" subtype:@"html"]) {
+
+    // Bug #939: Mailvelope seems to use text/plain for PGP encrypted attachments,
+    // In order to handle these attachment properly, only use -[MCMimePart contentForTextPlainOrHtml] if
+    // the current part is *NOT* an attachment.
+    if(([MAIL_SELF(self) isType:@"text" subtype:@"plain"] || [MAIL_SELF(self) isType:@"text" subtype:@"html"]) && ![MAIL_SELF(self) isAttachment]) {
         content = [self contentForTextPlainOrHtml];
     }
     // Check if this is a pgp-key and automatically import it.
@@ -209,10 +212,18 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     else if([MAIL_SELF(self) isType:@"application" subtype:@"pgp"]) {
 		// Special case application/pgp seems to be inline PGP with a weird content type.
 		// In order to handle it, it's treated like any other text/plain message.
-		content = [self contentForTextPlain];
+		
+        // Bug #939: Ain't this shit fun! Mailvelope or (Roundcube Webmail) thinks it's a good idea to use application/pgp
+        // for non plain-text attachments as well.
+        if([MAIL_SELF(self) isAttachment]) {
+            content = [self contentForApplicationOctetStream];
+        }
+        else {
+            content = [self contentForTextPlain];
+        }
 	}
     // Attachments might be PGP encrypted as well.
-    else if([MAIL_SELF(self) isType:@"application" subtype:@"octet-stream"]) {
+    else if([MAIL_SELF(self) isType:@"application" subtype:@"octet-stream"] || [MAIL_SELF(self) isAttachment]) {
         content = [self contentForApplicationOctetStream];
     }
     
