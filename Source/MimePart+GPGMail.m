@@ -742,8 +742,8 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     // .asc attachments might contain a public key. See #123.
     // So to avoid decrypting such attachments, check if the attachment
     // contains a public key.
-    if((*mightEnc || *mightSig) 
-       && [[MAIL_SELF(self) decodedData] rangeOfPGPPublicKey].location != NSNotFound) {
+    NSData *bodyData = [MAIL_SELF(self) decodedData];
+    if((*mightEnc || *mightSig) && ([bodyData rangeOfPGPPublicKey].location != NSNotFound || [bodyData containsPGPKeyPackets])) {
         *mightEnc = NO;
         *mightSig = NO;
         return;

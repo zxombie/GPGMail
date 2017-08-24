@@ -102,5 +102,5 @@
  signaturePacketsExpected.
  */
 - (BOOL)hasSignaturePacketsWithSignaturePacketsExpected:(BOOL)signaturePacketsExpected;
-
+- (BOOL)containsPGPKeyPackets;
 @end

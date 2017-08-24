@@ -218,6 +218,45 @@
     return hasSignature;
 }
 
+- (BOOL)containsPGPKeyPackets {
+    NSData *packetData = [self copy];
+
+    NSArray *packets = nil;
+    @try {
+        packets = [GPGPacket packetsWithData:packetData];
+    }
+    @catch (NSException *exception) {
+        return NO;
+    }
+
+    // Parsing packets failed due to unsupported packets.
+    if(![packets count]) {
+        return NO;
+    }
+
+    BOOL hasPGPKey = NO;
+
+    for(GPGPacket *packet in packets) {
+        switch(packet.tag) {
+            case GPGPublicKeyPacketTag:
+            case GPGSecretKeyPacketTag:
+            case GPGPublicSubkeyPacketTag:
+            case GPGSecretSubkeyPacketTag:
+                hasPGPKey = YES;
+                break;
+
+            default:
+                hasPGPKey = NO;
+                break;
+        }
+        if(hasPGPKey) {
+            break;
+        }
+    }
+
+    return hasPGPKey;
+}
+
 - (NSData *)dataPreparedForVerification {
 	return [[NSData alloc] initWithDataConvertingLineEndingsFromUnixToNetwork:self];
 }
