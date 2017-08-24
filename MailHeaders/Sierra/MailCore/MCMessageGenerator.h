@@ -60,7 +60,7 @@
 - (id)newMessageWithHtmlString:(id)arg1 headers:(id)arg2;	// IMP=0x0000000000044104
 - (void)_recursivelyAddSubresourcesFromArchive:(id)arg1 toArray:(id)arg2;	// IMP=0x0000000000043eaa
 - (id)newMessageWithHtmlString:(id)arg1 plainTextAlternative:(id)arg2 otherHtmlStringsAndAttachments:(id)arg3 headers:(id)arg4;	// IMP=0x0000000000042ff1
-- (void)setSigningIdentity:(struct OpaqueSecIdentityRef *)arg1;	// IMP=0x0000000000042fae
+- (void)setSigningIdentity:(id)arg1;	// IMP=0x0000000000042fae
 - (unsigned long long)_preferredEncodingUsingHintIfNecessary;	// IMP=0x0000000000042f76
 - (void)setShouldMarkNonresizableAttachmentData:(BOOL)arg1;	// IMP=0x0000000000042f66
 - (void)setShouldConvertCompositeImages:(BOOL)arg1;	// IMP=0x0000000000042f56

@@ -190,7 +190,7 @@ const static NSString *kMCMessageGeneratorSigningKeyKey = @"MCMessageGeneratorSi
     // Since the encryption certificates were reset, in order to prevent Mail from encrypting
     // the message itself, they have to be re-added now, that the message has been created,
     // so it's possible for future calls of this method, to have the contents encrypted as well.
-    [mailself setSigningIdentity:(__bridge struct OpaqueSecIdentityRef *)(signingIdentity)];
+    [mailself setSigningIdentity:signingIdentity];
     mailself.encryptionCertificates = encryptionCertificates;
     
     return outgoingMessage;
