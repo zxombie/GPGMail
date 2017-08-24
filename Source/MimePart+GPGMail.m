@@ -660,10 +660,10 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     return decryptedData;
 }
 
-- (id)decodePGPSignatureAttachment {
-    MCMimePart *parentPart = [MAIL_SELF(self) parentPart];
+- (MCMimePart *)signedPartForDetachedSignaturePart:(MCMimePart *)signaturePart {
+    MCMimePart *parentPart = [signaturePart parentPart];
     MCMimePart *signedPart = nil;
-    NSString *signatureFilename = [[MAIL_SELF(self) dispositionParameterForKey:@"filename"] lastPathComponent];
+    NSString *signatureFilename = [[signaturePart dispositionParameterForKey:@"filename"] lastPathComponent];
     NSString *signedFilename = [signatureFilename stringByDeletingPathExtension];
     for(MCMimePart *part in [parentPart subparts]) {
         if([[[part dispositionParameterForKey:@"filename"] lastPathComponent] isEqualToString:signedFilename]) {
@@ -672,7 +672,20 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         }
     }
     
-	if(!signedPart) {
+    return signedPart;
+}
+
+- (id)decodePGPSignatureAttachment {
+    MCMimePart *signedPart = [self signedPartForDetachedSignaturePart:MAIL_SELF(self)];
+    NSString *signatureFilename = [[MAIL_SELF(self) dispositionParameterForKey:@"filename"] lastPathComponent];
+
+    // Bug #936: PGP signed attachment parts are not properly detected as such
+    // Checking for the signedPart only works for detached signatures, not however
+    // if the attachment itself is signed.
+    // -[NSData hasSignaturePacketsWithSignaturePacketsExpected:] is used to make sure,
+    // that the attachment is not itself signed.
+    BOOL hasSignatureData = [[MAIL_SELF(self) decodedData] hasSignaturePacketsWithSignaturePacketsExpected:NO];
+    if(!signedPart && !hasSignatureData) {
 		// If there's no signed part, there's a good chance, this
 		// attachment isn't really signed after all, so let's reset
 		// PGPAttachment.
@@ -688,7 +701,7 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     DebugLog(@"Hide All attachments: %@", removeAllSignatureAttachments ? @"YES" : @"NO");
     BOOL remove = removeAllSignatureAttachments ? YES : self.PGPVerified;
     
-    if(remove)
+    if(remove && !hasSignatureData)
         [self scheduleSignatureAttachmentForRemoval:signatureFilename];
     
     // By returning nil, Mail's decode method will be called. That's what we want in this case.
@@ -736,7 +749,15 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     // Sometimes attachments with .asc extension might contain either encrypted data
     // or signed data, so it's best to test the actual data as well.
     if(*mightSig || [[MAIL_SELF(self) decodedData] hasSignaturePacketsWithSignaturePacketsExpected:NO]) {
-        *mightEnc = NO;
+        // Bug #936: PGP signed attachment parts are not properly detected as such
+        // At the moment, GPGMail always assumes that a signature part is a detached signature
+        // for an attachment part with the same filename. This however fails to take into account
+        // that the attachment itself might be signed.
+        // In order to fix this, GPGMail now checks for the signed part the signature part belongs to
+        // and if none is found, assumes that the file itself is signed.
+        // To get at the plain contents of the signed file, mightEnc is set to YES, so the
+        // part is run through a decrypt operation.
+        *mightEnc = [self signedPartForDetachedSignaturePart:MAIL_SELF(self)] == nil;
         *mightSig = YES; 
     }
     // .asc attachments might contain a public key. See #123.
