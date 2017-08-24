@@ -138,7 +138,7 @@ const static NSString *kMCMessageGeneratorSigningKeyKey = @"MCMessageGeneratorSi
     if(signingIdentity) {
         NSString *senderAddress = [EAEmailAddressParser rawAddressFromFullAddress:[topLevelHeaders firstAddressForKey:@"resent-from"]];
         if(!senderAddress) {
-            [EAEmailAddressParser rawAddressFromFullAddress:[topLevelHeaders firstAddressForKey:@"from"]];
+            senderAddress = [EAEmailAddressParser rawAddressFromFullAddress:[topLevelHeaders firstAddressForKey:@"from"]];
         }
         
         NSMutableData *newData = [mailself _newDataForMimePart:topLevelPart withPartData:partData];
