@@ -763,9 +763,9 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 	// The data might also be included in the application/pgp-encrypted part if available.
     MCMimePart *dataPart = nil;
     for(MCMimePart *part in [MAIL_SELF(self) subparts]) {
-        if([part isType:@"application" subtype:@"octet-stream"])
+        if([part isType:@"application" subtype:@"octet-stream"] && ![(MimePart_GPGMail *)[self topPart] isPseudoPGPMimeMessageFromiPGMail]) {
             dataPart = part;
-		
+        }
 		// application/octet-stream still takes precedence and will overwrite
 		// the dataPart store here.
 		// In the same way, application/pgp-encrypted is only used, if no previous
@@ -1986,14 +1986,50 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 	return versionPart && dataPart && htmlPart;
 }
 
+- (BOOL)isPseudoPGPMimeMessageFromiPGMail {
+    // Following requirements have to be satisfied:
+    // 1.) Part with content-type application/pgp-encrypted
+    // 2.) "Version: iPGMail" in the PGP encrypted part.
+    __block MCMimePart *encryptedDataPart = nil;
+
+    [(MimePart_GPGMail *)[self topPart] enumerateSubpartsWithBlock:^(MCMimePart *mimePart) {
+        if([mimePart isType:@"application" subtype:@"pgp-encrypted"]) {
+            encryptedDataPart = mimePart;
+            return;
+        }
+    }];
+
+    if(!encryptedDataPart) {
+        return NO;
+    }
+
+    return [[encryptedDataPart decodedData] containsPGPVersionString:@"iPGMail"];
+}
+
+- (BOOL)isPseudoPGPMimeTextPartFromiPGMail {
+    // Following requirements have to be satisfied:
+    // 1.) Part with content-type application/pgp-encrypted
+    // 2.) "Version: iPGMail" in the PGP encrypted part.
+    return [MAIL_SELF(self) isType:@"application" subtype:@"pgp-encrypted"] && [[MAIL_SELF(self) decodedData] containsPGPVersionString:@"iPGMail"];
+}
+
 - (BOOL)isPGPMimeEncrypted {
     // Special case for PGP/MIME encrypted emails, which were sent through an
     // exchange server, which unfortunately modifies the header.
-    if([self _isExchangeServerModifiedPGPMimeEncrypted])
+    if([self _isExchangeServerModifiedPGPMimeEncrypted] && ![self isPseudoPGPMimeMessageFromiPGMail])
         return YES;
 	if([self _isDraftThatHasBeenReEncryptedWithoutBeingDecrypted])
 		return YES;
 
+    // Bug #938: iPGMail is not capable of creating a proper PGP/MIME structure due to restrictions of iOS
+    // Since the application/pgp-encrypted content-type can be used for any pgp encrypted attachment,
+    // GPGMail currently treats it as an attachment, where it should display the contents of the attachment
+    // as another text/html part of the message.
+    // In order to properly treat it as non-PGP/MIME message, return false
+    // if -[MCMimePart isPseudoPGPMimeMessageFromiPGMail] returns true.
+    if([self isPseudoPGPMimeMessageFromiPGMail]) {
+        return NO;
+    }
 	// Check for multipart/encrypted, protocol application/pgp-encrypted, otherwise exit!
     if(![MAIL_SELF(self) isType:@"multipart" subtype:@"encrypted"])
         return NO;
@@ -2053,6 +2089,9 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 
 - (BOOL)MAIsAttachment {
     BOOL ret = [self MAIsAttachment];
+    if([self isPseudoPGPMimeTextPartFromiPGMail]) {
+        return NO;
+    }
     return ret;
 }
 

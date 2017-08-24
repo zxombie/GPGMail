@@ -90,6 +90,11 @@
 - (BOOL)containsPGPVersionMarker:(int)version;
 
 /**
+ Checks if the data contains a specific version in the ----BEGIN PGP MESSAGE---- header.
+*/
+- (BOOL)containsPGPVersionString:(NSString *)version;
+
+/**
  Checks the pgp packets for a signature packet.
  Use for recognizing non-clear-signed messages in decrypt.
  In some rare cases if packets are found which are not yet supported

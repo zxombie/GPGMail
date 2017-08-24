@@ -171,6 +171,25 @@
     return isMatched;
 }
 
+- (BOOL)containsPGPVersionString:(NSString *)version {
+    // While -[NSData containsPGPVersionMarker:] is used to check if the
+    // PGP/MIME application/pgp-encrypted version part contains Version: 1
+    // this method is used to check if the PGP BEGIN marker contains the version
+    // string given.
+    NSString *versionRegex = [NSString stringWithFormat:@"(?smi)(version[ ]?: %@)", version];
+    BOOL isMatched = NO;
+    @try {
+        RKRegex *versionRKRegex = [RKRegex regexWithRegexString:versionRegex options:RKCompileNoOptions];
+        isMatched = [self isMatchedByRegex:versionRKRegex];
+    }
+    @catch (NSException *exception) {
+        // Ignore...
+    }
+
+    return isMatched;
+}
+
+
 - (BOOL)hasSignaturePacketsWithSignaturePacketsExpected:(BOOL)signaturePacketsExpected {
     NSData *packetData = [self copy];
     
