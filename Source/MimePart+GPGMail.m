@@ -617,10 +617,12 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 }
 
 - (BOOL)isPGPMimeEncryptedAttachment {
-    // application/pgp-encrypted is also considered to be an attachment.
-    if([[MAIL_SELF(self) dispositionParameterForKey:@"filename"] isEqualToString:@"encrypted.asc"] ||
-       [MAIL_SELF(self) isType:@"application" subtype:@"pgp-encrypted"])
+    // application/pgp-encrypted is also considered to be an attachment, but doesn't have
+    // to be the PGP MIME Version attachment, so it makes sense to check for the Version as well.
+    BOOL isPGPMimeVersionPart = [MAIL_SELF(self) isType:@"application" subtype:@"pgp-encrypted"] && [[MAIL_SELF(self) decodedData] containsPGPVersionMarker:1];
+    if(isPGPMimeVersionPart || [[MAIL_SELF(self) dispositionParameterForKey:@"filename"] isEqualToString:@"encrypted.asc"]) {
         return YES;
+    }
     
     return NO;
 }

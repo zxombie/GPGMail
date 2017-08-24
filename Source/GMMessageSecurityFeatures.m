@@ -207,14 +207,16 @@
     // PGP inline data or failed to decrypt. In either case, the top part
     // passed in contains all the information.
     //MimePart *informationPart = decryptedBody == nil ? topPart : [decryptedBody topLevelPart];
+    BOOL isPGPMimeEncrypted = [topPart isPGPMimeEncrypted];
     [topPart enumerateSubpartsWithBlock:^(GM_CAST_CLASS(MimePart *, id) currentPart) {
         // Only set the flags for non attachment parts to support
         // plain messages with encrypted/signed attachments.
         // Otherwise those would display as signed/encrypted as well.
         // application/pgp is a special case since Mail.app identifies it as an attachment, while its
         // truly a text/plain part (legacy pgp format)
+        BOOL isPGPMimeVersionMarkerPart = [currentPart isPGPMimeEncryptedAttachment] && isPGPMimeEncrypted;
         if([currentPart isAttachment] && ![currentPart isType:@"application" subtype:@"pgp"] &&
-           ![currentPart isPGPMimeEncryptedAttachment] && ![currentPart isPGPMimeSignatureAttachment]) {
+           !isPGPMimeVersionMarkerPart && ![currentPart isPGPMimeSignatureAttachment]) {
             if([currentPart PGPAttachment]) {
                 [pgpAttachments addObject:currentPart];
             }
