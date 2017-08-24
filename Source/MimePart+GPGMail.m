@@ -2212,7 +2212,7 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     __block NSMutableArray *flattenedCertificates = [NSMutableArray array];
     // In order to support gnupg groups, each certificate array entry is an array
     // with one or more than one key. (#903)
-    [certificates enumerateObjectsUsingBlock:^(id  _Nonnull obj, __unused NSUInteger idx, __unused BOOL * _Nonnull stop) {
+    [certificates enumerateObjectsUsingBlock:^(id  obj, __unused NSUInteger idx, __unused BOOL * stop) {
         if(![obj isKindOfClass:[NSArray class]]) {
             [flattenedCertificates addObject:obj];
         }
