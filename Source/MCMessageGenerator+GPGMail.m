@@ -120,7 +120,14 @@ const static NSString *kMCMessageGeneratorSigningKeyKey = @"MCMessageGeneratorSi
         messageShouldBeProtectedUsingPGP = YES;
     }
     for(id certificate in encryptionCertificates) {
-        if([certificate isKindOfClass:[GPGKey class]]) {
+        if([certificate isKindOfClass:[NSArray class]]) {
+            for(id element in certificate) {
+                if([element isKindOfClass:[GPGKey class]]) {
+                    messageShouldBeProtectedUsingPGP = YES;
+                }
+            }
+        }
+        else if([certificate isKindOfClass:[GPGKey class]]) {
             messageShouldBeProtectedUsingPGP = YES;
         }
     }
