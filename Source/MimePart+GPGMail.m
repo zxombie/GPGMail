@@ -742,13 +742,21 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         return;
 
     NSArray *encExtensions = @[@"pgp", @"gpg", @"asc"];
-    *mightEnc = ([encExtensions containsObject:nameExt] || [encExtensions containsObject:filenameExt]);
+    BOOL hasEncryptedExtension = ([encExtensions containsObject:nameExt] || [encExtensions containsObject:filenameExt]);
+    *mightEnc = hasEncryptedExtension;
     NSArray *sigExtensions = @[@"sig"];
-    *mightSig = ([sigExtensions containsObject:nameExt] || [sigExtensions containsObject:filenameExt]);
+    BOOL hasSignedExtension = ([sigExtensions containsObject:nameExt] || [sigExtensions containsObject:filenameExt]);
+    *mightSig = hasSignedExtension;
     
     // Sometimes attachments with .asc extension might contain either encrypted data
     // or signed data, so it's best to test the actual data as well.
-    if(*mightSig || [[MAIL_SELF(self) decodedData] hasSignaturePacketsWithSignaturePacketsExpected:NO]) {
+    // Bug #942: Attachments that are either signed nor encrypted are falsely detected as signed, since GPGPacket
+    // returns a signature packet in some cases (e.g. some PNG files appear to have binary data which is interpreted
+    // as a pgp signature packet with an invalid version 71).
+    // In order to avoid that, an attachment is only checked for signature packets, if the extension of the filename
+    // matches either a known encrypted or signed extension.
+    // In addition, Libmacgpg might be improved to better check for faulty signature packets.
+    if(hasSignedExtension || ((hasSignedExtension || hasEncryptedExtension) && [[MAIL_SELF(self) decodedData] hasSignaturePacketsWithSignaturePacketsExpected:NO])) {
         // Bug #936: PGP signed attachment parts are not properly detected as such
         // At the moment, GPGMail always assumes that a signature part is a detached signature
         // for an attachment part with the same filename. This however fails to take into account
