@@ -56,6 +56,9 @@
 #import "MCAttachment.h"
 #import "MCFileTypeInfo.h"
 
+#import "GMMessageSecurityFeatures.h"
+#import "MCMessageBody.h"
+
 #define MAIL_SELF(self) ((MCMimePart *)(self))
 
 extern const NSString *kMimeBodyMessageKey;
@@ -164,9 +167,9 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
  */
 
 // TODO: Extend to find multiple signatures and encrypted data parts, if necessary.
-- (id)MADecode {
+- (id)MA_decode {
     if(![(MimePart_GPGMail *)[self topPart] shouldBePGPProcessed]) {
-        return [self MADecode];
+        return [self MA_decode];
     }
     
     // `content` will contain the result to be returned from MADecode.
@@ -189,7 +192,7 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     // Check if this is an exchange TNEF attachment and.
     else if(![MAIL_SELF(self) parentPart] && (tnefPart = [self mimePartWithTNEFAttachmentContainingSignedMessage])) {
         MCMimeBody *newMessageBody = [(MimePart_GPGMail *)tnefPart decodeApplicationMS_tnefWithContext:nil];
-        content = [[newMessageBody topLevelPart] decode];
+        content = [[newMessageBody topLevelPart] _decode];
         MCMimePart *newTopLevel = [newMessageBody topLevelPart];
         self.PGPSigned = [(MimePart_GPGMail *)newTopLevel PGPSigned];
         self.PGPError = [(MimePart_GPGMail *)newTopLevel PGPError];
@@ -198,13 +201,16 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     }
     // Check if this is a PGP/MIME encrypted message and process it.
     else if([self isPGPMimeEncrypted]) {
-        MCMimeBody *decryptedBody = [self decodeMultipartEncryptedWithContext:nil];
+        MCMimePart *decryptedTopLevelPart = [self decodeMultipartEncryptedWithContext:nil];
         // Add PGP information from mime parts.
-        content = [[decryptedBody topLevelPart] decode];
-        [(MimeBody_GPGMail *)decryptedBody collectSecurityFeatures];
+        [decryptedTopLevelPart setIvar:@"kMimePartAllowPGPProcessingKey" value:@(YES)];
+        //content = [decryptedTopLevelPart _decode];
+        MCMessageBody *body = [decryptedTopLevelPart messageBody];
+        [(MimePart_GPGMail *)[self topPart] setDecryptedTopLevelMimePart:decryptedTopLevelPart];
+        content = body;
         // If decryption failed, call the original method.
         if(!content)
-            content = [self MADecode];
+            content = [self MA_decode];
     }
     else if([self _isPretendPGPMIME] && [self mightContainEncryptedData]) {
         content = [self contentForApplicationOctetStream];
@@ -229,7 +235,7 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     
     if(!content) {
         // None of our methods matched? Call Mail's.
-        content = [self MADecode];
+        content = [self MA_decode];
     }
     
     // Loop through all the mime parts that have been processed and set
@@ -420,9 +426,9 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 	
 	// Otherwise let's create a new message now.
 	MCMessage *signedMessage = [GM_MAIL_CLASS(@"Message") messageWithRFC822Data:signedAttachment sanitizeData:YES];
-    MCMimeBody *messageBody = [MCMimeBody new];
+//    MCMimeBody *messageBody = [MCMimeBody new];
     MCMimePart *topLevelPart = [[MCMimePart alloc] initWithEncodedData:signedMessage];
-    [messageBody setTopLevelPart:topLevelPart];
+//    [messageBody setTopLevelPart:topLevelPart];
     if(![topLevelPart parse])
         return nil;
 //    [signedMessage setMessageInfoFromMessage:[(MimeBody_GPGMail *)[self mimeBody] message]];
@@ -432,8 +438,9 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 	// It's necessary to temporarily store this message, so it's retained,
 	// otherwise it will be released to early.
     [[self topPart] setIvar:@"TNEFDecodedMessage" value:signedMessage];
-	
-	return messageBody;
+    
+    return topLevelPart;
+//    return messageBody;
 }
 
 #pragma mark Mime Part Helpers
@@ -1249,7 +1256,7 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     // 1. Create a new Message using messageWithRFC822Data:
     // This creates the message store automatically!
     MCMessage *decryptedMessage;
-    MCMimeBody *decryptedMimeBody;
+//    MCMimeBody *decryptedMimeBody;
     // Unfortunately the Evolution PGP plugins seems to fuck up the encrypted message,
     // which renders it unreadable for Mail.app. This is frustrating but fixable.
     // Actually even easier than i thought at first. Instead of messageWithRFC822Data:
@@ -1270,13 +1277,13 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     // messageBodyUpdatingFlags: calls isMimeEncrypted. Set MimeEncrypted on the message,
     // so the correct info is returned.
     [decryptedMessage setIvar:@"MimeEncrypted" value:@YES];
-    decryptedMimeBody = [MCMimeBody new];
+//    decryptedMimeBody = [MCMimeBody new];
     [decryptedMessage setIvar:@"UserSelectedMessage" value:@YES];
-    [decryptedMimeBody setIvar:kMimeBodyMessageKey value:decryptedMessage];
+//    [decryptedMimeBody setIvar:kMimeBodyMessageKey value:decryptedMessage];
     id decryptedMimePart = [[MCMimePart alloc] initWithEncodedData:decryptedData];
-    [decryptedMimePart setIvar:@"MimeBody" value:decryptedMimeBody];
+//    [decryptedMimePart setIvar:@"MimeBody" value:decryptedMimeBody];
     [decryptedMimePart setIvar:kMimePartAllowPGPProcessingKey value:@(YES)];
-    [decryptedMimeBody setTopLevelPart:decryptedMimePart];
+//    [decryptedMimeBody setTopLevelPart:decryptedMimePart];
     [decryptedMimePart parse];
     
     //[decryptedMessage messageBodyUpdatingFlags:YES];
@@ -1284,10 +1291,13 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     // Top Level part reparses the message. This method doesn't.
     MCMimePart *topPart = [self topPart];
     // Set the decrypted message here, otherwise we run into a memory problem.
-    [(id)topPart setDecryptedMimeBody:decryptedMimeBody isEncrypted:self.PGPEncrypted isSigned:self.PGPSigned error:self.PGPError];
-    self.PGPDecryptedBody = [self decryptedMimeBody];
+    // TODO: Figure out what methods are used on High Sierra.
+    [topPart _setCMSExtractedContent:decryptedMimePart isEncrypted:self.PGPEncrypted isSigned:self.PGPSigned error:self.PGPError];
+    self.PGPDecryptedBody = decryptedMimePart;
+    //    [(id)topPart setDecryptedMimeBody:decryptedMimeBody isEncrypted:self.PGPEncrypted isSigned:self.PGPSigned error:self.PGPError];
+    //self.PGPDecryptedBody = [self decryptedMimeBody];
           
-    return decryptedMimeBody;
+    return decryptedMimePart;
 }
 
 - (NSData *)partDataByReplacingEncryptedData:(NSData *)originalPartData decryptedData:(NSData *)decryptedData encryptedRange:(NSRange)encryptedRange {
@@ -2151,24 +2161,24 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 //    return ret || isPGPMimeSigned;
 //}
 
-- (Message *)messageWithMessageData:(NSData *)messageData {
-    MCMutableMessageHeaders *headers = [MCMutableMessageHeaders new];
-    NSMutableString *contentTypeString = [[NSMutableString alloc] init];
-    [contentTypeString appendFormat:@"%@/%@", MAIL_SELF(self).type, MAIL_SELF(self).subtype];
-    if([MAIL_SELF(self) bodyParameterForKey:@"charset"])
-        [contentTypeString appendFormat:@"; charset=\"%@\"", [MAIL_SELF(self) bodyParameterForKey:@"charset"]];
-    [headers setHeader:[contentTypeString dataUsingEncoding:NSASCIIStringEncoding] forKey:@"Content-Type"];
-    if(MAIL_SELF(self).contentTransferEncoding)
-        [headers setHeader:MAIL_SELF(self).contentTransferEncoding forKey:@"Content-Transfer-Encoding"];
-
-    NSMutableData *completeMessageData = [[NSMutableData alloc] init];
-    [completeMessageData appendData:[headers encodedHeadersIncludingFromSpace:NO]];
-    [completeMessageData appendData:messageData];
-
-    Message *message = [GM_MAIL_CLASS(@"Message") messageWithRFC822Data:completeMessageData];
-
-    return message;
-}
+//- (Message *)messageWithMessageData:(NSData *)messageData {
+//    MCMutableMessageHeaders *headers = [MCMutableMessageHeaders new];
+//    NSMutableString *contentTypeString = [[NSMutableString alloc] init];
+//    [contentTypeString appendFormat:@"%@/%@", MAIL_SELF(self).type, MAIL_SELF(self).subtype];
+//    if([MAIL_SELF(self) bodyParameterForKey:@"charset"])
+//        [contentTypeString appendFormat:@"; charset=\"%@\"", [MAIL_SELF(self) bodyParameterForKey:@"charset"]];
+//    [headers setHeader:[contentTypeString dataUsingEncoding:NSASCIIStringEncoding] forKey:@"Content-Type"];
+//    if(MAIL_SELF(self).contentTransferEncoding)
+//        [headers setHeader:MAIL_SELF(self).contentTransferEncoding forKey:@"Content-Transfer-Encoding"];
+//
+//    NSMutableData *completeMessageData = [[NSMutableData alloc] init];
+//    [completeMessageData appendData:[headers encodedHeadersIncludingFromSpace:NO]];
+//    [completeMessageData appendData:messageData];
+//
+//    Message *message = [GM_MAIL_CLASS(@"Message") messageWithRFC822Data:completeMessageData];
+//
+//    return message;
+//}
 
 - (void)MAClearCachedDecryptedMessageBody {
     // Check if message should be processed (-[Message shouldBePGPProcessed])
@@ -2887,6 +2897,119 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 	// Puh, this was all but easy, to find out where the error is used.
     // Overreleasing allows to track it's path as an NSZombie in Instruments!
     [(MCActivityMonitor *)[GM_MAIL_CLASS(@"ActivityMonitor") currentMonitor] setError:mailError];
+}
+
+#pragma mark - Methods previously on MCMimeBody.
+
+- (BOOL)mightContainPGPMIMESignedData {
+    __block BOOL foundMIMESignedTopLevel = NO;
+    __block BOOL foundMIMESignature = NO;
+    [(MimePart_GPGMail *)[self topPart] enumerateSubpartsWithBlock:^(MCMimePart *mimePart) {
+        if([mimePart isType:@"multipart" subtype:@"signed"]) {
+            foundMIMESignedTopLevel = YES;
+        }
+        if([mimePart isType:@"application" subtype:@"pgp-signature"]) {
+            foundMIMESignature = YES;
+        }
+    }];
+    
+    return foundMIMESignedTopLevel && foundMIMESignature;
+}
+
+- (BOOL)mightContainPGPData {
+    __block BOOL mightContainPGPData = NO;
+    __block BOOL mightContainSMIMEData = NO;
+    
+    NSArray *pgpExtensions = @[@"pgp", @"gpg", @"asc", @"sig"];
+    NSArray *smimeExtensions = @[@"p7m", @"p7s", @"p7c", @"p7z"];
+    [(MimePart_GPGMail *)[self topPart] enumerateSubpartsWithBlock:^(MCMimePart *mimePart) {
+        // Check for S/MIME hints.
+        if(([mimePart isType:@"multipart" subtype:@"signed"] && [[[mimePart bodyParameterForKey:@"protocol"] lowercaseString] isEqualToString:@"application/pkcs7-signature"]) ||
+           [smimeExtensions containsObject:[[[mimePart bodyParameterForKey:@"filename"] lowercaseString] pathExtension]] ||
+           [smimeExtensions containsObject:[[[mimePart bodyParameterForKey:@"name"] lowercaseString] pathExtension]] ||
+           [mimePart isType:@"application" subtype:@"pkcs7-mime"]) {
+            mightContainSMIMEData = YES;
+            return;
+        }
+        BOOL mimeSigned = [mimePart isType:@"multipart" subtype:@"signed"] && ![[[mimePart bodyParameterForKey:@"protocol"] lowercaseString] isEqualToString:@"application/pkcs7-signature"];
+        if([mimePart isType:@"multipart" subtype:@"encrypted"] ||
+           mimeSigned ||
+           [mimePart isType:@"application" subtype:@"pgp-encrypted"] ||
+           [mimePart isType:@"application" subtype:@"pgp-signature"]) {
+            mightContainPGPData = YES;
+            return;
+        }
+        
+        NSString *nameParameter = [[mimePart bodyParameterForKey:@"name"] lowercaseString];
+        NSString *filenameParameter = [[mimePart bodyParameterForKey:@"filename"] lowercaseString];
+        
+        NSString *nameExt = [nameParameter pathExtension];
+        NSString *filenameExt = [filenameParameter pathExtension];
+        
+        if([pgpExtensions containsObject:nameExt] || [pgpExtensions containsObject:filenameExt]) {
+            mightContainPGPData = YES;
+            return;
+        }
+        
+        // Last but not least, check for winmail.dat files, which could contain
+        // signed or encrypted data, where the mime structure was altered by
+        // MS Exchange.
+        if([mimePart isType:@"application" subtype:@"ms-tnef"] ||
+           [nameParameter isEqualToString:@"winmail.dat"] ||
+           [nameParameter isEqualToString:@"win.dat"] ||
+           [filenameParameter isEqualToString:@"winmail.dat"] ||
+           [filenameParameter isEqualToString:@"win.dat"]) {
+            mightContainPGPData = YES;
+            return;
+        }
+        
+        // And another special case seems to be fixed by rebuilding the message.
+        // If message/rfc822 mime part is included in the received message,
+        // Mail seems to fuck up the data source necessary to decode that message.
+        // As a result, only parts of the message are displayed.
+        // If however GPGMail rebuilds the message internally from cached data,
+        // the data source is properly setup and it's possible to decode the message.
+        // While the message might not contain PGP data, YES is still returned
+        // from this method, in order to instruct GPGMail to rebuild the message.
+        if([mimePart isType:@"message" subtype:@"rfc822"]) {
+            mightContainPGPData = YES;
+            return;
+        }
+        
+    }];
+    
+    return mightContainPGPData && !mightContainSMIMEData;
+}
+
+- (MCMessageBody *)MAMessageBody {
+    MCMessageBody *messageBody = [self MAMessageBody];
+    GMMessageSecurityFeatures *securityFeatures = [GMMessageSecurityFeatures securityFeaturesFromTopLevelMimePart:[self topPart]];
+    // Still have to decided, if the security features should be on MessageBody or MimePart.
+    //((MimeBody_GPGMail *)messageBody).securityFeatures = securityFeatures;
+    [self setIvar:@"SecurityFeatures" value:securityFeatures];
+    if(securityFeatures.PGPMainError) {
+        [messageBody setSmimeError:securityFeatures.PGPMainError];
+    }
+    return messageBody;
+}
+
+- (void)setDecryptedTopLevelMimePart:(MCMimePart *)decryptedTopLevelMimePart {
+    @synchronized([self valueForKey:@"_encryptSignLock"]) {
+        [[self topPart] setIvar:@"MimePartDecryptedTopLevelMimePart" value:decryptedTopLevelMimePart];
+    }
+}
+
+- (MCMimePart *)decryptedTopLevelMimePart {
+    MCMimePart *decryptedTopLevelMimePart = nil;
+    @synchronized([self valueForKey:@"_encryptSignLock"]) {
+        decryptedTopLevelMimePart = [[self topPart] getIvar:@"MimePartDecryptedTopLevelMimePart"];
+    }
+    return decryptedTopLevelMimePart;
+//    return [MAIL_SELF(self) cmsExtractedContent];
+}
+
+- (GMMessageSecurityFeatures *)securityFeatures {
+    return [[self topPart] getIvar:@"SecurityFeatures"];
 }
 
 @end

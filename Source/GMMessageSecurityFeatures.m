@@ -38,6 +38,12 @@
     return [super init];
 }
 
++ (GMMessageSecurityFeatures *)securityFeaturesFromTopLevelMimePart:(MCMimePart *)topLevelMimePart {
+    GMMessageSecurityFeatures *securityFeatures = [self new];
+    [securityFeatures collectSecurityFeaturesStartingWithMimePart:topLevelMimePart];
+    return securityFeatures;
+}
+
 + (GMMessageSecurityFeatures *)securityFeaturesFromMimeBody:(id)mimeBody {
     GMMessageSecurityFeatures *securityFeatures = [self new];
     [securityFeatures collectSecurityFeaturesStartingWithMimePart:[mimeBody topLevelPart]];
@@ -195,8 +201,9 @@
     __block BOOL isDecrypted = NO;
     __block BOOL isVerified = NO;
     
-    MCMimeBody *mimeBody = [topPart mimeBody];
-    id decryptedBody = [topPart decryptedMimeBody];
+    //MCMimeBody *mimeBody = [topPart mimeBody];
+    MCMimePart *decryptedMimePart = [(MimePart_GPGMail *)topPart decryptedTopLevelMimePart];
+    //id decryptedBody = [topPart decryptedMimeBody];
     // If there's a decrypted message body, its top level part possibly holds information
     // about signatures and errors.
     // Theoretically it could contain encrypted inline data, signed inline data
@@ -249,7 +256,7 @@
     // Set the flags based on the parsed message.
     // Happened before in decrypt bla bla bla, now happens before decodig is finished.
     // Should work better.
-    GMMessageSecurityFeatures *decryptedMimeBodySecurityFeatures = [(MimeBody_GPGMail *)decryptedBody securityFeatures];
+    GMMessageSecurityFeatures *decryptedMimeBodySecurityFeatures = [(MimePart_GPGMail *)decryptedMimePart securityFeatures];
     
     self.PGPEncrypted = isEncrypted || [decryptedMimeBodySecurityFeatures PGPEncrypted];
     self.PGPSigned = isSigned || [decryptedMimeBodySecurityFeatures PGPSigned];
@@ -298,13 +305,13 @@
         self.PGPMainError = nil;
     }
     
-    DebugLog(@"%@ Decrypted Message [%@]:\n\tisEncrypted: %@, isSigned: %@,\n\tisPartlyEncrypted: %@, isPartlySigned: %@\n\tsignatures: %@\n\terrors: %@",
-             [decryptedBody GMMessage], [(MCMessage *)[decryptedBody GMMessage] subject], [decryptedMimeBodySecurityFeatures PGPEncrypted] ? @"YES" : @"NO", [decryptedMimeBodySecurityFeatures PGPSigned] ? @"YES" : @"NO",
-             [decryptedMimeBodySecurityFeatures PGPPartlyEncrypted] ? @"YES" : @"NO", [decryptedMimeBodySecurityFeatures PGPPartlySigned] ? @"YES" : @"NO", [decryptedMimeBodySecurityFeatures PGPSignatures], [decryptedMimeBodySecurityFeatures PGPErrors]);
-    
-    DebugLog(@"%@ Message [%@]:\n\tisEncrypted: %@, isSigned: %@,\n\tisPartlyEncrypted: %@, isPartlySigned: %@\n\tsignatures: %@\n\terrors: %@\n\tattachments: %@",
-             [(MimeBody_GPGMail *)mimeBody GMMessage], [[(MimeBody_GPGMail *)mimeBody GMMessage] subject], self.PGPEncrypted ? @"YES" : @"NO", self.PGPSigned ? @"YES" : @"NO",
-             self.PGPPartlyEncrypted ? @"YES" : @"NO", self.PGPPartlySigned ? @"YES" : @"NO", self.PGPSignatures, self.PGPErrors, self.PGPAttachments);
+//    DebugLog(@"%@ Decrypted Message [%@]:\n\tisEncrypted: %@, isSigned: %@,\n\tisPartlyEncrypted: %@, isPartlySigned: %@\n\tsignatures: %@\n\terrors: %@",
+//             [decryptedBody GMMessage], [(MCMessage *)[decryptedBody GMMessage] subject], [decryptedMimeBodySecurityFeatures PGPEncrypted] ? @"YES" : @"NO", [decryptedMimeBodySecurityFeatures PGPSigned] ? @"YES" : @"NO",
+//             [decryptedMimeBodySecurityFeatures PGPPartlyEncrypted] ? @"YES" : @"NO", [decryptedMimeBodySecurityFeatures PGPPartlySigned] ? @"YES" : @"NO", [decryptedMimeBodySecurityFeatures PGPSignatures], [decryptedMimeBodySecurityFeatures PGPErrors]);
+//
+//    DebugLog(@"%@ Message [%@]:\n\tisEncrypted: %@, isSigned: %@,\n\tisPartlyEncrypted: %@, isPartlySigned: %@\n\tsignatures: %@\n\terrors: %@\n\tattachments: %@",
+//             [(MimeBody_GPGMail *)mimeBody GMMessage], [[(MimeBody_GPGMail *)mimeBody GMMessage] subject], self.PGPEncrypted ? @"YES" : @"NO", self.PGPSigned ? @"YES" : @"NO",
+//             self.PGPPartlyEncrypted ? @"YES" : @"NO", self.PGPPartlySigned ? @"YES" : @"NO", self.PGPSignatures, self.PGPErrors, self.PGPAttachments);
     
     // Fix the number of attachments, this time for real!
     // Uncomment once completely implemented.
