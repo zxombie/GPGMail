@@ -2976,6 +2976,23 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
             return;
         }
         
+        // Bug #945: GPGMail does not detect inline PGP in incoming messages.
+        // If a message contains inline PGP in the text/plain or text/html file,
+        // none of the above methods will detect that and thus GPGMail is led to believe,
+        // that the message doesn't contain any PGP data.
+        // In order to properly detect inline PGP, it is necessary to check the body data
+        // that is available for each mime part. (Even partial contain the non-attachment
+        // mime part body data).
+        if(![mimePart isAttachment]) {
+            NSData *partBodyData = [mimePart decodedData];
+            
+            if(partBodyData) {
+                partBodyData = [mimePart encodedBodyData];
+            }
+            if(partBodyData && [partBodyData mightContainPGPEncryptedDataOrSignatures]) {
+                mightContainPGPData = YES;
+            }
+        }
     }];
     
     return mightContainPGPData && !mightContainSMIMEData;
