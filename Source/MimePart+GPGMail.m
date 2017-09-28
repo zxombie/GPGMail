@@ -1964,7 +1964,7 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         }
     }];
 
-    return applicationPGPEncrypted != nil && ![self _isExchangeServerModifiedPGPMimeEncrypted] && !hasMultipartEncryptedPart;
+    return applicationPGPEncrypted != nil && !hasMultipartEncryptedPart && ![self _isExchangeServerModifiedPGPMimeEncrypted];
 }
 
 - (BOOL)_isDraftThatHasBeenReEncryptedWithoutBeingDecrypted {
