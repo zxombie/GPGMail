@@ -38,20 +38,42 @@
 
 @implementation NSPreferences (GPGMail)
 
-+ (id)MASharedPreferences {
-	id preferences = [self MASharedPreferences];
-    if(preferences == nil)
-        return preferences;
++ (id)MAMakePreferenceTabViewItems {
+    // Bug #943: Make sure the GPGMail preference item is only added once.
+    //
+    // In theory -[GPGMailBundle registerBundle] is responsible for registering
+    // the preference panel of GPGMail with Mail.app
+    // This however only works, if an instance of MailPreferences already exists,
+    // which seems to only be the case, if it was instantiated by a second plugin.
+    // Otherwise +[MailPreferences sharedPreferences] would return nil and the
+    // preference panel would not be registered.
+    // To fix this problem, GPGMail hooked into +[MailPreferences sharedPreferences]
+    // This however lead to the problem that the preference panel might have been registered
+    // twice, if a second plugin was available which was loaded *prior* to GPGMail being
+    // loaded.
+    // In that case the preference panel would be loaded once in +[MailPreferences sharedPreferences]
+    // and again in -[GPGMailBundle registerBundle].
+    // In order to make sure that the preference panel is really only registered once, the code
+    // hook on +[MailPreferences sharedPreferences] has been moved here.
+    // This method is called by Mail, once the preference window is loaded,
+    // and is probably the best place to add GPGMail's preference panel, if
+    // it has not been already added from -[GPGMailBundle registerBundle]
     
+    // At this point, the preference panel has been registered by -[GPGMailBundle registerBundle]
+    // if a second plugin is available and has been loaded first, so it's safe, to trust the
+    // bundles registered in preference owners.
+    // Only if GPGMail's NSPreferencesModule is not yet present, it will be registered.
+    NSPreferences *preferences = [NSClassFromString(@"MailPreferences") sharedPreferences];
     NSPreferencesModule *gpgMailPreferences = [GPGMailPreferences sharedInstance];
     NSArray *preferencesModules = [preferences valueForKey:@"_preferenceOwners"];
-    NSString *panelName = [GPGMailBundle  preferencesPanelName];
+    NSString *panelName = [GPGMailBundle preferencesPanelName];
+
+    // Register the preference panel if it's not already registered.
     if(![preferencesModules containsObject:gpgMailPreferences]) {
         [preferences addPreferenceNamed:panelName
                                   owner:gpgMailPreferences];
     }
-    
-    return preferences;
+    return [self MAMakePreferenceTabViewItems];
 }
 
 @end

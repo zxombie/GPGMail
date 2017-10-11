@@ -536,6 +536,11 @@
                                          @"_generateMessageBodiesFromOriginalMessages"]
                                      ]
                              }
+                     },
+             @"MailPreferences": @{
+                     @"selectors": @[
+                             @"makePreferenceTabViewItems"
+                             ]
                      }
      };
 }
