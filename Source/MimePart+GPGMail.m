@@ -2975,7 +2975,9 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         // While the message might not contain PGP data, YES is still returned
         // from this method, in order to instruct GPGMail to rebuild the message.
         if([mimePart isType:@"message" subtype:@"rfc822"]) {
-            mightContainPGPData = YES;
+            if(!NSClassFromString(@"OMiCBundle")) {
+                mightContainPGPData = YES;
+            }
             return;
         }
         
