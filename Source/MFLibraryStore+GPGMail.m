@@ -29,12 +29,14 @@
 #import "MFLibraryStore+GPGMail.h"
 
 #import "NSObject+LPDynamicIvars.h"
+#import "CCLog.h"
 
 #import "MCMessage.h"
 #import "Library+GPGMail.h"
 #import "MFLibraryStore.h"
 #import "MCMessageBody.h"
 #import "MFLibrary.h"
+#import "MimePart+GPGMail.h"
 
 extern NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey;
 extern NSString * const kLibraryMimeBodyReturnCompleteBodyDataForMessageKey;
@@ -83,6 +85,22 @@ NSString * const kMFLibraryStoreMessageDataFetchLockMap = @"MFLibraryStoreMessag
         return [self MAGetTopLevelMimePart:topLevelMimePart headers:headers body:body forMessage:currentMessage fetchIfNotAvailable:fetchIfNotAvailable updateFlags:updateFlags allowPartial:allowPartial];
     }
     
+    // Bug #952: Messages containing PGP data are not always processed properly
+    //
+    // Under some circumstances a call to +[MFLibrary _messageDataAtPath:] returns nil
+    // even though the file exists on disk.
+    // It's not yet entirely clear why that happens, but it might help, if the data is only
+    // read when the mime part is created for display instead of twice, once for the check
+    // if the message contains PGP data and once for display.
+    // Call into the original Mail method in order to get the top level mime part based
+    // on the partial data available.
+    MCMimePart *temporaryMimePart = nil;
+    // It appears that for display, topLevelMimePart is always NULL.
+    [self MAGetTopLevelMimePart:&temporaryMimePart headers:headers body:body forMessage:currentMessage fetchIfNotAvailable:fetchIfNotAvailable updateFlags:updateFlags allowPartial:allowPartial];
+    if(![(MimePart_GPGMail *)temporaryMimePart mightContainPGPData]) {
+        return;
+    }
+
     // Now all the best cases are covered, down to the nitty gritty.
     NSMutableDictionary *messageLockMap = [self valueForKey:@"_libraryFetchLockMap"];
     NSRecursiveLock *messageLock = nil;
@@ -94,26 +112,6 @@ NSString * const kMFLibraryStoreMessageDataFetchLockMap = @"MFLibraryStoreMessag
         }
     }
     [messageLock lock];
-    
-    if(![Library_GPGMail GMMessageMightContainPGPData:currentMessage]) {
-        // If the message doesn't contain any PGP data, call the original Mail method.
-        [messageLock unlock];
-        messageLockMap = [self valueForKey:@"_libraryFetchLockMap"];
-        @synchronized(messageLockMap) {
-            NSRecursiveLock *endLock = messageLockMap[currentMessage];
-            if(messageLock == endLock) {
-                @try {
-                    [messageLockMap removeObjectForKey:currentMessage];
-                }
-                @catch(NSException *exception) {
-                    @throw exception;
-                    // Should we do something here? Maybe fall back?
-                }
-            }
-        }
-        [self MAGetTopLevelMimePart:topLevelMimePart headers:headers body:body forMessage:currentMessage fetchIfNotAvailable:fetchIfNotAvailable updateFlags:updateFlags allowPartial:allowPartial];
-        return;
-    }
     
     // The message contains PGP data, so the first step is to try to re-create the complete body data
     // from locally available message data. If the message hasn't been downloaded yet in its entirety,
@@ -165,13 +163,19 @@ NSString * const kMFLibraryStoreMessageDataFetchLockMap = @"MFLibraryStoreMessag
             }
         }
     }
-    
+    if(!messageData) {
+        DebugLog(@"Failed to fetch data for message! %@", currentMessage);
+    }
     @try {
+        if(topLevelMimePart != NULL) {
+            *topLevelMimePart = nil;
+        }
+        if(body != NULL) {
+            *body = nil;
+        }
         BOOL success = [Library_GPGMail GMGetTopLevelMimePart:topLevelMimePart headers:headers body:body forMessage:currentMessage messageData:messageData shouldProcessPGPData:YES];
     }
     @catch (NSException *exception) {
-        // As a fallback, invoke the original method.
-        @throw exception;
         [self MAGetTopLevelMimePart:topLevelMimePart headers:headers body:body forMessage:currentMessage fetchIfNotAvailable:fetchIfNotAvailable updateFlags:updateFlags allowPartial:allowPartial];
     }
     @finally {
@@ -186,7 +190,7 @@ NSString * const kMFLibraryStoreMessageDataFetchLockMap = @"MFLibraryStoreMessag
                 [messageLockMap removeObjectForKey:currentMessage];
             }
             @catch(NSException *exception) {
-                @throw exception;
+                //@throw exception;
                 // Should we do something here? Maybe fall back?
             }
         }

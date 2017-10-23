@@ -198,6 +198,9 @@ extern NSString * const kMessageSecurityFeaturesKey;
     if(isCompleteMessageAvailable) {
         return messageData;
     }
+    if(!messageData) {
+        DebugLog(@"Oh noes, can't fetch message data for message: %@", currentMessage);
+    }
     
     if(!topLevelPart) {
         topLevelPart = [[MCMimePart alloc] initWithEncodedData:messageData];
@@ -291,45 +294,20 @@ extern NSString * const kMessageSecurityFeaturesKey;
 
 + (NSData *)GMMessageDataForMessage:(MCMessage *)currentMessage isCompleteMessageAvailable:(BOOL *)isCompleteMessageAvailable {
     NSData *messageData = nil;
-    NSString *completeMessagePath = [MFLibrary _dataPathForMessage:currentMessage type:0];
-    BOOL hasEntireMessage = [[NSFileManager defaultManager] fileExistsAtPath:completeMessagePath];
-    *isCompleteMessageAvailable = hasEntireMessage;
-    
-    if(hasEntireMessage) {
-        messageData = [MFLibrary _messageDataAtPath:completeMessagePath];
+    messageData = [MFLibrary fullMessageDataForMessage:currentMessage];
+    if(!messageData) {
+        NSString *partialMessagePath = [MFLibrary _dataPathForMessage:currentMessage type:1];
+        messageData = [MFLibrary _messageDataAtPath:partialMessagePath];
+        if(!messageData) {
+            DebugLog(@"Oh noes, no message data: %@", currentMessage);
+        }
     }
     else {
-        // The complete message is not available, so it's necessary to load the partial message in order to build
-        // a mime tree from.
-        messageData = [MFLibrary _messageDataAtPath:[MFLibrary _dataPathForMessage:currentMessage type:1]];
+        if(isCompleteMessageAvailable != NULL) {
+            *isCompleteMessageAvailable = YES;
+        }
     }
     return messageData;
-}
-
-+ (BOOL)GMMessageMightContainPGPData:(MCMessage *)message {
-    BOOL isCompleteMessageAvailable = NO;
-    NSData *messageData = [self GMMessageDataForMessage:message isCompleteMessageAvailable:&isCompleteMessageAvailable];
-    MCMimePart *topLevelMimePart = [[MCMimePart alloc] initWithEncodedData:messageData];
-    if([topLevelMimePart parse] && [(MimePart_GPGMail *)topLevelMimePart mightContainPGPData]) {
-        return YES;
-    }
-    
-    return NO;
-}
-
-+ (BOOL)MAGetTopLevelMimePart:(__autoreleasing id *)topLevelMimePart headers:(__autoreleasing id *)headers body:(__autoreleasing id *)body forMessage:(MCMessage *)currentMessage {
-    // This method is responsible for fetching the complete message data
-    // in case it's not yet available, or re-construct it from the locally cached data.
-    // It's only allowed to do so however, if a user actively selected a message, in which
-    // case it's invoked from -[RedundantContentIdentificationManager redundantContentMarkupForMessage:inConversation:]
-    // and the current thread dictionary has the ReturnCompleteBodyData and the ReturnCompleteBodyDataForMessage message reference set.
-    BOOL wantsCompleteBodyData = ([[[[NSThread currentThread] threadDictionary] valueForKey:kLibraryMimeBodyReturnCompleteBodyDataKey] boolValue] &&
-                                  [[[NSThread currentThread] threadDictionary] valueForKey:kLibraryMimeBodyReturnCompleteBodyDataForMessageKey] == currentMessage) || [[[[NSThread currentThread] threadDictionary] valueForKey:kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey] boolValue];
-    
-    BOOL isCompleteMessageAvailable = NO;
-    NSData *messageData = [self GMMessageDataForMessage:currentMessage isCompleteMessageAvailable:&isCompleteMessageAvailable];
-    
-    return [self GMGetTopLevelMimePart:topLevelMimePart headers:headers body:body forMessage:currentMessage messageData:messageData shouldProcessPGPData:wantsCompleteBodyData];
 }
 
 + (void)GMSetupDataSourcesForParsedMessage:(id)parsedMessage ofMessage:(MCMessage *)message {
