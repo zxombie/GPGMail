@@ -283,10 +283,6 @@ extern const NSString *kComposeWindowControllerAllowWindowTearDown;
 	// If the pinentry dialog was cancelled, there's no need to show any error.
 	// Simply let the user continue editing.
 	if(errorCode && [errorCode integerValue] == GPGErrorCancelled) {
-		if([GPGMailBundle isElCapitan]) {
-			// Cancel the send animation, the window is gone and can't be restored.
-			[(ComposeWindowController_GPGMail *)[self delegate] cancelSendAnimation];
-		}
 		return NO;
 	}
 	
