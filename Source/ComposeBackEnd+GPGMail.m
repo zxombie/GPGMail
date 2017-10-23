@@ -585,10 +585,15 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"
             // to be nil instead of an empty array.
             NSMutableArray *keys = nil;
             if(userWantsDraftsEncrypted) {
-                keys = [NSMutableArray array];
+                // Bug #951: GPGMail tries to encrypt draft even though no PGP key is available
+                //
+                // In case no PGP key is returned by -[GMComposeMessagePreferredSecurityProperties encryptionKeyForDraft],
+                // the Mail's writer object is currently passed an empty array, which errorneously causes Mail to try to
+                // encrypt the message even thogh no key is available.
+                // In order to fix that, the array has to be niled
                 encryptionKeyForDraft = [securityProperties encryptionKeyForDraft];
                 if(encryptionKeyForDraft) {
-                    [keys addObject:encryptionKeyForDraft];
+                    keys = [NSMutableArray arrayWithObject:encryptionKeyForDraft];
                 }
             }
             // TODO: If userWantsDraftsEncrypted is enabled, but no appropriate key could be found
