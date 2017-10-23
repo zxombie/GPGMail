@@ -2959,7 +2959,10 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
            [nameParameter isEqualToString:@"win.dat"] ||
            [filenameParameter isEqualToString:@"winmail.dat"] ||
            [filenameParameter isEqualToString:@"win.dat"]) {
-            mightContainPGPData = YES;
+            // Bug #950: Ignore winmail.dat files if Letter Opener is installed.
+            if(!NSClassFromString(@"OMiCBundle")) {
+                mightContainPGPData = YES;
+            }
             return;
         }
         
