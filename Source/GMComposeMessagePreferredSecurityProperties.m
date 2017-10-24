@@ -119,11 +119,17 @@
 - (GPGKey *)encryptionKeyForDraft {
     // Check if a key for encrypting the draft is available matching the sender.
     // Otherwise, return any key pair with encryption capabilities.
+    // The best match is of course a signing key which is set when selecting a sender address.
+    if(self.signingKey) {
+        return self.signingKey;
+    }
+    // Otherwise check for a secret key matching the sender address.
     NSString *senderAddress = [self.sender gpgNormalizedEmail];
     id key = [self.PGPSigningKeys valueForKey:senderAddress];
     if([key isKindOfClass:[GPGKey class]] && ((GPGKey *)key).canAnyEncrypt) {
         return key;
     }
+    // Last but not least, accept any public key associated with an available secret key.
     return [[GPGMailBundle sharedInstance] anyPersonalPublicKeyWithPreferenceAddress:senderAddress];
 }
 
