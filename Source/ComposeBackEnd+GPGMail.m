@@ -1000,6 +1000,7 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"
         [self MAUpdateSMIMEStatus:onComplete];
         return;
     }
+    [MAIL_SELF setDefaultSenderIfNeeded];
     NSString *sender = nil;
 //    if([MAIL_SELF respondsToSelector:@selector(senderWithValidation:)]) {
 //        sender = [MAIL_SELF senderWithValidation:YES];
