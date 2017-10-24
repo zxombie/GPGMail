@@ -146,6 +146,7 @@
     BOOL canSMIMEEncrypt = [self.recipients count] ? YES : NO;
     BOOL canPGPSign = NO;
     BOOL canPGPEncrypt = [self.recipients count] ? YES : NO;
+    BOOL allowEncryptEvenIfNoSigningKeyIsAvailable = [[GPGOptions sharedOptions] boolForKey:@"AllowEncryptEvenIfNoSigningKeyIsAvailable"];
     
     NSString *sender = [self.sender copy];
     NSArray *recipients = [self.recipients copy];
@@ -167,19 +168,25 @@
     }
     
     //BOOL canEncrypt = [recipients count] ? YES : NO;
-    for(id recipient in recipients) {
-        // Only accept cached S/MIME encryption certificates, otherwise for a new check.
-        id certificate = encryptionCertificates[recipient];
-        if(certificate && ([certificate isKindOfClass:[GPGKey class]] || certificate == [NSNull null])) {
-            certificate = nil;
+    // SMIME only allows encryption if a signing certificate exists.
+    if(canSMIMESign) {
+        for(id recipient in recipients) {
+            // Only accept cached S/MIME encryption certificates, otherwise for a new check.
+            id certificate = encryptionCertificates[recipient];
+            if(certificate && ([certificate isKindOfClass:[GPGKey class]] || certificate == [NSNull null])) {
+                certificate = nil;
+            }
+            if(!certificate) {
+                certificate = [MCKeychainManager copyEncryptionCertificateForAddress:recipient];
+                encryptionCertificates[recipient] = certificate ? certificate : [NSNull null];
+            }
+            if(encryptionCertificates[recipient] == [NSNull null]) {
+                canSMIMEEncrypt = NO;
+            }
         }
-        if(!certificate) {
-            certificate = [MCKeychainManager copyEncryptionCertificateForAddress:recipient];
-            encryptionCertificates[recipient] = certificate ? certificate : [NSNull null];
-        }
-        if(encryptionCertificates[recipient] == [NSNull null]) {
-            canSMIMEEncrypt = NO;
-        }
+    }
+    else {
+        canSMIMEEncrypt = NO;
     }
     
     // Load signing key and encryption keys for OpenPGP.
@@ -221,23 +228,28 @@
     }
     
     //BOOL canEncrypt = [recipients count] ? YES : NO;
-    for(id recipient in recipients) {
-        NSString *normalizedRecipient = [recipient gpgNormalizedEmail];
-        // Only accept cached PGP encryption certificates, otherwise for a new check.
-        id key = encryptionKeys[normalizedRecipient];
-        if(key && (![key isKindOfClass:[GPGKey class]] || key == [NSNull null])) {
-            key = nil;
+    if(canPGPSign || allowEncryptEvenIfNoSigningKeyIsAvailable) {
+        for(id recipient in recipients) {
+            NSString *normalizedRecipient = [recipient gpgNormalizedEmail];
+            // Only accept cached PGP encryption certificates, otherwise for a new check.
+            id key = encryptionKeys[normalizedRecipient];
+            if(key && (![key isKindOfClass:[GPGKey class]] || key == [NSNull null])) {
+                key = nil;
+            }
+            if(!key) {
+                NSArray *keyList = [[[GPGMailBundle sharedInstance] publicKeyListForAddresses:@[normalizedRecipient]] allObjects];
+                // In order to support gnupg groups, it's possible that a list of keys is returned, even if only
+                // one recipient is passed in. If more than one key is found, the list of keys is stored for that recipient,
+                // instead of only the first key. (#903)
+                encryptionKeys[normalizedRecipient] = [keyList count] > 0 ? keyList : [NSNull null];
+            }
+            if(encryptionKeys[normalizedRecipient] == [NSNull null]) {
+                canPGPEncrypt = NO;
+            }
         }
-        if(!key) {
-            NSArray *keyList = [[[GPGMailBundle sharedInstance] publicKeyListForAddresses:@[normalizedRecipient]] allObjects];
-            // In order to support gnupg groups, it's possible that a list of keys is returned, even if only
-            // one recipient is passed in. If more than one key is found, the list of keys is stored for that recipient,
-            // instead of only the first key. (#903)
-            encryptionKeys[normalizedRecipient] = [keyList count] > 0 ? keyList : [NSNull null];
-        }
-        if(encryptionKeys[normalizedRecipient] == [NSNull null]) {
-            canPGPEncrypt = NO;
-        }
+    }
+    else {
+        canPGPEncrypt = NO;
     }
     
     // Now we know, if signing and encryption is available. Now on to determine, what security properties should be enabled.
