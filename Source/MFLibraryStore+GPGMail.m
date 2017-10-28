@@ -44,6 +44,7 @@ extern NSString * const kLibraryMimeBodyReturnCompleteBodyDataKey;
 
 NSString * const kMFLibraryStoreMessageBodyContainsPGPData = @"MFLibraryStoreMessageBodyContainsPGPData";
 NSString * const kMFLibraryStoreMessageDataFetchLockMap = @"MFLibraryStoreMessageDataFetchLockMap";
+NSString * const kMFLibraryStoreMessageWaitForData = @"MFLibraryStoreMessageWaitForData";
 
 // This class is responsible for fetching message data on High Sierra.
 
@@ -85,6 +86,38 @@ NSString * const kMFLibraryStoreMessageDataFetchLockMap = @"MFLibraryStoreMessag
         return [self MAGetTopLevelMimePart:topLevelMimePart headers:headers body:body forMessage:currentMessage fetchIfNotAvailable:fetchIfNotAvailable updateFlags:updateFlags allowPartial:allowPartial];
     }
     
+    void (^cleanUp)(id, MCMessage *, NSRecursiveLock *, NSLock *) = ^void(id object, MCMessage *currentMessage, NSRecursiveLock *messageLock, NSLock *messageDataFetchLock) {
+        // Unset wait for data, so method calls not controlled by GPGMail don't use
+        // the locks. (ref. Bug #952)
+        [[[NSThread currentThread] threadDictionary] setValue:@(NO) forKey:kMFLibraryStoreMessageWaitForData];
+
+        if(messageDataFetchLock) {
+            NSMutableDictionary *messageDataFetchLockMap = [self getIvar:kMFLibraryStoreMessageDataFetchLockMap];
+            @synchronized(messageDataFetchLockMap) {
+                NSLock *endLock = messageDataFetchLockMap[currentMessage];
+                if(messageDataFetchLock == endLock) {
+                    @try {
+                        [messageDataFetchLockMap removeObjectForKey:currentMessage];
+                    }
+                    @catch(NSException *exception) {}
+                }
+            }
+        }
+
+        if(messageLock) {
+            NSMutableDictionary *messageLockMap = [object valueForKey:@"_libraryFetchLockMap"];
+            @synchronized(messageLockMap) {
+                NSRecursiveLock *endLock = messageLockMap[currentMessage];
+                if(messageLock == endLock) {
+                    @try {
+                        [messageLockMap removeObjectForKey:currentMessage];
+                    }
+                    @catch(NSException *exception) {}
+                }
+            }
+        }
+    };
+
     // Bug #952: Messages containing PGP data are not always processed properly
     //
     // Under some circumstances a call to +[MFLibrary _messageDataAtPath:] returns nil
@@ -96,8 +129,10 @@ NSString * const kMFLibraryStoreMessageDataFetchLockMap = @"MFLibraryStoreMessag
     // on the partial data available.
     MCMimePart *temporaryMimePart = nil;
     // It appears that for display, topLevelMimePart is always NULL.
+    [[[NSThread currentThread] threadDictionary] setValue:@(YES) forKey:kMFLibraryStoreMessageWaitForData];
     [self MAGetTopLevelMimePart:&temporaryMimePart headers:headers body:body forMessage:currentMessage fetchIfNotAvailable:fetchIfNotAvailable updateFlags:updateFlags allowPartial:allowPartial];
     if(![(MimePart_GPGMail *)temporaryMimePart mightContainPGPData]) {
+        cleanUp(self, currentMessage, nil, nil);
         return;
     }
 
@@ -112,7 +147,7 @@ NSString * const kMFLibraryStoreMessageDataFetchLockMap = @"MFLibraryStoreMessag
         }
     }
     [messageLock lock];
-    
+
     // The message contains PGP data, so the first step is to try to re-create the complete body data
     // from locally available message data. If the message hasn't been downloaded yet in its entirety,
     // the message data is fetched from the mail server.
@@ -137,34 +172,22 @@ NSString * const kMFLibraryStoreMessageDataFetchLockMap = @"MFLibraryStoreMessag
                 messageDataFetchLockMap[currentMessage] = messageDataFetchLock;
             }
         }
-        [messageLock unlock];
-        
+
         [messageDataFetchLock lock];
         @try {
             messageData = [Library_GPGMail GMRawDataForMessage:currentMessage topLevelPart:nil fetchIfNotAvailable:YES];
         }
         @catch(NSException *exception) {
-            @throw exception;
+            cleanUp(self, currentMessage, nil, nil);
         }
         @finally {
-            [messageDataFetchLock unlock];
-            messageDataFetchLockMap = [self getIvar:kMFLibraryStoreMessageDataFetchLockMap];
-            @synchronized(messageDataFetchLockMap) {
-                NSLock *endLock = messageDataFetchLockMap[currentMessage];
-                if(messageDataFetchLock == endLock) {
-                    @try {
-                        [messageDataFetchLockMap removeObjectForKey:currentMessage];
-                    }
-                    @catch(NSException *exception) {
-                        @throw exception;
-                        // Should we do something here? Maybe fall back?
-                    }
-                }
-            }
+            cleanUp(self, currentMessage, nil, messageDataFetchLock);
         }
     }
     if(!messageData) {
+        // Something is going really wrong. It should never be possible to come here.
         DebugLog(@"Failed to fetch data for message! %@", currentMessage);
+        return;
     }
     @try {
         if(topLevelMimePart != NULL) {
@@ -177,23 +200,11 @@ NSString * const kMFLibraryStoreMessageDataFetchLockMap = @"MFLibraryStoreMessag
     }
     @catch (NSException *exception) {
         [self MAGetTopLevelMimePart:topLevelMimePart headers:headers body:body forMessage:currentMessage fetchIfNotAvailable:fetchIfNotAvailable updateFlags:updateFlags allowPartial:allowPartial];
+        cleanUp(self, currentMessage, nil, nil);
     }
     @finally {
         [messageLock unlock];
-    }
-    
-    messageLockMap = [self valueForKey:@"_libraryFetchLockMap"];
-    @synchronized(messageLockMap) {
-        NSRecursiveLock *endLock = messageLockMap[currentMessage];
-        if(messageLock == endLock) {
-            @try {
-                [messageLockMap removeObjectForKey:currentMessage];
-            }
-            @catch(NSException *exception) {
-                //@throw exception;
-                // Should we do something here? Maybe fall back?
-            }
-        }
+        cleanUp(self, currentMessage, messageLock, nil);
     }
 }
 
