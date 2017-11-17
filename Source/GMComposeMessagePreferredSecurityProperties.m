@@ -35,6 +35,8 @@
 @property (nonatomic, readwrite, assign) BOOL shouldSignMessage;
 @property (nonatomic, readwrite, assign) BOOL shouldEncryptMessage;
 
+@property (nonatomic, readwrite, copy) NSError *invalidSigningIdentitiyError;
+
 @end
 
 @implementation GMComposeMessagePreferredSecurityProperties
@@ -52,21 +54,26 @@
         
         _userShouldSignMessage = ThreeStateBooleanUndetermined;
         _userShouldEncryptMessage = ThreeStateBooleanUndetermined;
+
+        _invalidSigningIdentityError = nil;
     }
     
     return self;
 }
 
-- (id)initWithSender:(NSString *)sender signingKey:(GPGKey *)signingKey recipients:(NSArray *)recipients userShouldSignMessage:(ThreeStateBoolean)userShouldSign userShouldEncryptMessage:(ThreeStateBoolean)userShouldEncrypt {
+- (id)initWithSender:(NSString *)sender signingKey:(GPGKey *)signingKey invalidSigningIdentityError:(NSError *)invalidSigningIdentitiyError recipients:(NSArray *)recipients userShouldSignMessage:(ThreeStateBoolean)userShouldSign userShouldEncryptMessage:(ThreeStateBoolean)userShouldEncrypt {
     if((self = [self initWithSender:sender recipients:recipients])) {
         _userShouldSignMessage = userShouldSign;
         _userShouldEncryptMessage = userShouldEncrypt;
         _signingKey = [signingKey copy];
         _signingSender = [sender copy];
+
+        _invalidSigningIdentityError = [invalidSigningIdentitiyError copy];
     }
     
     return self;
 }
+
 
 + (GPGMAIL_SECURITY_METHOD)defaultSecurityMethod {
     return [GMSecurityHistory defaultSecurityMethod];
@@ -164,8 +171,19 @@
             signingIdentity = nil;
         }
         if(!signingIdentity) {
-            signingIdentity = (__bridge id)[MCKeychainManager copySigningIdentityForAddress:sender];
+            // Bug #957: Adapt GPGMail to the S/MIME changes introduced in Mail for 10.13.2b3
+            //
+            // Apple Mail team has added a possibility to display errors, if macOS fails to read
+            // a signing identity.
+            NSError __autoreleasing *invalidSigningIdentityError = nil;
+            if([MCKeychainManager respondsToSelector:@selector(copySigningIdentityForAddress:error:)]) {
+                signingIdentity = (__bridge id)[MCKeychainManager copySigningIdentityForAddress:sender error:&invalidSigningIdentityError];
+            }
+            else {
+                signingIdentity = (__bridge id)[MCKeychainManager copySigningIdentityForAddress:sender];
+            }
             signingIdentities[sender] = signingIdentity ? signingIdentity : [NSNull null];
+            self.invalidSigningIdentitiyError = invalidSigningIdentityError;
         }
         canSMIMESign = signingIdentities[sender] && signingIdentities[sender] != [NSNull null] ? YES : NO;
     }
@@ -248,6 +266,14 @@
                 // one recipient is passed in. If more than one key is found, the list of keys is stored for that recipient,
                 // instead of only the first key. (#903)
                 encryptionKeys[normalizedRecipient] = [keyList count] > 0 ? keyList : [NSNull null];
+                // Bug #957: Adapt GPGMail to the S/MIME changes introduced in Mail for 10.13.2b3
+                //
+                // Apple has added another check if all encryption keys are valid within -[ComposeViewController sendMessageAfterChecking:]
+                // but instead of re-using the -[ComposeBackEnd recipientsThatHaveNoKeyForEncryption] method, they have copy
+                // and pasted the exact same code.
+                // Unfortunately that check wants the dictionary key to be the recipient instead of the normalizedRecipient, so
+                // it's necessary to store the certificates under both keys.
+                encryptionKeys[recipient] = [keyList count] > 0 ? keyList : [NSNull null];
             }
             if(encryptionKeys[normalizedRecipient] == [NSNull null]) {
                 canPGPEncrypt = NO;

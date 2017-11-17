@@ -104,10 +104,8 @@ extern const NSString *kComposeWindowControllerAllowWindowTearDown;
 	[self setupSecurityMethodHintAccessoryView];
 
     ComposeBackEnd *backEnd = MAIL_SELF(self).backEnd;
-    @synchronized ([backEnd valueForKey:@"_smimeLock"]) {
-        GPGMAIL_SECURITY_METHOD securityMethod = ((ComposeBackEnd_GPGMail *)MAIL_SELF(self).backEnd).preferredSecurityProperties.securityMethod;
-        [self updateSecurityMethod:securityMethod];
-    }
+    GPGMAIL_SECURITY_METHOD securityMethod = ((ComposeBackEnd_GPGMail *)MAIL_SELF(self).backEnd).preferredSecurityProperties.securityMethod;
+    [self updateSecurityMethod:securityMethod];
 
     [self MABackEndDidLoadInitialContent:content];
 }
@@ -128,11 +126,9 @@ extern const NSString *kComposeWindowControllerAllowWindowTearDown;
 
 - (void)securityMethodAccessoryView:(GMSecurityMethodAccessoryView *)accessoryView didChangeSecurityMethod:(GPGMAIL_SECURITY_METHOD)securityMethod {
     ComposeBackEnd *backEnd = MAIL_SELF(self).backEnd;
-    @synchronized ([backEnd valueForKey:@"_smimeLock"]) {
-        ((ComposeBackEnd_GPGMail *)(MAIL_SELF(self)).backEnd).preferredSecurityProperties.securityMethod = securityMethod;
-        [(HeadersEditor_GPGMail *)[MAIL_SELF(self) headersEditor] updateFromAndAddSecretKeysIfNecessary:@(securityMethod == GPGMAIL_SECURITY_METHOD_OPENPGP ? YES : NO)];
-        [[MAIL_SELF(self) headersEditor] _updateSecurityControls];
-    }
+    ((ComposeBackEnd_GPGMail *)(MAIL_SELF(self)).backEnd).preferredSecurityProperties.securityMethod = securityMethod;
+    [(HeadersEditor_GPGMail *)[MAIL_SELF(self) headersEditor] updateFromAndAddSecretKeysIfNecessary:@(securityMethod == GPGMAIL_SECURITY_METHOD_OPENPGP ? YES : NO)];
+    [[MAIL_SELF(self) headersEditor] _updateSecurityControls];
 }
 
 - (void)MADealloc {
