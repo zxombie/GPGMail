@@ -21,13 +21,13 @@
 //#import "NSUserInterfaceValidations-Protocol.h"
 //#import "NSWindowDelegate-Protocol.h"
 //#import "NSWindowRestoration-Protocol.h"
-#import "SGTSearchFieldDelegate-Protocol.h"
-#import "SGTSearchFieldQueryScopeDelegate-Protocol.h"
+//#import "SGTSearchFieldDelegate-Protocol.h"
+//#import "SGTSearchFieldQueryScopeDelegate-Protocol.h"
 #import "TerminationHandler-Protocol.h"
 
 @class ActivityViewController, FavoritesBarView, FavoritesBarViewController, FlaggedStatusToolbarItem, MCMessage, MFBehaviorTracker, MFMailbox, MSDiagnosticManager, MSSearchSessionController, MailBarContainerView, MailToolbar, MailboxesOutlineViewController, MailboxesViewController, MessageListContentController, MessageListViewController, MessageSelection, MessageViewerSearchField, NSArray, NSButton, NSDictionary, NSIndexSet, NSMenu, NSMenuItem, NSMutableArray, NSNumber, NSOperationQueue, NSPopoverTouchBarItem, NSSegmentedControl, NSSplitViewController, NSStackView, NSString, NSTextField, NSTimer, NSToolbarItem, NSTouchBar, NSView, NSWindow, SGTMailQueryGenius, TableViewManager, ViewingPaneViewController, _MailboxSegmentedControl;
 
-@interface MessageViewer : NSResponder <FlaggedStatusToolbarItemDelegate, MessageViewerSearchFieldFocusDelegate, NSToolbarDelegate, MSSearchSessionControllerDataSource, NSTouchBarDelegate, NSTouchBarProvider, MailboxesOutlineViewControllerDelegate, MailboxSelectionOwner, MCActivityTarget, MessageTransferDelegate, NSAnimationDelegate, NSSpeechSynthesizerDelegate, NSUserInterfaceValidations, NSWindowDelegate, NSWindowRestoration, SGTSearchFieldDelegate, SGTSearchFieldQueryScopeDelegate, TerminationHandler>
+@interface MessageViewer : NSResponder <FlaggedStatusToolbarItemDelegate, MessageViewerSearchFieldFocusDelegate, NSToolbarDelegate, MSSearchSessionControllerDataSource, NSTouchBarDelegate, NSTouchBarProvider, MailboxesOutlineViewControllerDelegate, MailboxSelectionOwner, MCActivityTarget, MessageTransferDelegate, NSAnimationDelegate, NSSpeechSynthesizerDelegate, NSUserInterfaceValidations, NSWindowDelegate, NSWindowRestoration, /*SGTSearchFieldDelegate, SGTSearchFieldQueryScopeDelegate,*/ TerminationHandler>
 {
     MessageListContentController *_messageListContentController;
     NSString *_searchPhrase;
