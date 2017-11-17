@@ -13,13 +13,13 @@
 //#import "NSApplicationDelegate-Protocol.h"
 //#import "NSMenuDelegate-Protocol.h"
 //#import "NSTabViewDelegate-Protocol.h"
-//#import "NSTouchBarDelegate-Protocol.h"
-//#import "NSTouchBarProvider-Protocol.h"
+#import "NSTouchBarDelegate-Protocol.h"
+#import "NSTouchBarProvider-Protocol.h"
 #import "TerminationHandler-Protocol.h"
 
 @class ActivityWindowController, DeliveryQueue, DockCountController, DynamicErrorWindowController, FlagIconFactory, FlagsMenuItemView, MailActivityNotifier, MailboxesController, NSArray, NSMenu, NSMutableArray, NSMutableSet, NSOperationQueue, NSString, NSTimer, NSTouchBar, NSURL, NSUserDefaults, NSWindow, NSWindowController, SortByMenuDelegate, UserActivityHandler;
 
-@interface MailApp : NSApplication <IMAPUserAgent, MCUserAgent, MFUserAgent, /*NSTouchBarDelegate, NSTouchBarProvider,*/ MCActivityTarget, NSApplicationDelegate, NSMenuDelegate, NSTabViewDelegate, TerminationHandler>
+@interface MailApp : NSApplication <IMAPUserAgent, MCUserAgent, MFUserAgent, NSTouchBarDelegate, NSTouchBarProvider, MCActivityTarget, NSApplicationDelegate, NSMenuDelegate, NSTabViewDelegate, TerminationHandler>
 {
     NSMenu *_mailboxesContextMenu;
     NSMenu *_addButtonMenu;

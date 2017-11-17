@@ -13,7 +13,7 @@
 //#import "NSTableViewDataSource-Protocol.h"
 //#import "NSTableViewDelegate-Protocol.h"
 //#import "NSTokenFieldDelegate-Protocol.h"
-//#import "NSTouchBarDelegate-Protocol.h"
+#import "NSTouchBarDelegate-Protocol.h"
 
 @class CNAutocompleteResult, CNAutocompleteResultWindow, CNAutocompleteStore, MUITokenAddressField, NSArray, NSButton, NSLayoutConstraint, NSMapTable, NSScrollView, NSString;
 

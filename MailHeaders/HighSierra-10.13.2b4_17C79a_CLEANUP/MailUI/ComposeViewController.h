@@ -11,7 +11,7 @@
 #import "MCActivityTarget-Protocol.h"
 //#import "NSSharingServiceDelegate-Protocol.h"
 //#import "NSTextFinderClient-Protocol.h"
-//#import "NSTouchBarDelegate-Protocol.h"
+#import "NSTouchBarDelegate-Protocol.h"
 //#import "NSUserInterfaceValidations-Protocol.h"
 #import "PopoutAnimationContentProvider-Protocol.h"
 #import "ReportBugWindowControllerDelegate-Protocol.h"
