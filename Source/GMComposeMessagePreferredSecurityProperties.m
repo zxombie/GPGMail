@@ -197,7 +197,12 @@
         for(id recipient in recipients) {
             // Only accept cached S/MIME encryption certificates, otherwise for a new check.
             id certificate = encryptionCertificates[recipient];
-            if(certificate && ([certificate isKindOfClass:[GPGKey class]] || certificate == [NSNull null])) {
+            // Bug #962: Messages might be OpenPGP encrypted even though S/MIME is selected as security method
+            //
+            // Since adding support to the gnupg group feature, OpenPGP certificates are now stored as array
+            // and the key is the recipient.
+            // In order to remove any OpenPGP certificates, it's necessary to check for NSArray values.
+            if(certificate && ([certificate isKindOfClass:[GPGKey class]] || [certificate isKindOfClass:[NSArray class]] || certificate == [NSNull null])) {
                 certificate = nil;
             }
             if(!certificate) {
