@@ -978,12 +978,19 @@ NSString * const kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey = @"
     NSMutableArray *nonEligibleRecipients = [NSMutableArray array];
 
     GPGMAIL_SECURITY_METHOD securityMethod = self.preferredSecurityProperties.securityMethod;
-
-    if(securityMethod == GPGMAIL_SECURITY_METHOD_SMIME)
-        return [self MARecipientsThatHaveNoKeyForEncryption];
-
+    BOOL isSMIME = securityMethod == GPGMAIL_SECURITY_METHOD_SMIME;
+    // Bug #961: Deadlock when using S/MIME and trying to toggle encryption state of a message on macOS 10.13
+    //
+    // -[ComposeBackEnd recipientsThatHaveNoKeyForEncryption] uses the smimeLock internally.
+    // Since the calling method of _GMRecipientsThatHaveNoKeyForEncryption already uses the smimeLock,
+    // a deadlock is triggered when calling the original mail method.
+    //
+    // Since the code for checking for missing S/MIME certificates is by now almost identical to the
+    // check performed for OpenPGP keys, there's no need to call into the original mail method anymore.
     for(NSString *recipient in [((ComposeBackEnd *)self) allRecipients]) {
-        NSString *recipientAddress = [recipient gpgNormalizedEmail];
+        // For Apple's S/MIME implementation it's important that the full recipient matches the certificate.
+        // For OpenPGP the email address of the recipient suffices.
+        NSString *recipientAddress = isSMIME ? recipient : [recipient gpgNormalizedEmail];
         NSDictionary *encryptionCertificates = [self valueForKey:@"_encryptionCertificates"];
         if(!encryptionCertificates[recipientAddress] || encryptionCertificates[recipientAddress] == [NSNull null]) {
             [nonEligibleRecipients addObject:recipient];
