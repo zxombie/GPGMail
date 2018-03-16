@@ -3,6 +3,11 @@
 
 #define localized(key) [[GPGMailBundle bundle] localizedStringForKey:(key) value:(key) table:@"SignatureView"]
 
+@interface GPGSignatureView ()
+@property (strong, readwrite, nonatomic) GPGKey *gpgKey;
+@end
+
+
 
 @implementation GPGSignatureView
 @synthesize keyList, signatures, gpgKey;
@@ -57,24 +62,6 @@ GPGSignatureView *_sharedInstance;
 	}
 }
 
-- (NSString *)emailAndID {
-
-    NSMutableString *value = [[NSMutableString alloc] init];
-    if(gpgKey.email)
-        [value appendFormat:@"%@", gpgKey.email];
-    
-    NSString *keyID = [self keyID];
-    if(keyID) {
-        if(gpgKey.email)
-            [value appendString:@" ("];
-        [value appendFormat:@"%@", keyID];
-        if(gpgKey.email)
-            [value appendString:@")"];
-    }
-    
-    return value;
-}
-
 - (NSString *)validityDescription {
 	if (!signature) return nil;
 
@@ -99,7 +86,7 @@ GPGSignatureView *_sharedInstance;
 }
 
 - (NSString *)keyID {
-	NSString *keyID = gpgKey.keyID;
+	NSString *keyID = self.gpgKey.keyID;
 	if (!keyID) {
 		keyID = signature.fingerprint;
 	}
@@ -118,14 +105,6 @@ GPGSignatureView *_sharedInstance;
 }
 
 
-
-
-- (void)setGpgKey:(GPGKey *)value {
-	if (value != gpgKey) {
-		gpgKey = value;
-	}
-}
-
 - (void)setSignature:(GPGSignature *)value {
 	if (value != signature) {
 		signature = value;
@@ -133,24 +112,24 @@ GPGSignatureView *_sharedInstance;
 		GPGKey *key = nil;
 		if (signature) {
 			NSString *fingerprint = signature.primaryFingerprint;
-			if ((key = [keyList member:fingerprint])) {
-				goto found;
-			}
-			fingerprint = signature.fingerprint;
-			if ([fingerprint length] >= 8) {
-				if ((key = [keyList member:fingerprint])) {
-					goto found;
-				}
-				fingerprint = [fingerprint stringByAppendingString:@"\n"];
-				for (key in keyList) {
-					if ([[key allFingerprints] member:fingerprint]) {
-						goto found;
+			key = [keyList member:fingerprint];
+			if (!key) {
+				fingerprint = signature.fingerprint;
+				if (fingerprint.length >= 8) {
+					key = [keyList member:fingerprint];
+					if (!key) {
+						fingerprint = [fingerprint stringByAppendingString:@"\n"];
+						for (GPGKey *possibleKey in keyList) {
+							if ([possibleKey.allFingerprints member:fingerprint]) {
+								key = possibleKey;
+								break;
+							}
+						}
 					}
 				}
 			}
 		}
-	found:
-		[self setGpgKey:key];
+		self.gpgKey = key;
 	}
 }
 
@@ -167,11 +146,25 @@ GPGSignatureView *_sharedInstance;
 	return [super valueForKeyPath:keyPath];
 }
 
+
+- (void)prepareForShow {
+	running = 1;
+	[self willChangeValueForKey:@"signatureDescriptions"];
+	[self didChangeValueForKey:@"signatureDescriptions"];
+	
+	if (self.signatures.count == 1) {
+		[splitView setPosition:-splitView.dividerThickness ofDividerAtIndex:0];
+	} else {
+		if (splitView.subviews[0].frame.size.height < 60) {
+			[splitView setPosition:60 ofDividerAtIndex:0];
+		}
+	}
+	
+}
+
 - (NSInteger)runModal {
 	if (!running) {
-		running = 1;
-		[self willChangeValueForKey:@"signatureDescriptions"];
-		[self didChangeValueForKey:@"signatureDescriptions"];
+		[self prepareForShow];
 		[NSApp runModalForWindow:window];
 		return NSOKButton;
 	} else {
@@ -180,9 +173,7 @@ GPGSignatureView *_sharedInstance;
 }
 - (void)beginSheetModalForWindow:(NSWindow *)modalWindow completionHandler:(void (^)(NSInteger result))handler {
 	if (!running) {
-		running = 1;
-		[self willChangeValueForKey:@"signatureDescriptions"];
-		[self didChangeValueForKey:@"signatureDescriptions"];
+		[self prepareForShow];
 		[NSApp beginSheet:window modalForWindow:modalWindow modalDelegate:self didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:(__bridge void *)(handler)];
 	} else {
 		handler(NSCancelButton);
@@ -225,20 +216,34 @@ GPGSignatureView *_sharedInstance;
 }
 
 
-- (CGFloat)splitView:(NSSplitView *)splitView constrainMinCoordinate:(CGFloat)proposedMinimumPosition ofSubviewAt:(NSInteger)dividerIndex {
-	return proposedMinimumPosition + 20;
+
+
+- (BOOL)splitView:(__unused NSSplitView *)aSplitView shouldHideDividerAtIndex:(__unused NSInteger)dividerIndex {
+	return self.signatures.count == 1;
 }
-- (CGFloat)splitView:(NSSplitView *)splitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex {
+- (CGFloat)splitView:(__unused NSSplitView *)aSplitView constrainMinCoordinate:( __unused CGFloat)proposedMinimumPosition ofSubviewAt:(__unused NSInteger)dividerIndex {
+	if (self.signatures.count == 1) {
+		return -splitView.dividerThickness;
+	} else {
+		return 60;
+	}
+}
+- (CGFloat)splitView:(NSSplitView *)aSplitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex {
 	return proposedMaximumPosition - 90;
 }
-- (void)splitView:(NSSplitView *)splitView resizeSubviewsWithOldSize:(NSSize)oldSize {
-	NSArray *subviews = [splitView subviews];
+- (void)splitView:(NSSplitView *)aSplitView resizeSubviewsWithOldSize:(NSSize)oldSize {
+//	if (self.signatures.count == 1) {
+//		return;
+//	}
+	
+	
+	NSArray *subviews = [aSplitView subviews];
 	NSView *view1 = subviews[0];
 	NSView *view2 = subviews[1];
-	NSSize splitViewSize = [splitView frame].size;
+	NSSize splitViewSize = [aSplitView frame].size;
 	NSSize size1 = [view1 frame].size;
 	NSRect frame2 = [view2 frame];
-	CGFloat dividerThickness = [splitView dividerThickness];
+	CGFloat dividerThickness = self.signatures.count == 1 ? 0 : aSplitView.dividerThickness;
 
 	size1.width = splitViewSize.width;
 	frame2.size.width = splitViewSize.width;
@@ -250,59 +255,14 @@ GPGSignatureView *_sharedInstance;
 	}
 	frame2.origin.y = splitViewSize.height - frame2.size.height;
 
-	[view1 setFrameSize:size1];
+	
+	if (self.signatures.count != 1) {
+		[view1 setFrameSize:size1];
+	}
+	
 	[view2 setFrame:frame2];
 }
 
-- (void)awakeFromNib {
-	[detailView setFrameOrigin:NSMakePoint(0, [scrollContentView frame].size.height)];
-}
-
-
-
-- (IBAction)switchDetailView:(NSButton *)sender {
-	static CGFloat minHeight = 0;
-	static CGFloat maxHeight = 450;
-	NSRect windowFrame = [window frame];
-	NSSize windowSize = windowFrame.size;
-	NSSize scrollContentSize = [scrollContentView frame].size;
-	NSSize detailSize = [detailView frame].size;
-
-	if ([detailView superview]) {
-		if (minHeight > 0 && minHeight < windowSize.height) {
-			maxHeight = windowSize.height;
-			windowSize.height = minHeight;
-		} else {
-			maxHeight = 0;
-		}
-
-		scrollContentSize.height -= detailSize.height;
-		//infoSize.width = [infoView frame].size.width;
-
-		[detailView removeFromSuperview];
-	} else {
-		if (maxHeight > 0 && windowSize.height < maxHeight) {
-			minHeight = windowSize.height;
-			windowSize.height = maxHeight;
-		} else {
-			minHeight = 0;
-		}
-
-		scrollContentSize.height += detailSize.height;
-		[detailView setFrameSize:NSMakeSize(scrollContentSize.width, [detailView frame].size.height)];
-		//infoSize.width = [detailView frame].size.width;
-
-		[scrollContentView addSubview:detailView];
-	}
-	[scrollContentView setFrameSize:scrollContentSize];
-
-
-	windowFrame.origin.x = windowFrame.origin.x + (windowSize.width - windowFrame.size.width) / 2;
-	windowFrame.origin.y = windowFrame.origin.y + windowFrame.size.height - windowSize.height;
-	windowFrame.size = windowSize;
-
-	[window setFrame:windowFrame display:YES animate:YES];
-}
 
 + (id)signatureView {
     static dispatch_once_t pred;

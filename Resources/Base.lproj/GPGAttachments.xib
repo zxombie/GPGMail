@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12120" systemVersion="16G29" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="13771" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none">
     <dependencies>
         <deployment version="1090" identifier="macosx"/>
-        <development version="7000" identifier="xcode"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12120"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="13771"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="GPGAttachmentController">
@@ -161,7 +161,7 @@
                                                                 <binding destination="264" name="value" keyPath="selection.errorBadgeImage" id="295"/>
                                                             </connections>
                                                         </imageView>
-                                                        <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="290">
+                                                        <textField verticalHuggingPriority="750" id="290">
                                                             <rect key="frame" x="50" y="91" width="370" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES"/>
                                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="The signature could not be verified." id="291">
@@ -173,7 +173,7 @@
                                                                 <binding destination="264" name="value" keyPath="selection.errorTitle" id="303"/>
                                                             </connections>
                                                         </textField>
-                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="292">
+                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="292">
                                                             <rect key="frame" x="50" y="0.0" width="390" height="85"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <textFieldCell key="cell" selectable="YES" sendsActionOnEndEditing="YES" id="293">
@@ -205,7 +205,7 @@ Please download the key using GPG Keychain.</string>
                                                                 <binding destination="264" name="value" keyPath="selection.successBadgeImage" id="389"/>
                                                             </connections>
                                                         </imageView>
-                                                        <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="379">
+                                                        <textField verticalHuggingPriority="750" id="379">
                                                             <rect key="frame" x="50" y="91" width="370" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES"/>
                                                             <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="The signature could not be verified." id="382">
@@ -217,7 +217,7 @@ Please download the key using GPG Keychain.</string>
                                                                 <binding destination="264" name="value" keyPath="selection.decryptionSuccessTitle" id="391"/>
                                                             </connections>
                                                         </textField>
-                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsCharacterPickerTouchBarItem="NO" id="378">
+                                                        <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" id="378">
                                                             <rect key="frame" x="50" y="0.0" width="350" height="238"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES" heightSizable="YES"/>
                                                             <textFieldCell key="cell" selectable="YES" sendsActionOnEndEditing="YES" id="383">
@@ -240,7 +240,7 @@ Please download the key using GPG Keychain.</string>
                                                     <rect key="frame" x="0.0" y="0.0" width="438" height="120"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                     <subviews>
-                                                        <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="197">
+                                                        <textField verticalHuggingPriority="750" id="197">
                                                             <rect key="frame" x="90" y="93" width="331" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="name" id="210">
@@ -252,7 +252,7 @@ Please download the key using GPG Keychain.</string>
                                                                 <binding destination="264" name="value" keyPath="selection.signature.name" id="315"/>
                                                             </connections>
                                                         </textField>
-                                                        <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="199">
+                                                        <textField verticalHuggingPriority="750" misplaced="YES" id="199">
                                                             <rect key="frame" x="106" y="53" width="315" height="14"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="validityDescription" id="208">
@@ -272,7 +272,7 @@ Please download the key using GPG Keychain.</string>
                                                                 <binding destination="-2" name="value" keyPath="signature.validityImage" id="332"/>
                                                             </connections>
                                                         </imageView>
-                                                        <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="198">
+                                                        <textField verticalHuggingPriority="750" id="198">
                                                             <rect key="frame" x="90" y="73" width="322" height="14"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="emailAndID" id="209">
@@ -295,7 +295,7 @@ Please download the key using GPG Keychain.</string>
                                                                 <action selector="switchDetailView:" target="-2" id="338"/>
                                                             </connections>
                                                         </button>
-                                                        <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="196">
+                                                        <textField verticalHuggingPriority="750" id="196">
                                                             <rect key="frame" x="27" y="10" width="44" height="14"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Details" id="211">
@@ -364,7 +364,7 @@ DQ
             <rect key="frame" x="0.0" y="0.0" width="429" height="242"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
             <subviews>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="238">
+                <textField verticalHuggingPriority="750" misplaced="YES" id="238">
                     <rect key="frame" x="17" y="174" width="86" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Key" id="239">
@@ -373,7 +373,7 @@ DQ
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="237">
+                <textField verticalHuggingPriority="750" misplaced="YES" id="237">
                     <rect key="frame" x="17" y="152" width="86" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Name:" id="240">
@@ -382,7 +382,7 @@ DQ
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="236">
+                <textField verticalHuggingPriority="750" misplaced="YES" id="236">
                     <rect key="frame" x="17" y="130" width="86" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Email:" id="241">
@@ -391,7 +391,7 @@ DQ
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="229">
+                <textField verticalHuggingPriority="750" misplaced="YES" id="229">
                     <rect key="frame" x="105" y="152" width="307" height="14"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.name" id="248">
@@ -403,7 +403,7 @@ DQ
                         <binding destination="-2" name="value" keyPath="gpgKey.name" id="355"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="228">
+                <textField verticalHuggingPriority="750" misplaced="YES" id="228">
                     <rect key="frame" x="105" y="130" width="307" height="14"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.email" id="249">
@@ -419,7 +419,7 @@ DQ
                     <rect key="frame" x="108" y="178" width="309" height="5"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                 </box>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="220">
+                <textField verticalHuggingPriority="750" id="220">
                     <rect key="frame" x="17" y="218" width="86" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Signature" id="256">
@@ -428,7 +428,7 @@ DQ
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="219">
+                <textField verticalHuggingPriority="750" id="219">
                     <rect key="frame" x="17" y="196" width="86" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Created:" id="257">
@@ -437,7 +437,7 @@ DQ
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" allowsCharacterPickerTouchBarItem="NO" id="218">
+                <textField verticalHuggingPriority="750" id="218">
                     <rect key="frame" x="105" y="196" width="307" height="14"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="signature.creationDate" id="258">
@@ -454,7 +454,7 @@ DQ
                     <rect key="frame" x="108" y="222" width="309" height="5"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                 </box>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="234">
+                <textField verticalHuggingPriority="750" misplaced="YES" id="234">
                     <rect key="frame" x="17" y="108" width="86" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Fingerprint:" id="243">
@@ -463,7 +463,7 @@ DQ
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="233">
+                <textField verticalHuggingPriority="750" misplaced="YES" id="233">
                     <rect key="frame" x="17" y="86" width="86" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Created:" id="244">
@@ -472,7 +472,7 @@ DQ
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="232">
+                <textField verticalHuggingPriority="750" misplaced="YES" id="232">
                     <rect key="frame" x="17" y="64" width="86" height="14"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Expires:" id="245">
@@ -481,25 +481,7 @@ DQ
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="231">
-                    <rect key="frame" x="17" y="42" width="86" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Algorithm:" id="246">
-                        <font key="font" metaFont="smallSystemBold"/>
-                        <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="230">
-                    <rect key="frame" x="17" y="20" width="86" height="14"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Ownertrust:" id="247">
-                        <font key="font" metaFont="smallSystemBold"/>
-                        <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="226">
+                <textField verticalHuggingPriority="750" misplaced="YES" id="226">
                     <rect key="frame" x="105" y="108" width="314" height="14"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingMiddle" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.fingerprint" id="251">
@@ -515,7 +497,7 @@ DQ
                         </binding>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="225">
+                <textField verticalHuggingPriority="750" misplaced="YES" id="225">
                     <rect key="frame" x="105" y="86" width="307" height="14"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.creationDate" id="252">
@@ -528,7 +510,7 @@ DQ
                         <outlet property="formatter" destination="323" id="372"/>
                     </connections>
                 </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="224">
+                <textField verticalHuggingPriority="750" misplaced="YES" id="224">
                     <rect key="frame" x="105" y="64" width="307" height="14"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.expirationDate" id="253">
@@ -542,34 +524,6 @@ DQ
                                 <string key="NSNullPlaceholder">Never</string>
                             </dictionary>
                         </binding>
-                    </connections>
-                </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="223">
-                    <rect key="frame" x="105" y="42" width="307" height="14"/>
-                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.algorithm" id="254">
-                        <font key="font" metaFont="smallSystem"/>
-                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                    <connections>
-                        <binding destination="-2" name="value" keyPath="gpgKey.algorithm" id="369">
-                            <dictionary key="options">
-                                <string key="NSValueTransformerName">GPGKeyAlgorithmNameTransformer</string>
-                            </dictionary>
-                        </binding>
-                    </connections>
-                </textField>
-                <textField verticalHuggingPriority="750" misplaced="YES" allowsCharacterPickerTouchBarItem="NO" id="222">
-                    <rect key="frame" x="105" y="20" width="307" height="14"/>
-                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.ownerTrust" id="255">
-                        <font key="font" metaFont="smallSystem"/>
-                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                    </textFieldCell>
-                    <connections>
-                        <binding destination="-2" name="value" keyPath="gpgKey.ownerTrust" id="371"/>
                     </connections>
                 </textField>
             </subviews>

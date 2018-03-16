@@ -8,8 +8,6 @@
 "243.title" = "Fingerprint:";
 "244.title" = "Created:";
 "245.title" = "Expires:";
-"246.title" = "Algorithm:";
-"247.title" = "Ownertrust:";
 "256.title" = "Signature";
 "257.title" = "Created:";
 "291.title" = "The signature could not be verified.";

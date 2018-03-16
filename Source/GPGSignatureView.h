@@ -9,27 +9,26 @@
 	BOOL running;
 	NSIndexSet *signatureIndexes;
 	GPGSignature *signature;
-	GPGKey *gpgKey;
 	
 	IBOutlet NSView *scrollContentView;
 	IBOutlet NSView *infoView;
 	IBOutlet NSView *detailView;
 	IBOutlet NSScrollView *scrollView;
+	IBOutlet NSSplitView *splitView;
 }
 
 //Private
-@property (strong) NSIndexSet *signatureIndexes;
-@property (readonly) GPGKey *gpgKey;
+@property (strong, nonatomic) NSIndexSet *signatureIndexes;
+@property (strong, readonly, nonatomic) GPGKey *gpgKey;
 
-- (IBAction)switchDetailView:(NSButton *)sender;
 - (IBAction)close:(id)sender;
 
 
 
 
 //Public
-@property (strong) NSSet *keyList;
-@property (strong) NSArray *signatures;
+@property (strong, nonatomic) NSSet *keyList;
+@property (strong, nonatomic) NSArray *signatures;
 
 + (id)signatureView;
 
@@ -42,4 +41,5 @@
 
 @interface GPGSignatureCertImageTransformer : NSValueTransformer {} @end
 @interface GPGFlippedView : NSView {} @end
+@interface GPGFlippedClipView : NSClipView {} @end
 @interface TopScrollView : NSScrollView {} @end
