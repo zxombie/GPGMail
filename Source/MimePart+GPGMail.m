@@ -731,9 +731,11 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 - (void)attachmentMightBePGPEncrypted:(BOOL *)mightEnc orSigned:(BOOL *)mightSig {
     *mightEnc = NO;
     *mightSig = NO;
-    NSString *nameExt = [[MAIL_SELF(self) bodyParameterForKey:@"name"] pathExtension];
-    NSString *filenameExt = [[MAIL_SELF(self) dispositionParameterForKey:@"filename"] pathExtension];
-    
+	NSString *name = [MAIL_SELF(self) bodyParameterForKey:@"name"];
+	NSString *filename = [MAIL_SELF(self) dispositionParameterForKey:@"filename"];
+	NSString *nameExt = [name pathExtension];
+	NSString *filenameExt = [filename pathExtension];
+
     // Check if the attachment is part of a pgp/mime encrypted message.
     // In that case, don't try to inline decrypt it.
     // This is necessary since decodeMultipartWithContext checks the attachments
@@ -768,6 +770,22 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         *mightEnc = [self signedPartForDetachedSignaturePart:MAIL_SELF(self)] == nil;
         *mightSig = YES; 
     }
+
+	// Bug #958: Single signature.asc files is erroneously recognized as encrypted attachment
+	// Since the current method to check for encrypted or signed data in attachments is based
+	// for the most part on the extension of the file, the signature.asc file looks to GPGMail
+	// like a signed attachment. As mentioned above for #936, a signed attachment has to be decrypted
+	// in order to strip the signature and get to the raw contents. signature.asc files however
+	// should never be treated as containing encrypted data.
+	// To further improve this fix, signed (not detached signed) attachments should be treated differently
+	// from encrypted attachments.
+	if([[name lowercaseString] isEqualToString:@"signature.asc"] || [[filename lowercaseString] isEqualToString:@"signature.asc"]) {
+		*mightEnc = NO;
+		// TODO: It should be safe to set signed to no, since that's the case for these messages and real
+		// PGP/MIME signed messages should still be properly recognized. VERIFY!
+		*mightSig = NO;
+	}
+
     // .asc attachments might contain a public key. See #123.
     // So to avoid decrypting such attachments, check if the attachment
     // contains a public key.
