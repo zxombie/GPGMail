@@ -3009,7 +3009,11 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         if(![mimePart isAttachment]) {
             NSData *partBodyData = [mimePart decodedData];
             
-            if(partBodyData) {
+			// Bug #972: Due to the use of base64 encoding, GPGMail does not recognize PGP Data in inline encrypted messages
+			//           from gpg4o
+			// In order to fix this issue, GPGMail will search the decodedData for inline PGP markers, if content-transfer-encoding
+			// is base64.
+			if(partBodyData && ![[[mimePart contentTransferEncoding] lowercaseString] isEqualToString:@"base64"]) {
                 partBodyData = [mimePart encodedBodyData];
             }
             if(partBodyData && [partBodyData mightContainPGPEncryptedDataOrSignatures]) {
