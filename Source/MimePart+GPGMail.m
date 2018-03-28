@@ -2937,10 +2937,21 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 - (BOOL)mightContainPGPData {
     __block BOOL mightContainPGPData = NO;
     __block BOOL mightContainSMIMEData = NO;
+    __block BOOL mightBeSMIMESigned = NO;
     
     NSArray *pgpExtensions = @[@"pgp", @"gpg", @"asc", @"sig"];
     NSArray *smimeExtensions = @[@"p7m", @"p7s", @"p7c", @"p7z"];
     [(MimePart_GPGMail *)[self topPart] enumerateSubpartsWithBlock:^(MCMimePart *mimePart) {
+        // Bug #973: PGP Data within a S/MIME signed message is not decrypted properly
+        // At the moment, if any S/MIME data is detected in a message, GPGMail will stop processing
+        // any PGP data which might be contained as well.
+        // Unfortunately there are now messages around which are S/MIME signed, but contain PGP-Partitioned data
+        // as well. In that case, GPGMail will process any found PGP data and ignore the S/MIME signature.
+        // Of course some fuckwits have to use x-pkcs7-signature instead of pkcs7-signature.
+        if([mimePart isType:@"multipart" subtype:@"signed"] && ([[[mimePart bodyParameterForKey:@"protocol"] lowercaseString] isEqualToString:@"application/pkcs7-signature"] || [[[mimePart bodyParameterForKey:@"protocol"] lowercaseString] isEqualToString:@"application/x-pkcs7-signature"])) {
+            mightBeSMIMESigned = YES;
+            return;
+        }
         // Check for S/MIME hints.
         if(([mimePart isType:@"multipart" subtype:@"signed"] && [[[mimePart bodyParameterForKey:@"protocol"] lowercaseString] isEqualToString:@"application/pkcs7-signature"]) ||
            [smimeExtensions containsObject:[[[mimePart bodyParameterForKey:@"filename"] lowercaseString] pathExtension]] ||
@@ -3022,7 +3033,10 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         }
     }];
     
-    return mightContainPGPData && !mightContainSMIMEData;
+    // If the message contains PGP data *and* is S/MIME signed it's treated as if it
+    // only contained PGP data. Before it was treated as if it *didn't* contain any PGP data
+    // at all. Have a look at #973 for details.
+    return mightContainPGPData && (!mightContainSMIMEData || mightBeSMIMESigned);
 }
 
 - (MCMessageBody *)MAMessageBody {
