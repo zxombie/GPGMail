@@ -8,7 +8,9 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="GPGSignatureView">
             <connections>
+                <outlet property="parentView" destination="a39-Ez-Fso" id="wP9-OH-TOV"/>
                 <outlet property="splitView" destination="23" id="Owf-Er-9RM"/>
+                <outlet property="subkeyView" destination="Kqv-mD-hlw" id="Rlv-Lp-JyF"/>
                 <outlet property="window" destination="21" id="300"/>
             </connections>
         </customObject>
@@ -17,16 +19,16 @@
         <window title="Signatures" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="21" userLabel="Signature Panel" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES" utility="YES"/>
             <windowPositionMask key="initialPositionMask" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="739" y="696" width="495" height="303"/>
+            <rect key="contentRect" x="739" y="696" width="495" height="463"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1418"/>
             <value key="minSize" type="size" width="495" height="300"/>
             <value key="maxSize" type="size" width="800" height="500"/>
             <view key="contentView" misplaced="YES" id="22">
-                <rect key="frame" x="0.0" y="0.0" width="495" height="303"/>
+                <rect key="frame" x="0.0" y="0.0" width="495" height="463"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <splitView id="23">
-                        <rect key="frame" x="20" y="60" width="455" height="223"/>
+                        <rect key="frame" x="20" y="60" width="455" height="383"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="28" userLabel="Scroll View (Table View)">
@@ -96,217 +98,315 @@
                                 </scroller>
                             </scrollView>
                             <customView id="qqQ-dl-4xA">
-                                <rect key="frame" x="0.0" y="69" width="455" height="154"/>
+                                <rect key="frame" x="0.0" y="69" width="455" height="314"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <subviews>
                                     <scrollView misplaced="YES" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="yjh-dP-p2K" customClass="TopScrollView">
-                                        <rect key="frame" x="0.0" y="0.0" width="455" height="154"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="455" height="314"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <clipView key="contentView" copiesOnScroll="NO" id="4NF-pX-R0O">
-                                            <rect key="frame" x="1" y="1" width="438" height="152"/>
+                                            <rect key="frame" x="1" y="1" width="453" height="312"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <view misplaced="YES" id="LMj-zy-XS1" customClass="GPGFlippedView">
-                                                    <rect key="frame" x="0.0" y="-380" width="438" height="217"/>
+                                                    <rect key="frame" x="0.0" y="-220" width="453" height="306"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                     <subviews>
-                                                        <customView misplaced="YES" id="eHy-ZH-8f3" userLabel="Content View">
-                                                            <rect key="frame" x="0.0" y="0.0" width="438" height="217"/>
+                                                        <customView misplaced="YES" id="a39-Ez-Fso">
+                                                            <rect key="frame" x="0.0" y="0.0" width="468" height="306"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="XwN-or-zlE">
-                                                                    <rect key="frame" x="87" y="185" width="346" height="17"/>
+                                                                <customView misplaced="YES" id="Kqv-mD-hlw" userLabel="Subkey Details">
+                                                                    <rect key="frame" x="0.0" y="0.0" width="468" height="88"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="name" id="aPs-2L-F5B">
-                                                                        <font key="font" metaFont="systemBold"/>
-                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                    <connections>
-                                                                        <binding destination="90" name="value" keyPath="selection.name" id="Ils-gd-WYa">
-                                                                            <dictionary key="options">
-                                                                                <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
-                                                                                <string key="NSNoSelectionPlaceholder">No signature</string>
-                                                                            </dictionary>
-                                                                        </binding>
-                                                                    </connections>
-                                                                </textField>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="CmU-L3-gsk">
-                                                                    <rect key="frame" x="103" y="145" width="330" height="14"/>
+                                                                    <subviews>
+                                                                        <textField verticalHuggingPriority="750" id="vzi-rr-YR5">
+                                                                            <rect key="frame" x="15" y="74" width="86" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Subkey" id="3gD-Gj-5Yj">
+                                                                                <font key="font" metaFont="smallSystemBold"/>
+                                                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <box verticalHuggingPriority="750" boxType="separator" id="HXq-fi-Gs8">
+                                                                            <rect key="frame" x="106" y="78" width="354" height="5"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                        </box>
+                                                                        <textField verticalHuggingPriority="750" id="KqN-BH-7us">
+                                                                            <rect key="frame" x="15" y="52" width="86" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Fingerprint:" id="xuz-dm-20o">
+                                                                                <font key="font" metaFont="smallSystemBold"/>
+                                                                                <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="PS8-Xh-DGa">
+                                                                            <rect key="frame" x="15" y="30" width="86" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Created:" id="ACy-br-I3A">
+                                                                                <font key="font" metaFont="smallSystemBold"/>
+                                                                                <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="tJZ-6B-x3D">
+                                                                            <rect key="frame" x="15" y="8" width="86" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Expires:" id="418-M7-8hR">
+                                                                                <font key="font" metaFont="smallSystemBold"/>
+                                                                                <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="pHV-nu-PUA">
+                                                                            <rect key="frame" x="103" y="52" width="359" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingMiddle" selectable="YES" sendsActionOnEndEditing="YES" title="subkey.fingerprint" id="zWr-XG-9bS">
+                                                                                <font key="font" metaFont="smallSystem"/>
+                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                            <connections>
+                                                                                <binding destination="-2" name="value" keyPath="subkey.fingerprint" id="ZeL-bt-GB4">
+                                                                                    <dictionary key="options">
+                                                                                        <string key="NSValueTransformerName">GPGFingerprintTransformer</string>
+                                                                                    </dictionary>
+                                                                                </binding>
+                                                                            </connections>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="9L2-gH-ngy">
+                                                                            <rect key="frame" x="103" y="30" width="352" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="subkey.creationDate" id="g8g-fX-KTF">
+                                                                                <font key="font" metaFont="smallSystem"/>
+                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                            <connections>
+                                                                                <binding destination="-2" name="value" keyPath="subkey.creationDate" id="voa-Cm-gm3"/>
+                                                                                <outlet property="formatter" destination="517" id="3cN-97-44i"/>
+                                                                            </connections>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="E1h-hB-s1H">
+                                                                            <rect key="frame" x="103" y="8" width="352" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="subkey.expirationDate" id="56o-9r-2Ik">
+                                                                                <font key="font" metaFont="smallSystem"/>
+                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                            <connections>
+                                                                                <binding destination="-2" name="value" keyPath="subkey.expirationDate" id="EdN-HU-io4">
+                                                                                    <dictionary key="options">
+                                                                                        <string key="NSNullPlaceholder">Never</string>
+                                                                                    </dictionary>
+                                                                                </binding>
+                                                                                <outlet property="formatter" destination="517" id="OkI-ga-4sG"/>
+                                                                            </connections>
+                                                                        </textField>
+                                                                    </subviews>
+                                                                </customView>
+                                                                <customView misplaced="YES" id="HiW-Ys-Q4p" userLabel="Main Details">
+                                                                    <rect key="frame" x="0.0" y="88" width="468" height="218"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="validityDescription" id="LMo-Xe-gOt">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" name="disabledControlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                    <connections>
-                                                                        <binding destination="-2" name="value" keyPath="signature.validityDescription" id="foU-ZY-E0E">
-                                                                            <dictionary key="options">
-                                                                                <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
-                                                                            </dictionary>
-                                                                        </binding>
-                                                                        <binding destination="-2" name="toolTip" keyPath="signature.validityToolTip" id="Who-6w-D79"/>
-                                                                    </connections>
-                                                                </textField>
-                                                                <imageView misplaced="YES" id="JeD-2v-UKc">
-                                                                    <rect key="frame" x="90" y="147" width="10" height="10"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="CYu-Ft-owx"/>
-                                                                    <connections>
-                                                                        <binding destination="-2" name="value" keyPath="signature.validityImage" id="8hz-Ww-MQY">
-                                                                            <dictionary key="options">
-                                                                                <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
-                                                                                <bool key="NSConditionallySetsEnabled" value="NO"/>
-                                                                            </dictionary>
-                                                                        </binding>
-                                                                        <binding destination="-2" name="toolTip" keyPath="signature.validityToolTip" id="l5Y-0f-Fni"/>
-                                                                    </connections>
-                                                                </imageView>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="qxP-M9-Qre">
-                                                                    <rect key="frame" x="87" y="165" width="322" height="14"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="emailAndID" id="k4Z-u2-ee5">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                    <connections>
-                                                                        <binding destination="-2" name="value" keyPath="gpgKey.email" id="1A7-XJ-SCN">
-                                                                            <dictionary key="options">
-                                                                                <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
-                                                                            </dictionary>
-                                                                        </binding>
-                                                                    </connections>
-                                                                </textField>
-                                                                <imageView misplaced="YES" id="Qpd-HK-zxW">
-                                                                    <rect key="frame" x="9" y="139" width="64" height="64"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="Y3I-hR-Hpq"/>
-                                                                    <connections>
-                                                                        <binding destination="-2" name="value" keyPath="signature.signatureImage" id="nSK-iM-g6l"/>
-                                                                    </connections>
-                                                                </imageView>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="Qah-Fp-uk9">
-                                                                    <rect key="frame" x="15" y="73" width="86" height="14"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Key" id="fzP-uO-NLI">
-                                                                        <font key="font" metaFont="smallSystemBold"/>
-                                                                        <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
-                                                                <box verticalHuggingPriority="750" misplaced="YES" boxType="separator" id="Wtv-ZB-YeS">
-                                                                    <rect key="frame" x="106" y="77" width="324" height="5"/>
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                                                </box>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="nBU-jt-aLg">
-                                                                    <rect key="frame" x="15" y="117" width="86" height="14"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Signature" id="tjk-xY-J70">
-                                                                        <font key="font" metaFont="smallSystemBold"/>
-                                                                        <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="33d-8V-sQs">
-                                                                    <rect key="frame" x="15" y="95" width="86" height="14"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Created:" id="uk5-gh-Nof">
-                                                                        <font key="font" metaFont="smallSystemBold"/>
-                                                                        <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="7yX-kT-LeK">
-                                                                    <rect key="frame" x="103" y="95" width="322" height="14"/>
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="signature.creationDate" id="mmO-A5-wlC">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                    <connections>
-                                                                        <binding destination="-2" name="value" keyPath="signature.creationDate" id="Dua-pM-OxO"/>
-                                                                        <outlet property="formatter" destination="517" id="gsO-Cg-ZXV"/>
-                                                                    </connections>
-                                                                </textField>
-                                                                <box verticalHuggingPriority="750" misplaced="YES" boxType="separator" id="bnx-1w-LRh">
-                                                                    <rect key="frame" x="106" y="121" width="324" height="5"/>
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                                                </box>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="MXV-Tz-phU">
-                                                                    <rect key="frame" x="15" y="51" width="86" height="14"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Fingerprint:" id="7W1-7R-DHA">
-                                                                        <font key="font" metaFont="smallSystemBold"/>
-                                                                        <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="kyg-ES-FO8">
-                                                                    <rect key="frame" x="15" y="29" width="86" height="14"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Created:" id="9VU-aj-U2y">
-                                                                        <font key="font" metaFont="smallSystemBold"/>
-                                                                        <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="MNd-Ln-8qT">
-                                                                    <rect key="frame" x="15" y="7" width="86" height="14"/>
-                                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Expires:" id="fEG-KY-jPo">
-                                                                        <font key="font" metaFont="smallSystemBold"/>
-                                                                        <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                </textField>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="fKH-2X-tUY">
-                                                                    <rect key="frame" x="103" y="51" width="329" height="14"/>
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingMiddle" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.fingerprint" id="Bpc-Dj-mck">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                    <connections>
-                                                                        <binding destination="-2" name="value" keyPath="gpgKey.fingerprint" id="Zit-IH-rxJ">
-                                                                            <dictionary key="options">
-                                                                                <string key="NSValueTransformerName">GPGFingerprintTransformer</string>
-                                                                            </dictionary>
-                                                                        </binding>
-                                                                    </connections>
-                                                                </textField>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="bIb-GO-5Ye">
-                                                                    <rect key="frame" x="103" y="29" width="322" height="14"/>
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.creationDate" id="OAB-hd-fjo">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                    <connections>
-                                                                        <binding destination="-2" name="value" keyPath="gpgKey.creationDate" id="2zY-aJ-AnE"/>
-                                                                        <outlet property="formatter" destination="517" id="6Ev-El-9yb"/>
-                                                                    </connections>
-                                                                </textField>
-                                                                <textField verticalHuggingPriority="750" misplaced="YES" id="bBh-9M-dCk">
-                                                                    <rect key="frame" x="103" y="7" width="322" height="14"/>
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                                                                    <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.expirationDate" id="XkF-em-5g9">
-                                                                        <font key="font" metaFont="smallSystem"/>
-                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                    </textFieldCell>
-                                                                    <connections>
-                                                                        <binding destination="-2" name="value" keyPath="gpgKey.expirationDate" id="sTQ-fH-j3p">
-                                                                            <dictionary key="options">
-                                                                                <string key="NSNullPlaceholder">Never</string>
-                                                                            </dictionary>
-                                                                        </binding>
-                                                                        <outlet property="formatter" destination="517" id="MPj-t6-dYs"/>
-                                                                    </connections>
-                                                                </textField>
+                                                                    <subviews>
+                                                                        <textField verticalHuggingPriority="750" id="z3m-Uo-vqd">
+                                                                            <rect key="frame" x="87" y="186" width="376" height="17"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="name" id="Me0-WW-wV0">
+                                                                                <font key="font" metaFont="systemBold"/>
+                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                            <connections>
+                                                                                <binding destination="90" name="value" keyPath="selection.name" id="34N-N7-cZe">
+                                                                                    <dictionary key="options">
+                                                                                        <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
+                                                                                        <string key="NSNoSelectionPlaceholder">No signature</string>
+                                                                                    </dictionary>
+                                                                                </binding>
+                                                                            </connections>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="fQt-Ey-6Oz">
+                                                                            <rect key="frame" x="103" y="146" width="360" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="validityDescription" id="ORB-hE-YO4">
+                                                                                <font key="font" metaFont="smallSystem"/>
+                                                                                <color key="textColor" name="disabledControlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                            <connections>
+                                                                                <binding destination="-2" name="toolTip" keyPath="signature.validityToolTip" id="nBl-hA-xbr"/>
+                                                                                <binding destination="-2" name="value" keyPath="signature.validityDescription" id="WLn-X3-6SL">
+                                                                                    <dictionary key="options">
+                                                                                        <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
+                                                                                    </dictionary>
+                                                                                </binding>
+                                                                            </connections>
+                                                                        </textField>
+                                                                        <imageView id="DSE-c8-Gjc">
+                                                                            <rect key="frame" x="90" y="148" width="10" height="10"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="Z6x-ot-vxf"/>
+                                                                            <connections>
+                                                                                <binding destination="-2" name="toolTip" keyPath="signature.validityToolTip" id="kYA-5D-vJ1"/>
+                                                                                <binding destination="-2" name="value" keyPath="signature.validityImage" id="eB8-gB-Qwj">
+                                                                                    <dictionary key="options">
+                                                                                        <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
+                                                                                        <bool key="NSConditionallySetsEnabled" value="NO"/>
+                                                                                    </dictionary>
+                                                                                </binding>
+                                                                            </connections>
+                                                                        </imageView>
+                                                                        <textField verticalHuggingPriority="750" id="RFD-S9-B91">
+                                                                            <rect key="frame" x="87" y="166" width="322" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="emailAndID" id="u60-9X-IF1">
+                                                                                <font key="font" metaFont="smallSystem"/>
+                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                            <connections>
+                                                                                <binding destination="-2" name="value" keyPath="gpgKey.email" id="gYb-S6-9iL">
+                                                                                    <dictionary key="options">
+                                                                                        <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
+                                                                                    </dictionary>
+                                                                                </binding>
+                                                                            </connections>
+                                                                        </textField>
+                                                                        <imageView id="uwB-HG-5cm">
+                                                                            <rect key="frame" x="9" y="140" width="64" height="64"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="k3m-83-W7J"/>
+                                                                            <connections>
+                                                                                <binding destination="-2" name="value" keyPath="signature.signatureImage" id="lJO-bE-Vha"/>
+                                                                            </connections>
+                                                                        </imageView>
+                                                                        <textField verticalHuggingPriority="750" id="kez-x3-9K8">
+                                                                            <rect key="frame" x="15" y="74" width="86" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Key" id="7Gt-hf-1Lp">
+                                                                                <font key="font" metaFont="smallSystemBold"/>
+                                                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <box verticalHuggingPriority="750" boxType="separator" id="jQa-wr-UGJ">
+                                                                            <rect key="frame" x="106" y="78" width="354" height="5"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                        </box>
+                                                                        <textField verticalHuggingPriority="750" id="S3o-x3-oww">
+                                                                            <rect key="frame" x="15" y="118" width="86" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Signature" id="N5Z-7K-gGL">
+                                                                                <font key="font" metaFont="smallSystemBold"/>
+                                                                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="BUX-3g-MHe">
+                                                                            <rect key="frame" x="15" y="96" width="86" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Created:" id="Cl2-oG-aDW">
+                                                                                <font key="font" metaFont="smallSystemBold"/>
+                                                                                <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="iSl-aH-FdQ">
+                                                                            <rect key="frame" x="103" y="96" width="352" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="signature.creationDate" id="2ka-nH-ty0">
+                                                                                <font key="font" metaFont="smallSystem"/>
+                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                            <connections>
+                                                                                <binding destination="-2" name="value" keyPath="signature.creationDate" id="7Sn-mk-jei"/>
+                                                                                <outlet property="formatter" destination="517" id="9pb-ci-r71"/>
+                                                                            </connections>
+                                                                        </textField>
+                                                                        <box verticalHuggingPriority="750" boxType="separator" id="tqN-Qh-GMd">
+                                                                            <rect key="frame" x="106" y="122" width="354" height="5"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                        </box>
+                                                                        <textField verticalHuggingPriority="750" id="wJO-3a-NIu">
+                                                                            <rect key="frame" x="15" y="52" width="86" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Fingerprint:" id="Ul1-Sd-9fr">
+                                                                                <font key="font" metaFont="smallSystemBold"/>
+                                                                                <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="um2-e4-ltm">
+                                                                            <rect key="frame" x="15" y="30" width="86" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Created:" id="1vT-Be-sTQ">
+                                                                                <font key="font" metaFont="smallSystemBold"/>
+                                                                                <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="Cay-Ce-Ivn">
+                                                                            <rect key="frame" x="15" y="8" width="86" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Expires:" id="7QF-X1-YTw">
+                                                                                <font key="font" metaFont="smallSystemBold"/>
+                                                                                <color key="textColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="BDn-rq-ZjX">
+                                                                            <rect key="frame" x="103" y="52" width="359" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingMiddle" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.fingerprint" id="pEQ-oB-xDv">
+                                                                                <font key="font" metaFont="smallSystem"/>
+                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                            <connections>
+                                                                                <binding destination="-2" name="value" keyPath="gpgKey.fingerprint" id="hFo-SH-vxC">
+                                                                                    <dictionary key="options">
+                                                                                        <string key="NSValueTransformerName">GPGFingerprintTransformer</string>
+                                                                                    </dictionary>
+                                                                                </binding>
+                                                                            </connections>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="BvX-Bh-wvd">
+                                                                            <rect key="frame" x="103" y="30" width="352" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.creationDate" id="Gh3-j4-uMw">
+                                                                                <font key="font" metaFont="smallSystem"/>
+                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                            <connections>
+                                                                                <binding destination="-2" name="value" keyPath="gpgKey.creationDate" id="yDR-Z9-frG"/>
+                                                                                <outlet property="formatter" destination="517" id="Rxv-x8-g7U"/>
+                                                                            </connections>
+                                                                        </textField>
+                                                                        <textField verticalHuggingPriority="750" id="SNH-pr-EI9">
+                                                                            <rect key="frame" x="103" y="8" width="352" height="14"/>
+                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.expirationDate" id="lxD-vu-vhP">
+                                                                                <font key="font" metaFont="smallSystem"/>
+                                                                                <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                                                                <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                                                            </textFieldCell>
+                                                                            <connections>
+                                                                                <binding destination="-2" name="value" keyPath="gpgKey.expirationDate" id="RFq-iO-kLC">
+                                                                                    <dictionary key="options">
+                                                                                        <string key="NSNullPlaceholder">Never</string>
+                                                                                    </dictionary>
+                                                                                </binding>
+                                                                                <outlet property="formatter" destination="517" id="ZVR-Fb-g6Z"/>
+                                                                            </connections>
+                                                                        </textField>
+                                                                    </subviews>
+                                                                </customView>
                                                             </subviews>
                                                         </customView>
                                                     </subviews>
@@ -317,8 +417,8 @@
                                             <rect key="frame" x="-100" y="-100" width="438" height="15"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
-                                        <scroller key="verticalScroller" verticalHuggingPriority="750" horizontal="NO" id="Goq-T3-t2l">
-                                            <rect key="frame" x="439" y="1" width="15" height="152"/>
+                                        <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="Goq-T3-t2l">
+                                            <rect key="frame" x="439" y="1" width="15" height="317"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </scroller>
                                     </scrollView>
@@ -352,7 +452,7 @@ DQ
             <connections>
                 <outlet property="delegate" destination="-2" id="39"/>
             </connections>
-            <point key="canvasLocation" x="338.5" y="54.5"/>
+            <point key="canvasLocation" x="5.5" y="-229.5"/>
         </window>
         <arrayController objectClassName="GPGSignature" editable="NO" id="90">
             <declaredKeys>

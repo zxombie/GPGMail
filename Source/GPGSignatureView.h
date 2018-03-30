@@ -10,16 +10,15 @@
 	NSIndexSet *signatureIndexes;
 	GPGSignature *signature;
 	
-	IBOutlet NSView *scrollContentView;
-	IBOutlet NSView *infoView;
-	IBOutlet NSView *detailView;
-	IBOutlet NSScrollView *scrollView;
 	IBOutlet NSSplitView *splitView;
+	IBOutlet NSView *parentView;
+	IBOutlet NSView *subkeyView;
 }
 
 //Private
 @property (strong, nonatomic) NSIndexSet *signatureIndexes;
 @property (strong, readonly, nonatomic) GPGKey *gpgKey;
+@property (strong, readonly, nonatomic) GPGKey *subkey;
 
 - (IBAction)close:(id)sender;
 

@@ -5,6 +5,7 @@
 
 @interface GPGSignatureView ()
 @property (strong, readwrite, nonatomic) GPGKey *gpgKey;
+@property (strong, readwrite, nonatomic) GPGKey *subkey;
 @end
 
 
@@ -106,31 +107,42 @@ GPGSignatureView *_sharedInstance;
 
 
 - (void)setSignature:(GPGSignature *)value {
-	if (value != signature) {
-		signature = value;
-
-		GPGKey *key = nil;
-		if (signature) {
-			NSString *fingerprint = signature.primaryFingerprint;
-			key = [keyList member:fingerprint];
-			if (!key) {
-				fingerprint = signature.fingerprint;
-				if (fingerprint.length >= 8) {
-					key = [keyList member:fingerprint];
-					if (!key) {
-						fingerprint = [fingerprint stringByAppendingString:@"\n"];
-						for (GPGKey *possibleKey in keyList) {
-							if ([possibleKey.allFingerprints member:fingerprint]) {
-								key = possibleKey;
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-		self.gpgKey = key;
+	if (value == signature) {
+		return;
 	}
+	signature = value;
+	
+	GPGKey *key = nil;
+	GPGKey *subkey = nil;
+
+	key = signature.primaryKey;
+	subkey = signature.key;
+	
+	if ([key isEqual:subkey]) {
+		subkey = nil;
+	}
+	
+	
+	if (subkey && !subkeyView.superview) {
+		[parentView addSubview:subkeyView];
+		CGFloat height = 0;
+		for (NSView *view in parentView.subviews) {
+			height += view.frame.size.height;
+		}
+		[parentView.superview setFrameSize:NSMakeSize(parentView.frame.size.width, height)];
+		[subkeyView setFrameOrigin:NSMakePoint(0, 0)];
+	} else if (!subkey && subkeyView.superview) {
+		[subkeyView removeFromSuperview];
+		CGFloat height = 0;
+		for (NSView *view in parentView.subviews) {
+			height += view.frame.size.height;
+		}
+		[parentView.superview setFrameSize:NSMakeSize(parentView.frame.size.width, height)];
+	}
+	
+	
+	self.gpgKey = key;
+	self.subkey = subkey;
 }
 
 - (id)valueForKeyPath:(NSString *)keyPath {
@@ -228,10 +240,10 @@ GPGSignatureView *_sharedInstance;
 		return 60;
 	}
 }
-- (CGFloat)splitView:(NSSplitView *)aSplitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(NSInteger)dividerIndex {
+- (CGFloat)splitView:(__unused NSSplitView *)aSplitView constrainMaxCoordinate:(CGFloat)proposedMaximumPosition ofSubviewAt:(__unused NSInteger)dividerIndex {
 	return proposedMaximumPosition - 90;
 }
-- (void)splitView:(NSSplitView *)aSplitView resizeSubviewsWithOldSize:(NSSize)oldSize {
+- (void)splitView:(NSSplitView *)aSplitView resizeSubviewsWithOldSize:(__unused NSSize)oldSize {
 //	if (self.signatures.count == 1) {
 //		return;
 //	}
