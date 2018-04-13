@@ -202,6 +202,14 @@
 			[scrollContentView addSubview:infoView];
 
 			if (self.subkey) {
+				if (self.window.contentView.frame.size.height == initialHeight) {
+					NSRect frame = self.window.frame;
+					initialHeight = CGFLOAT_MAX; // The window will never be that height, so this if branches only the first time.
+					CGFloat height = subkeyView.frame.size.height;
+					frame.size.height += height;
+					frame.origin.y -= height;
+					[self.window.animator setFrame:frame display:YES];
+				}
 				[subkeyView setFrameSize:NSMakeSize(scrollContentView.frame.size.width, subkeyView.frame.size.height)];
 				[scrollContentView addSubview:subkeyView];
 			} else {
@@ -397,10 +405,12 @@
 - (void)awakeFromNib {
     // Get attachment for row.
     NSDictionary *attachment = attachments[0];
-    if([attachment valueForKey:@"error"])
+	if ([attachment valueForKey:@"error"]) {
         [scrollView setBackgroundColor:[NSColor colorWithDeviceRed:1.0 green:0.9451 blue:0.6074 alpha:1.0]];
-    else
+	} else {
         [scrollView setBackgroundColor:[NSColor whiteColor]];
+	}
+	initialHeight = self.window.contentView.frame.size.height;
 }
 
 #pragma mark - Table delegate

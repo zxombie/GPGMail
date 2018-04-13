@@ -18,7 +18,9 @@
     NSDictionary *currentAttachment;
     NSSet *keyList;
     NSIndexSet *attachmentIndexes;
-
+	CGFloat initialHeight;
+	
+	
     IBOutlet NSView *scrollContentView;
 	IBOutlet NSView *infoView;
 	IBOutlet NSView *subkeyView;
