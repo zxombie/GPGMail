@@ -101,10 +101,10 @@
                                 <rect key="frame" x="0.0" y="69" width="455" height="314"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <subviews>
-                                    <scrollView misplaced="YES" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="yjh-dP-p2K" customClass="TopScrollView">
+                                    <scrollView misplaced="YES" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" id="yjh-dP-p2K" userLabel="Top Scroll View" customClass="TopScrollView">
                                         <rect key="frame" x="0.0" y="0.0" width="455" height="314"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                        <clipView key="contentView" copiesOnScroll="NO" id="4NF-pX-R0O">
+                                        <clipView key="contentView" id="4NF-pX-R0O">
                                             <rect key="frame" x="1" y="1" width="453" height="312"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
@@ -113,11 +113,11 @@
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                     <subviews>
                                                         <customView misplaced="YES" id="a39-Ez-Fso">
-                                                            <rect key="frame" x="0.0" y="0.0" width="468" height="306"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="453" height="306"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <customView misplaced="YES" id="Kqv-mD-hlw" userLabel="Subkey Details">
-                                                                    <rect key="frame" x="0.0" y="0.0" width="468" height="88"/>
+                                                                    <rect key="frame" x="0.0" y="0.0" width="453" height="88"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" id="vzi-rr-YR5">
@@ -130,7 +130,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <box verticalHuggingPriority="750" boxType="separator" id="HXq-fi-Gs8">
-                                                                            <rect key="frame" x="106" y="78" width="354" height="5"/>
+                                                                            <rect key="frame" x="106" y="78" width="339" height="5"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                         </box>
                                                                         <textField verticalHuggingPriority="750" id="KqN-BH-7us">
@@ -161,7 +161,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="pHV-nu-PUA">
-                                                                            <rect key="frame" x="103" y="52" width="359" height="14"/>
+                                                                            <rect key="frame" x="103" y="52" width="344" height="14"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingMiddle" selectable="YES" sendsActionOnEndEditing="YES" title="subkey.fingerprint" id="zWr-XG-9bS">
                                                                                 <font key="font" metaFont="smallSystem"/>
@@ -177,7 +177,7 @@
                                                                             </connections>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="9L2-gH-ngy">
-                                                                            <rect key="frame" x="103" y="30" width="352" height="14"/>
+                                                                            <rect key="frame" x="103" y="30" width="337" height="14"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="subkey.creationDate" id="g8g-fX-KTF">
                                                                                 <font key="font" metaFont="smallSystem"/>
@@ -190,7 +190,7 @@
                                                                             </connections>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="E1h-hB-s1H">
-                                                                            <rect key="frame" x="103" y="8" width="352" height="14"/>
+                                                                            <rect key="frame" x="103" y="8" width="337" height="14"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="subkey.expirationDate" id="56o-9r-2Ik">
                                                                                 <font key="font" metaFont="smallSystem"/>
@@ -209,11 +209,11 @@
                                                                     </subviews>
                                                                 </customView>
                                                                 <customView misplaced="YES" id="HiW-Ys-Q4p" userLabel="Main Details">
-                                                                    <rect key="frame" x="0.0" y="88" width="468" height="218"/>
+                                                                    <rect key="frame" x="0.0" y="88" width="453" height="218"/>
                                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                     <subviews>
                                                                         <textField verticalHuggingPriority="750" id="z3m-Uo-vqd">
-                                                                            <rect key="frame" x="87" y="186" width="376" height="17"/>
+                                                                            <rect key="frame" x="87" y="186" width="361" height="17"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="name" id="Me0-WW-wV0">
                                                                                 <font key="font" metaFont="systemBold"/>
@@ -230,7 +230,7 @@
                                                                             </connections>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="fQt-Ey-6Oz">
-                                                                            <rect key="frame" x="103" y="146" width="360" height="14"/>
+                                                                            <rect key="frame" x="103" y="146" width="345" height="14"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="validityDescription" id="ORB-hE-YO4">
                                                                                 <font key="font" metaFont="smallSystem"/>
@@ -238,12 +238,12 @@
                                                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                                             </textFieldCell>
                                                                             <connections>
-                                                                                <binding destination="-2" name="toolTip" keyPath="signature.validityToolTip" id="nBl-hA-xbr"/>
                                                                                 <binding destination="-2" name="value" keyPath="signature.validityDescription" id="WLn-X3-6SL">
                                                                                     <dictionary key="options">
                                                                                         <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
                                                                                     </dictionary>
                                                                                 </binding>
+                                                                                <binding destination="-2" name="toolTip" keyPath="signature.validityToolTip" id="nBl-hA-xbr"/>
                                                                             </connections>
                                                                         </textField>
                                                                         <imageView id="DSE-c8-Gjc">
@@ -251,19 +251,19 @@
                                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                             <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="Z6x-ot-vxf"/>
                                                                             <connections>
-                                                                                <binding destination="-2" name="toolTip" keyPath="signature.validityToolTip" id="kYA-5D-vJ1"/>
                                                                                 <binding destination="-2" name="value" keyPath="signature.validityImage" id="eB8-gB-Qwj">
                                                                                     <dictionary key="options">
                                                                                         <bool key="NSAllowsEditingMultipleValuesSelection" value="NO"/>
                                                                                         <bool key="NSConditionallySetsEnabled" value="NO"/>
                                                                                     </dictionary>
                                                                                 </binding>
+                                                                                <binding destination="-2" name="toolTip" keyPath="signature.validityToolTip" id="kYA-5D-vJ1"/>
                                                                             </connections>
                                                                         </imageView>
                                                                         <textField verticalHuggingPriority="750" id="RFD-S9-B91">
                                                                             <rect key="frame" x="87" y="166" width="322" height="14"/>
                                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="emailAndID" id="u60-9X-IF1">
+                                                                            <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="email" id="u60-9X-IF1">
                                                                                 <font key="font" metaFont="smallSystem"/>
                                                                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                                                                 <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
@@ -294,7 +294,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <box verticalHuggingPriority="750" boxType="separator" id="jQa-wr-UGJ">
-                                                                            <rect key="frame" x="106" y="78" width="354" height="5"/>
+                                                                            <rect key="frame" x="106" y="78" width="339" height="5"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                         </box>
                                                                         <textField verticalHuggingPriority="750" id="S3o-x3-oww">
@@ -316,7 +316,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="iSl-aH-FdQ">
-                                                                            <rect key="frame" x="103" y="96" width="352" height="14"/>
+                                                                            <rect key="frame" x="103" y="96" width="337" height="14"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="signature.creationDate" id="2ka-nH-ty0">
                                                                                 <font key="font" metaFont="smallSystem"/>
@@ -329,7 +329,7 @@
                                                                             </connections>
                                                                         </textField>
                                                                         <box verticalHuggingPriority="750" boxType="separator" id="tqN-Qh-GMd">
-                                                                            <rect key="frame" x="106" y="122" width="354" height="5"/>
+                                                                            <rect key="frame" x="106" y="122" width="339" height="5"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                         </box>
                                                                         <textField verticalHuggingPriority="750" id="wJO-3a-NIu">
@@ -360,7 +360,7 @@
                                                                             </textFieldCell>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="BDn-rq-ZjX">
-                                                                            <rect key="frame" x="103" y="52" width="359" height="14"/>
+                                                                            <rect key="frame" x="103" y="52" width="344" height="14"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" controlSize="small" lineBreakMode="truncatingMiddle" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.fingerprint" id="pEQ-oB-xDv">
                                                                                 <font key="font" metaFont="smallSystem"/>
@@ -376,7 +376,7 @@
                                                                             </connections>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="BvX-Bh-wvd">
-                                                                            <rect key="frame" x="103" y="30" width="352" height="14"/>
+                                                                            <rect key="frame" x="103" y="30" width="337" height="14"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.creationDate" id="Gh3-j4-uMw">
                                                                                 <font key="font" metaFont="smallSystem"/>
@@ -389,7 +389,7 @@
                                                                             </connections>
                                                                         </textField>
                                                                         <textField verticalHuggingPriority="750" id="SNH-pr-EI9">
-                                                                            <rect key="frame" x="103" y="8" width="352" height="14"/>
+                                                                            <rect key="frame" x="103" y="8" width="337" height="14"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                                             <textFieldCell key="cell" controlSize="small" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" title="gpgKey.expirationDate" id="lxD-vu-vhP">
                                                                                 <font key="font" metaFont="smallSystem"/>
@@ -467,6 +467,6 @@ DQ
                 <binding destination="-2" name="contentArray" keyPath="signatures" id="96"/>
             </connections>
         </arrayController>
-        <dateFormatter dateStyle="full" timeStyle="long" id="517"/>
+        <dateFormatter dateStyle="long" timeStyle="short" id="517"/>
     </objects>
 </document>

@@ -124,7 +124,9 @@ GPGSignatureView *_sharedInstance;
 	
 	
 	if (subkey && !subkeyView.superview) {
+		[subkeyView setFrameSize:NSMakeSize(parentView.frame.size.width, subkeyView.frame.size.height)];
 		[parentView addSubview:subkeyView];
+		
 		CGFloat height = 0;
 		for (NSView *view in parentView.subviews) {
 			height += view.frame.size.height;
@@ -318,6 +320,8 @@ GPGSignatureView *_sharedInstance;
 @end
 
 @implementation TopScrollView
+// When the view is resized, the content would normally stay at the bottom.
+// The TopScrollView inverts this behavior, so the top of the contents stays visible.
 - (void)setFrameSize:(NSSize)newSize {
 	NSClipView *clipView = [self contentView];
 	NSRect bounds = [clipView bounds];
