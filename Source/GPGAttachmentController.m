@@ -202,13 +202,18 @@
 			[scrollContentView addSubview:infoView];
 
 			if (self.subkey) {
-				if (self.window.contentView.frame.size.height == initialHeight) {
+				if (self.window.contentView.frame.size.height == initialHeight || initialHeight == 0) {
 					NSRect frame = self.window.frame;
-					initialHeight = CGFLOAT_MAX; // The window will never be that height, so this if branches only the first time.
 					CGFloat height = subkeyView.frame.size.height;
 					frame.size.height += height;
 					frame.origin.y -= height;
-					[self.window.animator setFrame:frame display:YES];
+					if (initialHeight == 0) {
+						[self.window setFrame:frame display:YES];
+					} else {
+						[self.window.animator setFrame:frame display:YES];
+
+					}
+					initialHeight = CGFLOAT_MAX; // The window will never be that height, so this if branches only the first time.
 				}
 				[subkeyView setFrameSize:NSMakeSize(scrollContentView.frame.size.width, subkeyView.frame.size.height)];
 				[scrollContentView addSubview:subkeyView];

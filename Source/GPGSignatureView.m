@@ -121,8 +121,9 @@ GPGSignatureView *_sharedInstance;
 	if ([key isEqual:subkey]) {
 		subkey = nil;
 	}
-	
-	
+	self.gpgKey = key;
+	self.subkey = subkey;
+
 	if (subkey && !subkeyView.superview) {
 		[subkeyView setFrameSize:NSMakeSize(parentView.frame.size.width, subkeyView.frame.size.height)];
 		[parentView addSubview:subkeyView];
@@ -133,6 +134,8 @@ GPGSignatureView *_sharedInstance;
 		}
 		[parentView.superview setFrameSize:NSMakeSize(parentView.frame.size.width, height)];
 		[subkeyView setFrameOrigin:NSMakePoint(0, 0)];
+		[self resizeForSubkeyAnimate:YES];
+		
 	} else if (!subkey && subkeyView.superview) {
 		[subkeyView removeFromSuperview];
 		CGFloat height = 0;
@@ -143,9 +146,31 @@ GPGSignatureView *_sharedInstance;
 	}
 	
 	
-	self.gpgKey = key;
-	self.subkey = subkey;
 }
+
+- (void)resizeForSubkeyAnimate:(BOOL)animate {
+	if (self.subkey) {
+		CGFloat currentHeight = self.window.contentView.frame.size.height;
+		CGFloat baseHeight;
+		if (self.signatures.count == 1) {
+			baseHeight = fullHeight - subkeyHeight - listHeight;
+		} else {
+			baseHeight = fullHeight - subkeyHeight;
+		}
+		
+		if (baseHeight == currentHeight) {
+			NSRect frame = self.window.frame;
+			frame.size.height += subkeyView.frame.size.height;
+			frame.origin.y -= subkeyView.frame.size.height;
+			if (animate) {
+				[self.window.animator setFrame:frame display:YES];
+			} else {
+				[self.window setFrame:frame display:YES];
+			}
+		}
+	}
+}
+
 
 - (id)valueForKeyPath:(NSString *)keyPath {
     if ([keyPath hasPrefix:@"signature."]) {
@@ -168,18 +193,25 @@ GPGSignatureView *_sharedInstance;
 	
 	if (self.signatures.count == 1) {
 		[splitView setPosition:-splitView.dividerThickness ofDividerAtIndex:0];
+
+		NSSize size = self.window.contentView.frame.size;
+		size.height = fullHeight - subkeyHeight - listHeight;
+		[self.window setContentSize:size];
 	} else {
-		if (splitView.subviews[0].frame.size.height < 60) {
-			[splitView setPosition:60 ofDividerAtIndex:0];
-		}
+		[splitView setPosition:listHeight ofDividerAtIndex:0];
+
+		NSSize size = self.window.contentView.frame.size;
+		size.height = fullHeight - subkeyHeight;
+		[self.window setContentSize:size];
 	}
 	
+	[self resizeForSubkeyAnimate:NO];
 }
 
 - (NSInteger)runModal {
 	if (!running) {
 		[self prepareForShow];
-		[NSApp runModalForWindow:window];
+		[NSApp runModalForWindow:self.window];
 		return NSOKButton;
 	} else {
 		return NSCancelButton;
@@ -188,7 +220,7 @@ GPGSignatureView *_sharedInstance;
 - (void)beginSheetModalForWindow:(NSWindow *)modalWindow completionHandler:(void (^)(NSInteger result))handler {
 	if (!running) {
 		[self prepareForShow];
-		[NSApp beginSheet:window modalForWindow:modalWindow modalDelegate:self didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:(__bridge void *)(handler)];
+		[NSApp beginSheet:self.window modalForWindow:modalWindow modalDelegate:self didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:(__bridge void *)(handler)];
 	} else {
 		handler(NSCancelButton);
 	}
@@ -201,15 +233,15 @@ GPGSignatureView *_sharedInstance;
 
 
 - (IBAction)close:(id)sender {
-	[window orderOut:self];
+	[self.window orderOut:self];
 	[NSApp stopModal];
-	[NSApp endSheet:window];
+	[NSApp endSheet:self.window];
 	running = 0;
 }
 
 - (void)windowWillClose:(NSNotification *)notification {
 	[NSApp stopModal];
-	[NSApp endSheet:window];
+	[NSApp endSheet:self.window];
 	running = 0;
 }
 
@@ -282,15 +314,26 @@ GPGSignatureView *_sharedInstance;
     static dispatch_once_t pred;
     static GPGSignatureView *_sharedInstance;
     dispatch_once(&pred, ^{
-        _sharedInstance = [[GPGSignatureView alloc] init];
-        [NSBundle loadNibNamed:@"GPGSignatureView" owner:_sharedInstance];
+        _sharedInstance = [[GPGSignatureView alloc] initWithWindowNibName:@"GPGSignatureView"];
     });
     return _sharedInstance;
 }
 
-- (id)init {
-	return [super init];
+- (instancetype)initWithWindowNibName:(NSNibName)windowNibName {
+	self = [super initWithWindowNibName:windowNibName];
+	if (!self) {
+		return nil;
+	}
+	[self.window layoutIfNeeded];
+	
+	fullHeight = self.window.contentView.frame.size.height;
+	listHeight = splitView.subviews[0].frame.size.height;
+	subkeyHeight = subkeyView.frame.size.height;
+	[subkeyView removeFromSuperview];
+	
+	return self;
 }
+
 
 @end
 

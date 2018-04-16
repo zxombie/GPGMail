@@ -1,14 +1,18 @@
 #import <Cocoa/Cocoa.h>
 #import <Libmacgpg/Libmacgpg.h>
 
-@interface GPGSignatureView : NSObject <NSWindowDelegate, NSTableViewDelegate, NSTableViewDataSource, NSSplitViewDelegate> {
-	IBOutlet NSWindow *window;
+@interface GPGSignatureView : NSWindowController <NSWindowDelegate, NSTableViewDelegate, NSTableViewDataSource, NSSplitViewDelegate> {
 	IBOutlet NSTableView *detailTable;
 	NSSet *keyList;
 	NSArray *signatures;
 	BOOL running;
 	NSIndexSet *signatureIndexes;
 	GPGSignature *signature;
+	CGFloat fullHeight;
+	CGFloat listHeight;
+	CGFloat subkeyHeight;
+
+	
 	
 	IBOutlet NSSplitView *splitView;
 	IBOutlet NSView *parentView;
