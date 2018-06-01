@@ -81,74 +81,7 @@
 
 @end
 
-@interface MCDataAttachmentDataSource_GPGMail : NSObject
-
-@end
-
-@implementation MCDataAttachmentDataSource_GPGMail
-
-- (id)MAInitWithData:(id)arg1 {
-    id ret = [self MAInitWithData:arg1];
-    return ret;
-}
-
-- (id)MAData {
-    id ret = [self MAData];
-    return ret;
-}
-
-@end
-
-@interface MFLibraryAttachmentDataSource_GPGMail : NSObject
-
-@end
-
-@implementation MFLibraryAttachmentDataSource_GPGMail
-
-- (id)MAInitWithMessage:(id)arg1 mimePartNumber:(id)arg2 attachment:(id)arg3 remoteDataSource:(id)arg4 {
-    id decryptedMessage = [arg3 getIvar:@"DecryptedMessage"];
-    if(decryptedMessage) {
-        arg1 = decryptedMessage;
-    }
-    id ret = [self MAInitWithMessage:(id)arg1 mimePartNumber:(id)arg2 attachment:(id)arg3 remoteDataSource:(id)arg4];
-    return ret;
-}
-
-@end
-
-
-
-@interface IMAPMessageDownload_GPGMail : NSObject
-@end
-
-@implementation IMAPMessageDownload_GPGMail
-
-- (void)MASetAllowsPartialDownloads:(BOOL)arg1 {
-    [self MASetAllowsPartialDownloads:arg1];
-}
-
-- (id)MACollectDataAndWriteToDisk:(BOOL)arg1 {
-    id ret = [self MACollectDataAndWriteToDisk:arg1];
-    return ret;
-}
-
-@end
-
-
-@interface MCKeychainManager_GPGMail : NSObject
-@end
-
-@implementation MCKeychainManager_GPGMail
-
-+ (struct OpaqueSecIdentityRef *)MACopySigningIdentityForAddress:(id)arg1 {
-    id ret = [self MACopySigningIdentityForAddress:arg1];
-    
-    return (__bridge struct OpaqueSecIdentityRef *)(ret);
-}
-
-@end
-
-NSString * const kGMED = @"1$5$2$7:8:8-3-2§0§0";
+NSString * const kGMED = @"1$5$3$7:4:7-3-6§0§0";
 
 @interface GPGMailBundle ()
 
