@@ -2157,7 +2157,7 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
         // In order to be super-compatible to all kind of bullshit structures, the assumption is,
         // that if the extension of the filename is .asc, this is a exchange server modified message
         // otherwise not.
-        if([part isType:@"application" subtype:@"pgp-encrypted"]) {
+        if([part isType:@"application" subtype:@"pgp-encrypted"] && [[(MimePart_GPGMail *)part GMBodyData] containsPGPVersionMarker:1]) {
             applicationPGPEncrypted = part;
         }
         BOOL partHasPGPFilename = [[[part attachmentFilename] lowercaseString] isEqualToString:@"encrypted.asc"] ||
@@ -2170,7 +2170,7 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     }
     // If such a part is found, the message is exchange modified, otherwise
     // not.
-    return applicationPGPEncrypted != nil && PGPDataPart != nil && ![self _isPretendPGPMIME];
+    return applicationPGPEncrypted != nil && PGPDataPart != nil;
 }
 
 - (BOOL)_isPretendPGPMIME {
@@ -3127,6 +3127,12 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 - (BOOL)GMIsEncryptedPGPMIMETree {
     BOOL isPGPMIMETree = NO;
     MCMimePart *mailself = MAIL_SELF(self);
+    if([self _isExchangeServerModifiedPGPMimeEncrypted]) {
+        return YES;
+    }
+    if([self _isDraftThatHasBeenReEncryptedWithoutBeingDecrypted]) {
+        return YES;
+    }
     if(![mailself isType:@"multipart" subtype:@"encrypted"]) {
         return NO;
     }
@@ -3203,6 +3209,10 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     NSArray *pgpExtensions = @[@"pgp", @"gpg", @"asc", @"sig"];
     NSArray *pgpContentTypes = @[@"multipart/encrypted", @"application/pgp", @"application/pgp-encrypted", @"application/pgp-signature"];
 
+    if([self GMIsEncryptedPGPMIMETree]) {
+        return YES;
+    }
+    
     MCMimePart *mailself = MAIL_SELF(self);
 
     BOOL hasPGPExtension = NO;
