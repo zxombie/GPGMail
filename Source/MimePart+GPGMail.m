@@ -444,7 +444,6 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     MCMimePart *mailself = MAIL_SELF(self);
     id content = [MAIL_SELF(self) decodeMultipartSigned];
     content = [MAIL_SELF(self) _messageBodyFromDecodedContents:content];
-    [content setSigners:self.PGPSignatures];
     if(self.PGPError) {
         [content setSmimeError:self.PGPError];
     }
