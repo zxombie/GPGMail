@@ -18,7 +18,7 @@
 @property(nonatomic) __weak BannerImageView *icon; // @synthesize icon=_icon;
 @property(nonatomic) __weak NSLayoutConstraint *messageFieldToLoadRemoteContentButtonHorizontalSpacing; // @synthesize messageFieldToLoadRemoteContentButtonHorizontalSpacing=_messageFieldToLoadRemoteContentButtonHorizontalSpacing;
 @property(nonatomic) __weak NSButton *loadRemoteContentButton; // @synthesize loadRemoteContentButton=_loadRemoteContentButton;
-- (void).cxx_destruct;	// IMP=0x00000001001b7cf9
+//- (void).cxx_destruct;	// IMP=0x00000001001b7cf9
 - (void)loadRemoteContent:(id)arg1;	// IMP=0x00000001001b7c33
 - (void)updateWantsDisplay;	// IMP=0x00000001001b7b8a
 - (void)updateBannerContents;	// IMP=0x00000001001b7a85

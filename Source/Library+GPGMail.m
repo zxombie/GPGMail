@@ -168,7 +168,12 @@ NSString * const kLibraryMessagePreventSnippingAttachmentDataKey = @"LibraryMess
 }
 
 + (NSData *)forceFetchMessageDataForMessage:(MCMessage *)message {
-    return [message messageDataIncludingFromSpace:YES newDocumentID:nil fetchIfNotAvailable:YES];
+    [message setIvar:@"LibraryIsForceFetchingMessageData" value:@(YES)];
+    [[[NSThread currentThread] threadDictionary] setValue:@(YES) forKey:@"LibraryIsForceFetchingMessageData"];
+    NSData *messageData = [message messageDataIncludingFromSpace:YES newDocumentID:nil fetchIfNotAvailable:YES];
+    [message removeIvar:@"LibraryIsForceFetchingMessageData"];
+    [[[NSThread currentThread] threadDictionary] removeObjectForKey:@"LibraryIsForceFetchingMessageData"];
+    return messageData;
 }
 
 + (MCMimeBody *)MAMimeBodyForMessage:(MCMessage *)currentMessage {
@@ -179,8 +184,9 @@ NSString * const kLibraryMessagePreventSnippingAttachmentDataKey = @"LibraryMess
     // and the current thread dictionary has the ReturnCompleteBodyData and the ReturnCompleteBodyDataForMessage message reference set.
     BOOL wantsCompleteBodyData = ([[[[NSThread currentThread] threadDictionary] valueForKey:kLibraryMimeBodyReturnCompleteBodyDataKey] boolValue] &&
                                  [[[NSThread currentThread] threadDictionary] valueForKey:kLibraryMimeBodyReturnCompleteBodyDataForMessageKey] == currentMessage) || [[[[NSThread currentThread] threadDictionary] valueForKey:kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey] boolValue];
+    BOOL isForceFetchingData = [[[[NSThread currentThread] threadDictionary] valueForKey:@"LibraryIsForceFetchingMessageData"] boolValue] && [[currentMessage getIvar:@"LibraryIsForceFetchingMessageData"] boolValue];
     MCMimeBody *mimeBody = [self MAMimeBodyForMessage:currentMessage];
-    if(!wantsCompleteBodyData) {
+    if(!wantsCompleteBodyData || isForceFetchingData) {
         return mimeBody;
     }
 
@@ -265,19 +271,23 @@ NSString * const kLibraryMessagePreventSnippingAttachmentDataKey = @"LibraryMess
 }
 
 + (id)MAParsedMessageForMessage:(MFLibraryMessage *)message {
-    MCMimeBody *mimeBody = [[MAIL_SELF(self) class] mimeBodyForMessage:message];
     BOOL wantsCompleteBodyData = ([[[[NSThread currentThread] threadDictionary] valueForKey:(NSString *)kLibraryMimeBodyReturnCompleteBodyDataKey] boolValue] &&
                                  [[[NSThread currentThread] threadDictionary] valueForKey:(NSString *)kLibraryMimeBodyReturnCompleteBodyDataForMessageKey] == message) || [[[[NSThread currentThread] threadDictionary] valueForKey:(NSString *)kLibraryMimeBodyReturnCompleteBodyDataForComposeBackendKey] boolValue];
-    if(!mimeBody || !wantsCompleteBodyData) {
+    if(!wantsCompleteBodyData) {
+        return [self MAParsedMessageForMessage:message];
+    }
+    
+    MCMimeBody *mimeBody = [[MAIL_SELF(self) class] mimeBodyForMessage:message];
+    if(!mimeBody) {
         return [self MAParsedMessageForMessage:message];
     }
     MCParsedMessage *parsedMessage = [mimeBody parsedMessage];
     // Check if there's a decrypted mimeBody on the mimeBody.
-    NSError *error = nil;
-    MCMimeBody *decryptedMimeBody = [[mimeBody topLevelPart] decryptedMimeBodyIsEncrypted:NULL isSigned:NULL error:&error];
-    if(decryptedMimeBody && !error) {
-        return [decryptedMimeBody parsedMessage];
-    }
+    //NSError *error = nil;
+    //MCMimeBody *decryptedMimeBody = [[mimeBody topLevelPart] decryptedMimeBodyIsEncrypted:NULL isSigned:NULL error:&error];
+    //if(decryptedMimeBody && !error) {
+    //    return [decryptedMimeBody parsedMessage];
+    //}
 
     // Setup the data source for attachments as Mail does.
     id <IMAPMessageDataSource> messageDataSource = [message dataSource];

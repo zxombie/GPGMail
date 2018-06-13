@@ -31,9 +31,13 @@
 #import <Libmacgpg/Libmacgpg.h>
 
 #import "MCMimePart.h"
+#import "GMContentPartsIsolator.h"
 
 @class MimeBody;
 @class MCMessage;
+@class GMMessageSecurityFeatures;
+@class MCAttachment;
+@class GMMessageProtectionStatus;
 
 #define PGP_ATTACHMENT_EXTENSION @"pgp"
 #define PGP_PART_MARKER_START @"::gpgmail-start-pgp-part::"
@@ -66,7 +70,7 @@ enum {
 
 @class MFMimeDecodeContext, _NSDataMessageStoreMessage;
 
-@interface MimePart_GPGMail : NSObject
+@interface MimePart_GPGMail : NSObject<GMContentPartsIsolatorDelegate>
 
 @property (assign) BOOL PGPEncrypted;
 @property (assign) BOOL PGPPartlyEncrypted;
@@ -78,7 +82,7 @@ enum {
 @property (retain) NSArray *PGPSignatures;
 @property (retain) NSError *PGPError;
 //@property (retain) NSData *PGPDecryptedData;
-@property (retain) MCMimeBody *PGPDecryptedBody;
+//@property (retain) MCMimeBody *PGPDecryptedBody;
 //@property (retain) NSString *PGPDecryptedContent;
 @property (retain) NSString *PGPVerifiedContent;
 @property (retain) NSData *PGPVerifiedData;
@@ -231,7 +235,7 @@ enum {
 /**
  Creates a new message similar the way S/MIME does it, from the decryptedData.
  */
-- (MCMimeBody *)decryptedMessageBodyFromDecryptedData:(NSData *)decryptedData;
+//- (MCMimeBody *)decryptedMessageBodyFromDecryptedData:(NSData *)decryptedData;
 
 /**
  Returns the complete part data but replaces the encrypted data with the decrypted
@@ -383,6 +387,20 @@ enum {
 - (void)failedToEncryptForRecipients:(NSArray *)recipients gpgErrorCode:(GPGErrorCode)errorCode error:(NSException *)error;
 
 - (BOOL)shouldBePGPProcessed;
+
+- (MCMimePart *)decryptedTopLevelMimePart;
+- (GMMessageSecurityFeatures *)securityFeatures;
+
+- (BOOL)mightContainPGPMIMESignedData;
+- (BOOL)mightContainPGPData;
+
+- (MCAttachment *)GMEncryptedPartAsMessageAttachment;
+- (GMMessageProtectionStatus *)GMMessageProtectionStatus;
+
+- (BOOL)GMIsEncryptedPGPMIMETree;
+
+- (NSString *)contentPartsIsolator:(GMContentPartsIsolator *)isolator alternativeContentForIsolatedPart:(GMIsolatedContentPart *)isolatedPart messageBody:(MCParsedMessage *)messageBody;
+- (BOOL)isContentThatNeedsIsolationAvailableForContentPartsIsolator:(GMContentPartsIsolator *)isolator;
 
 @end
 

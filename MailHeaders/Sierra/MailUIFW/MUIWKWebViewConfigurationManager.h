@@ -6,7 +6,7 @@
 
 //#import "NSObject.h"
 
-#import "WKScriptMessageHandler.h"
+//#import "WKScriptMessageHandler.h"
 
 @class NSString, WKWebViewConfiguration;
 
@@ -17,7 +17,7 @@
 
 + (id)sharedInstance;	// IMP=0x000000000002d3f2
 + (id)allocWithZone:(struct _NSZone *)arg1;	// IMP=0x000000000002d338
-- (void).cxx_destruct;	// IMP=0x000000000002efd6
+//- (void).cxx_destruct;	// IMP=0x000000000002efd6
 - (id)_defaultUserStyleSheetString;	// IMP=0x000000000002ed42
 - (id)_userStyleSheetString;	// IMP=0x000000000002e75f
 - (id)_userScripts;	// IMP=0x000000000002e2e9

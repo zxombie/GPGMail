@@ -362,7 +362,10 @@
                                      @"mimeBody",
                                      @"decode",
                                      @"isAttachment",
-                                     @"newEncryptedPartWithData:certificates:encryptedData:"
+                                     @"newEncryptedPartWithData:certificates:encryptedData:",
+                                     @"parsedMessage",
+                                     @"decodeApplicationPkcs7",
+                                     @"htmlStringForMimePart:attachment:"
                                      ]
                              }
                      },
@@ -425,7 +428,8 @@
                      },
              @"CertificateBannerViewController": @{
                      @"selectors": @[
-                             @"updateWantsDisplay"
+                             @"updateWantsDisplay",
+                             @"updateBannerContents"
                              ]
                      },
              @"MCDataAttachmentDataSource": @{
@@ -477,6 +481,44 @@
              @"MFLibraryMessage": @{
                      @"selectors": @[
                              @"shouldSnipAttachmentData"]
+					 },
+			 @"ConversationMember": @{
+					 @"selectors": @[
+							 @"setWebDocument:"
+							 ]
+					 },
+			 @"MUIWebDocument": @{
+					 @"selectors":
+						 @[
+							 @"setBlockRemoteContent:",
+							 @"setHasBlockedRemoteContent:",
+							 @"hasBlockedRemoteContent",
+							 @"setIsEncrypted:"
+							 ]
+					 },
+			 @"MUIWKWebViewController": @{
+					 @"selectors": @[
+							 @"setMessageHasBlockedRemoteContent",
+							 @"reloadDocument",
+							 @"webView:decidePolicyForNavigationAction:decisionHandler:",
+							 @"logInjectedWebBundleMessage:",
+							 @"logWebConsoleMessage:"
+							 ]
+					 },
+			 @"MUIWKWebViewConfigurationManager": @{
+					 @"selectors": @[
+							 @"init"]
+					 },
+			 @"LoadRemoteContentBannerViewController": @{
+					 @"selectors": @[
+							 @"wantsDisplay",
+							 @"setWantsDisplay:",
+							 @"updateBannerContents"]
+					 },
+			 @"JunkMailBannerViewController": @{
+					 @"selectors": @[
+							 @"updateBannerContents"
+							 ]
                      }
              };
 }

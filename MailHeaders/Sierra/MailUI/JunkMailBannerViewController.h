@@ -18,7 +18,7 @@
 @property(retain, nonatomic) NSButton *notJunkButton; // @synthesize notJunkButton=_notJunkButton;
 @property(retain, nonatomic) NSButton *moveMessageButton; // @synthesize moveMessageButton=_moveMessageButton;
 @property(nonatomic) __weak NSTextField *messageField; // @synthesize messageField=_messageField;
-- (void).cxx_destruct;	// IMP=0x00000001001b21d2
+//- (void).cxx_destruct;	// IMP=0x00000001001b21d2
 - (void)moveMessageToInbox:(id)arg1;	// IMP=0x00000001001b1fd1
 - (void)moveMessageToJunk:(id)arg1;	// IMP=0x00000001001b1e77
 - (void)markNotJunk:(id)arg1;	// IMP=0x00000001001b1e0b

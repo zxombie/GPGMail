@@ -51,6 +51,9 @@
 
 @end
 
+#import "MUIWebDocument.h"
+#import "WebDocumentGenerator.h"
+
 @interface CertificateBannerViewController_GPGMail (NotImplemented)
 
 - (id)webDocument;
@@ -68,6 +71,7 @@
     // message, it will force the error to be shown, regardless of error code (which is used by Mail's updateWantsDisplay to determine whether or not to show the banner)
     NSError *error = [[self webDocument] parseError];
     if([error ivarExists:@"ParseErrorIsPGPError"]) {
+        [(NSButton *)[self valueForKey:@"_helpButton"] setHidden:YES];
         [self setWantsDisplay:YES];
     }
     else {
@@ -75,71 +79,164 @@
     }
 }
 
-@end
-
-@interface MCDataAttachmentDataSource_GPGMail : NSObject
-
-@end
-
-@implementation MCDataAttachmentDataSource_GPGMail
-
-- (id)MAInitWithData:(id)arg1 {
-    id ret = [self MAInitWithData:arg1];
-    return ret;
-}
-
-- (id)MAData {
-    id ret = [self MAData];
-    return ret;
-}
-
-@end
-
-@interface MFLibraryAttachmentDataSource_GPGMail : NSObject
-
-@end
-
-@implementation MFLibraryAttachmentDataSource_GPGMail
-
-- (id)MAInitWithMessage:(id)arg1 mimePartNumber:(id)arg2 attachment:(id)arg3 remoteDataSource:(id)arg4 {
-    id decryptedMessage = [arg3 getIvar:@"DecryptedMessage"];
-    if(decryptedMessage) {
-        arg1 = decryptedMessage;
+- (void)MAUpdateBannerContents {
+    // The help button of the certificate banner points
+    // to entries in Apple's help doc about S/MIME.
+    // Doesn't make sense for GPGMail to show it.
+    [self MAUpdateBannerContents];
+    NSError *error = [[self webDocument] parseError];
+    if([error ivarExists:@"ParseErrorIsPGPError"]) {
+        [(NSButton *)[self valueForKey:@"_helpButton"] setHidden:YES];
     }
-    id ret = [self MAInitWithMessage:(id)arg1 mimePartNumber:(id)arg2 attachment:(id)arg3 remoteDataSource:(id)arg4];
-    return ret;
 }
 
 @end
 
+#import "LoadRemoteContentBannerViewController.h"
 
-
-@interface IMAPMessageDownload_GPGMail : NSObject
+@interface LoadRemoteContentBannerViewController_GPGMail : NSObject
 @end
 
-@implementation IMAPMessageDownload_GPGMail
+@implementation LoadRemoteContentBannerViewController_GPGMail
 
-- (void)MASetAllowsPartialDownloads:(BOOL)arg1 {
-    [self MASetAllowsPartialDownloads:arg1];
+- (BOOL)MAWantsDisplay {
+    BOOL wantsDisplay = [self MAWantsDisplay];
+    if(![self isMemberOfClass:NSClassFromString(@"LoadRemoteContentBannerViewController")]) {
+        return wantsDisplay;
+    }
+    if([(MUIWebDocument *)[(LoadRemoteContentBannerViewController *)self webDocument] isEncrypted]) {
+        return NO;
+}
+    return wantsDisplay;
 }
 
-- (id)MACollectDataAndWriteToDisk:(BOOL)arg1 {
-    id ret = [self MACollectDataAndWriteToDisk:arg1];
-    return ret;
+@end
+
+#import "JunkMailBannerViewController.h"
+
+@interface JunkMailBannerViewController_GPGMail : NSObject
+@end
+
+@implementation JunkMailBannerViewController_GPGMail
+
+- (void)MAUpdateBannerContents {
+    [self MAUpdateBannerContents];
+    if(![self isMemberOfClass:NSClassFromString(@"JunkMailBannerViewController")]) {
+        return;
+    }
+    if([(MUIWebDocument *)[(LoadRemoteContentBannerViewController *)self webDocument] isEncrypted]) {
+        [[(LoadRemoteContentBannerViewController *)self loadRemoteContentButton] setHidden:YES];
+    }
 }
 
 @end
 
+@interface MUIWKWebViewController_GPGMail : NSObject
 
-@interface MCKeychainManager_GPGMail : NSObject
+- (id)representedObject;
+- (id)baseURL;
+
 @end
 
-@implementation MCKeychainManager_GPGMail
+@implementation MUIWKWebViewController_GPGMail
+- (void)MAWebView:(WKWebView *)webView
+decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction
+decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+    // Bug #981: Efail
+    //
+    // By default macOS Mail allows HTML-Emails to contain HTML forms
+    // which can be submitted directly from the email.
+    // An attack has been shown, which uses mime part concatenation
+    // to wrap a form around legitimate encrypted content and uses
+    // CSS to make the entire email clickable and thus submitting the
+    // form.
+    //
+    // In order to mitigate against this attack in OpenPGP and S/MIME
+    // messages, form submission of any kind is disallowed within
+    // messages containing encrypted data.
+    //
+    // In order for S/MIME to be less broken, introduce a dialog
+    // asking the user if they really want to click on that link.
+    BOOL isEncrypted = [[self representedObject] isEncrypted];
+    BOOL isSMIMEEncrypted = isEncrypted && ![[self representedObject] getIvar:@"GMMessageSecurityFeatures"];
 
-+ (struct OpaqueSecIdentityRef *)MACopySigningIdentityForAddress:(id)arg1 {
-    id ret = [self MACopySigningIdentityForAddress:arg1];
+    if(!isEncrypted) {
+        [self MAWebView:webView decidePolicyForNavigationAction:navigationAction decisionHandler:decisionHandler];
+        return;
+    }
+
+    // Ignore any form events.
+    if(navigationAction.navigationType == WKNavigationTypeFormSubmitted ||
+       navigationAction.navigationType == WKNavigationTypeFormResubmitted) {
+        decisionHandler(WKNavigationActionPolicyCancel);
+        return;
+    }
+
+    // Ignore any other events besides link clicks.
+    if(navigationAction.navigationType != WKNavigationTypeLinkActivated) {
+        [self MAWebView:webView decidePolicyForNavigationAction:navigationAction decisionHandler:decisionHandler];
+        return;
+    }
+
+    if(isSMIMEEncrypted) {
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:[GPGMailBundle localizedStringForKey:@"NAVIGATION_ACTION_FROM_ENCRYPTED_MESSAGE_TITLE"]];
+        [alert setInformativeText:[NSString stringWithFormat:[GPGMailBundle localizedStringForKey:@"NAVIGATION_ACTION_FROM_ENCRYPTED_MESSAGE_MESSAGE"], navigationAction.request.URL]];
+        [alert addButtonWithTitle:[GPGMailBundle localizedStringForKey:@"NAVIGATION_ACTION_FROM_ENCRYPTED_MESSAGE_BUTTON_YES"]];
+        [alert addButtonWithTitle:[GPGMailBundle localizedStringForKey:@"NAVIGATION_ACTION_FROM_ENCRYPTED_MESSAGE_BUTTON_CANCEL"]];
+        [alert setAlertStyle:NSWarningAlertStyle];
+
+        [alert beginSheetModalForWindow:[(id)[(id)self view] window] completionHandler:^(NSModalResponse returnCode) {
+            if (returnCode == NSAlertSecondButtonReturn) {
+                decisionHandler(WKNavigationActionPolicyCancel);
+                return;
+            }
+            [self MAWebView:webView decidePolicyForNavigationAction:navigationAction decisionHandler:decisionHandler];
+        }];
+        return;
+}
+
+    // Invoke original handler, otherwise no navigation action will work.
+    [self MAWebView:webView decidePolicyForNavigationAction:navigationAction decisionHandler:decisionHandler];
+}
+
+
+@end
+
+
+
+#import "MUIWKWebViewConfigurationManager.h"
+
+@interface _WKUserStyleSheet
+
+- (instancetype)initWithSource:(NSString *)source forMainFrameOnly:(BOOL)forMainFrameOnly;
+
+@end
+
+@interface WKUserContentController (Private)
+
+- (void)_addUserStyleSheet:(_WKUserStyleSheet *)userStyleSheet;
+
+@end
+
+@interface MUIWKWebViewConfigurationManager_GPGMail: NSObject
+@end
+
+@implementation MUIWKWebViewConfigurationManager_GPGMail
+
+- (id)MAInit {
+    id ret = [self MAInit];
+    WKUserScript *resizeScript = [[WKUserScript alloc] initWithSource:@";var __GMIsMainFrame__=!0,console={log:function(){return;for(var e=\"\",t=0;t<arguments.length;t++)e+=\" \"+arguments[t];!function(e){var t=document.getElementsByClassName(\"lp-logger\"),i=t.length?t[0]:null;i||((i=document.createElement(\"div\")).className=\"lp-logger\",document.getElementsByTagName(\"body\")[0].appendChild(i));var n=document.createElement(\"div\");n.innerHTML=e,i.appendChild(n)}(e)}},IFRAME_PREFIX=\"{IFRAME_PREFIX}\";function iframeMatchingName(e){var t=null;return forEachIframe(function(){this.getAttribute(\"name\")===e&&(t=this)}),t}function forEachIframe(e){for(var t=\"untrusted-content-\"+IFRAME_PREFIX,i=document.getElementsByClassName(t),n=0;n<i.length;n++){var a=i[n];e.call(a,n,a)}}function setupIframes(){forEachIframe(function(e,t){this.setAttribute(\"name\",this.className+\"_\"+e),console.log(\"Setting name for iframe \",this.getAttribute(\"name\")),this.onload=resizeIframe,this.src=this.getAttribute(\"data-src\")})}function resizeIframe(e){console.log(\"Asking iframe for height\",this.getAttribute(\"name\"));try{this.contentWindow.postMessage({name:this.getAttribute(\"name\"),width:parseInt(this.getAttribute('width'))},\"*\")}catch(e){console.log(\"Error: \",e)}}function resizeIframes(){lastWindowWidth!==window.innerWidth&&(lastWindowWidth=window.innerWidth,console.log(\"Resizing all iframes...\"),forEachIframe(function(){console.log(\"window width\",window.innerWidth),this.setAttribute(\"width\",(document.body.getBoundingClientRect().width-parseInt(window.getComputedStyle(this).getPropertyValue(\"border-left-width\"))-parseInt(window.getComputedStyle(this).getPropertyValue(\"border-right-width\"))-parseInt(window.getComputedStyle(this).getPropertyValue(\"margin-left\"))-parseInt(window.getComputedStyle(this).getPropertyValue(\"margin-right\"))-20)+\"px\"),console.log('body width', document.body.getBoundingClientRect().width, document.body.getBoundingClientRect().left, document.body.getBoundingClientRect().x, document.body.getBoundingClientRect().right),resizeIframe.call(this)}))}IFRAME_PREFIX=IFRAME_PREFIX.replace(\"{IFRAME_PREFIX}\",\"test\"),window.addEventListener(\"message\",function(e){var t=e.data,i=iframeMatchingName(t.name);console.log(\"Set height: \"+t.height+\"px for iframe '\"+t.name+\"'\"),i.style.height=t.height+\"px\"},!1);var resizeTimeout=!1,resizeDelay=250,lastWindowWidth=0;window.addEventListener(\"resize\",function(){clearTimeout(resizeTimeout),resizeTimeout=setTimeout(resizeIframes,resizeDelay)}),setupIframes();document.getElementsByTagName('html')[0].className+='__main__content'" injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
+    // WebKit on Sierra doesn't have getBoundingClientRect().y
+    WKUserScript *iframeHeightScriptBegin = [[WKUserScript alloc] initWithSource:@"if(\"undefined\"==typeof __GMIsMainFrame__){document.getElementsByTagName('html')[0].className+='unsafe-content';var console={log:function(){return;for(var e=\"\",n=0;n<arguments.length;n++)e+=\" \"+arguments[n];!function(e){var n=document.getElementsByClassName(\"lp-logger\"),t=n.length?n[0]:null;t||((t=document.createElement(\"div\")).className=\"lp-logger\",document.getElementsByTagName(\"body\")[0].insertAdjacentElement(\"afterbegin\",t));var a=document.createElement(\"div\");a.innerHTML=e,t.appendChild(a)}(e)}};function computeContentHeight(){var rect = document.getElementsByTagName(\"iframe-content\")[0].getBoundingClientRect(); console.log('body bottom', document.body.getBoundingClientRect().bottom, document.body.getBoundingClientRect().height); console.log('rect bottom', rect.bottom, rect.height,rect.top,rect.y); return rect.height+rect.top;}window.addEventListener(\"message\",function(e){var n=e.data||{};document.body.style.width = n.width + 'px',n.height=computeContentHeight(),console.log(\"Sending message: \",n.height,n.name),window.parent.postMessage(n,\"*\")},!1)}" injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:NO];
+    [[[(MUIWKWebViewConfigurationManager *)ret configuration] userContentController] addUserScript:resizeScript];
+    [[[(MUIWKWebViewConfigurationManager *)ret configuration] userContentController] addUserScript:iframeHeightScriptBegin];
     
-    return (__bridge struct OpaqueSecIdentityRef *)(ret);
+    id styleSheet = [[NSClassFromString(@"_WKUserStyleSheet") alloc] initWithSource:[(MUIWKWebViewConfigurationManager *)self effectiveUserStyle] forMainFrameOnly:NO];
+    id styleSheet2 = [[NSClassFromString(@"_WKUserStyleSheet") alloc] initWithSource:@"iframe-content { display:block; max-width:100%; width: 100%; overflow-wrap: break-word; word-wrap: break-word; } html.unsafe-content, html.unsafe-content body { margin:0px;padding:0px; width:100%; max-width:100%; overflow:scroll; } html.__main__content .protected-part { margin-top: 20px; position: relative; } html.__main__content .protected-part .protected-title { position: absolute; margin-top: -5px; background-color: #fff; margin-left: 20px; font-weight: bold; } html.__main__content .protected-part .protected-content { border: 3px solid #ccc; padding: 16px; padding-left: 20px; }" forMainFrameOnly:NO];
+    [[[(MUIWKWebViewConfigurationManager *)ret configuration] userContentController] _addUserStyleSheet:styleSheet];
+    [[[(MUIWKWebViewConfigurationManager *)ret configuration] userContentController] _addUserStyleSheet:styleSheet2];
+    return ret;
 }
 
 @end
@@ -159,6 +256,8 @@ NSString *GPGMailAgent = @"GPGMail";
 NSString *GPGMailKeyringUpdatedNotification = @"GPGMailKeyringUpdatedNotification";
 NSString *gpgErrorIdentifier = @"^~::gpgmail-error-code::~^";
 static NSString * const kExpiredCheckKey = @"__gme__";
+
+NSString * const kGMAllowDecryptionOfDangerousMessagesMissingMDCKey = @"GMAllowDecryptionOfDangerousMessagesMissingMDC";
 
 int GPGMailLoggingLevel = 0;
 static BOOL gpgMailWorks = NO;
@@ -294,6 +393,8 @@ static BOOL gpgMailWorks = NO;
         // Initiate the Message Rules Applier.
         _messageRulesApplier = [[GMMessageRulesApplier alloc] init];
         
+        [self setAllowDecryptionOfPotentiallyDangerousMessagesWithoutMDC:[[[GPGOptions sharedOptions] valueForKey:@"AllowDecryptionOfPotentiallyDangerousMessagesWithoutMDC"] boolValue]];
+        
 //        if([GPGMailBundle isElCapitan])
 //            [self runBetaHasExpiredCheck];
         
@@ -313,6 +414,14 @@ static BOOL gpgMailWorks = NO;
 	}
     
 	return self;
+}
+
+- (void)setAllowDecryptionOfPotentiallyDangerousMessagesWithoutMDC:(BOOL)allow {
+    [self setIvar:kGMAllowDecryptionOfDangerousMessagesMissingMDCKey value:@(allow)];
+}
+
+- (BOOL)allowDecryptionOfPotentiallyDangerousMessagesWithoutMDC {
+    return [[self getIvar:kGMAllowDecryptionOfDangerousMessagesMissingMDCKey] boolValue];
 }
 
 + (BOOL)betaExpired {

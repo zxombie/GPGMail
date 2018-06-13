@@ -179,6 +179,6 @@
 - (id)newEncryptedPartWithData:(id)arg1 certificates:(id)arg2 encryptedData:(id *)arg3;	// IMP=0x000000000009baf3
 - (id)newSignedPartWithData:(id)arg1 sender:(id)arg2 identity:(struct OpaqueSecIdentityRef *)arg3 signatureData:(id *)arg4;	// IMP=0x000000000009a305
 - (int)_addDataConvertingLineEndingsFromUnixToNetwork:(id)arg1 toCMSEncoder:(struct _CMSEncoder *)arg2;	// IMP=0x000000000009c5fa
-
+- (id)_parsedMessageFromDecodedContents:(id)arg1;
 @end
 

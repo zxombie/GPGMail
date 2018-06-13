@@ -4,7 +4,7 @@
 //     class-dump is Copyright (C) 1997-1998, 2000-2001, 2004-2013 by Steve Nygard.
 //
 
-#import "NSViewController.h"
+/*#import "NSViewController.h"*/
 
 @class BannerBackgroundView, BannerContainerViewController, ConversationMember, MUIWebDocument, MessageWebDocumentView, NSColor, NSLayoutConstraint, NSLayoutGuide, NSView;
 
@@ -25,7 +25,7 @@
 @property(nonatomic) __weak NSView *leadingView; // @synthesize leadingView=_leadingView;
 @property(nonatomic) BOOL viewIsLoaded; // @synthesize viewIsLoaded=_viewIsLoaded;
 @property(nonatomic) BannerContainerViewController *container; // @synthesize container=_container;
-- (void).cxx_destruct;	// IMP=0x00000001000e7ac1
+//- (void).cxx_destruct;	// IMP=0x00000001000e7ac1
 - (void)updateViewConstraints;	// IMP=0x00000001000e791d
 @property(nonatomic) __weak NSLayoutGuide *leadingMarginGuide; // @synthesize leadingMarginGuide=_leadingMarginGuide;
 - (void)updateWantsDisplay;	// IMP=0x00000001000e786b
