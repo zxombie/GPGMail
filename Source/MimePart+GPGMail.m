@@ -1883,7 +1883,7 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 - (void)MAVerifySignature {
     // Check if message should be processed (-[Message shouldBePGPProcessed])
     // otherwise out of here!
-    if(![(MimePart_GPGMail *)[self topPart] shouldBePGPProcessed]) {
+    if(![(MimePart_GPGMail *)self shouldBePGPProcessed]) {
         return [self MAVerifySignature];
     }
     // If this is a non GPG signed message, let's call the original method
