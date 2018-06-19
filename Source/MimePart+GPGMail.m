@@ -861,14 +861,24 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     // the signed data.
     NSData *decryptedData = [self GMDecryptedDataForEncryptedAttachment];
     attachmentData = decryptedData ? decryptedData : attachmentData;
-        if(decryptedData) {
-        for(NSString *ext in pgpDataExtensions) {
-            if([[filename pathExtension] isEqualToStringIgnoringCase:ext]) {
+    // Bug #990: Re-add support for embedded filename
+    //
+    // Even if a embedded filename is available, GPGMail didn't use
+    // it, and always used the filename with the pgp extension stripped
+    // if decrypting the attachment succeeded.
+    if(decryptedData) {
+        if(self.PGPEmbeddedFilename && [self.PGPEmbeddedFilename length]) {
+            filename = self.PGPEmbeddedFilename;
+        }
+        else {
+            for(NSString *ext in pgpDataExtensions) {
+                if([[filename pathExtension] isEqualToStringIgnoringCase:ext]) {
                     filename = [filename substringWithRange:NSMakeRange(0, [filename length] - ([extension length] + 1))];
                     break;
                 }
             }
         }
+    }
     MCAttachment *attachment = [[MCAttachment alloc] initWithMimePart:self];
     [attachment setFilename:filename];
     MCDataAttachmentDataSource *attachmentDataSource = [[MCDataAttachmentDataSource alloc] initWithData:attachmentData];
@@ -1107,6 +1117,10 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 	// Sometimes decryption okay is issued even though a NODATA error occured.
 	BOOL success = gpgc.decryptionOkay && !error;
 	
+    if(gpgc.filename) {
+        self.PGPEmbeddedFilename = gpgc.filename;
+    }
+
     // Bug #982: Allow messages which don't include an MDC
     //
     // Some users have reported that after Libmacgpg has been patched,
@@ -1156,16 +1170,9 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 		self.PGPVerified = !(success && error);
 	}
 	
-	// Set attachment filename if needed.
-	NSString *filename = gpgc.filename;
-	if (!filename && self.PGPDecrypted) {
-		filename = [MAIL_SELF(self) dispositionParameterForKey:@"filename"];
-		if (filename) {
-			filename = [[filename lastPathComponent] stringByDeletingPGPExtension];
-		}
-	}
-	if (filename) {
-		[MAIL_SELF(self) setDispositionParameter:filename forKey:@"filename"];
+    // Unset the filename if the attachment failed to decrypt.
+    if(!self.PGPDecrypted) {
+        self.PGPEmbeddedFilename = nil;
 	}
 	
     // Last, store the error itself.
@@ -2160,6 +2167,13 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
     return [self getIvar:@"PGPVerifiedData"];
 }
 
+- (void)setPGPEmbeddedFilename:(NSString *)filename {
+    [self setIvar:@"MimePartPGPEmbeddedFilename" value:filename];
+}
+
+- (NSString *)PGPEmbeddedFilename {
+    return [self getIvar:@"MimePartPGPEmbeddedFilename"];
+}
 
 #pragma mark other stuff to test Xcode code folding.
 
