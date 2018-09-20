@@ -110,6 +110,19 @@
     return wantsDisplay;
 }
 
+- (void)MA_hasBlockedRemoteContentDidChange:(BOOL)arg1 {
+    if([(MUIWebDocument *)[(LoadRemoteContentBannerViewController *)self webDocument] isEncrypted]) {
+        if([self respondsToSelector:@selector(loadRemoteContentButton)]) {
+            NSButton *loadRemoteContentButton = [(LoadRemoteContentBannerViewController *)self loadRemoteContentButton];
+            [loadRemoteContentButton setHidden:YES];
+            [loadRemoteContentButton setEnabled:NO];
+        }
+    }
+    else {
+        [self MA_hasBlockedRemoteContentDidChange:arg1];
+    }
+}
+
 @end
 
 #import "JunkMailBannerViewController.h"

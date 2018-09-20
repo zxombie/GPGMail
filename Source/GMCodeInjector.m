@@ -365,7 +365,8 @@
                                      @"newEncryptedPartWithData:certificates:encryptedData:",
                                      @"parsedMessage",
                                      @"decodeApplicationPkcs7",
-                                     @"htmlStringForMimePart:attachment:"
+                                     @"htmlStringForMimePart:attachment:",
+                                     @"_decodeTextHtml"
                                      ]
                              }
                      },
@@ -513,7 +514,8 @@
 					 @"selectors": @[
 							 @"wantsDisplay",
 							 @"setWantsDisplay:",
-							 @"updateBannerContents"]
+							 @"updateBannerContents",
+                             @"_hasBlockedRemoteContentDidChange:"]
 					 },
 			 @"JunkMailBannerViewController": @{
 					 @"selectors": @[
