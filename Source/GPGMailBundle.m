@@ -241,7 +241,7 @@ decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
 
 @end
 
-NSString * const kGMED = @"1$5$3$7:4:7-3-6§0§0";
+NSString * const kGMED = @"1$5$3$9:1:2-2-4§0§0";
 
 @interface GPGMailBundle ()
 
