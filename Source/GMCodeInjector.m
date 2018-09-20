@@ -521,6 +521,10 @@
 					 @"selectors": @[
 							 @"updateBannerContents"
 							 ]
+                     },
+             @"MCMessageHeaders": @{
+                     @"selectors": @[
+                             @"headersForKey:"]
                      }
              };
 }
