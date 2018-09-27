@@ -274,7 +274,7 @@ decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
         //
         // To fix this, GPGMail only allows a single line subject.
         NSString *subject = [headers count] ? headers[0] : nil;
-        if(!subject) {
+        if(![subject length]) {
             return headers;
         }
         NSRange range = NSMakeRange(0, [subject length]);
@@ -285,6 +285,9 @@ decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
                                      firstSubjectLine = paragraph;
                                      *stop = YES;
                                  }];
+        if([!firstSubjectLine length]) {
+		return headers;
+        }
         return @[firstSubjectLine];
     }
     return headers;
