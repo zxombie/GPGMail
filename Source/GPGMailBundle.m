@@ -285,7 +285,7 @@ decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
                                      firstSubjectLine = paragraph;
                                      *stop = YES;
                                  }];
-        if([!firstSubjectLine length]) {
+        if(![firstSubjectLine length]) {
 		return headers;
         }
         return @[firstSubjectLine];
