@@ -585,7 +585,12 @@ NSString * const kMimePartAllowPGPProcessingKey = @"MimePartAllowPGPProcessingKe
 	GMContentPartsIsolator *contentIsolator = [self GMContentPartsIsolator];
     NSString *contentToIsolate = [content isKindOfClass:[MCParsedMessage class]] ? [content html] : content;
     NSString *isolatedContent = [contentIsolator isolationMarkupForContent:contentToIsolate mimePart:MAIL_SELF(self)];
-	[content setHtml:isolatedContent];
+        if([isolatedContent isKindOfClass:[MCParsedMessage class]]) {
+		[content setHtml:isolatedContent];
+	}
+	else {
+		content = isolatedContent;
+	}
 	return content;
 }
 
