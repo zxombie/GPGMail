@@ -11,5 +11,5 @@ task:
     mkdir -p artifacts
     tar -c -f gpgmail.tar -C build/Release GPGMail.mailbundle
     tar -r -f gpgmail.tar -C Dependencies/Libmacgpg/build/Release Libmacgpg.framework
-    xz -9 gpgmail.tar
+    bzip2 -9 gpgmail.tar
     ./upload.sh

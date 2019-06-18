@@ -7,7 +7,7 @@ fi
 
 file_content_type="application/octet-stream"
 files_to_upload=(
-    gpgmail.tar.xz
+    gpgmail.tar.bz2
 )
 
 for fpath in $files_to_upload
