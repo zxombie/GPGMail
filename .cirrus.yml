@@ -8,6 +8,6 @@ task:
     make
     mkdir -p artifacts
     cp -a Dependencies/Libmacgpg/build/Release/Libmacgpg.framework artifacts/
-    cp -a build/Releases/GPGMail.mailbundle artifacts/
+    cp -a build/Release/GPGMail.mailbundle artifacts/
   binaries_artifacts:
     path: "artifacts/*"
