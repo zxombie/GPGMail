@@ -1,0 +1,15 @@
+osx_instance:
+  image: mojave-xcode-10.2
+
+task:
+  env:
+    GITHUB_TOKEN: ENCRYPTED[5f1438ec9d179878e2bff038213edbb76ac9d93f6d229386b92eb96e0e39fe89605de402a4318acc4477cb2effa1bab1]
+  script: |
+    git submodule update --init --force
+    make -C Dependencies/Libmacgpg
+    make
+    mkdir -p artifacts
+    tar -c -f gpgmail.tar -C build/Release GPGMail.mailbundle
+    tar -r -f gpgmail.tar -C Dependencies/Libmacgpg/build/Release Libmacgpg.framework
+    bzip2 -9 gpgmail.tar
+    ./upload.sh
