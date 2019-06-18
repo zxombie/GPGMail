@@ -4,4 +4,5 @@ osx_instance:
 task:
   script: |
     git submodule update --init --force
+    make -C Dependencies/Libmacgpg
     make
