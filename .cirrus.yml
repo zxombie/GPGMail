@@ -2,4 +2,6 @@ osx_instance:
   image: mojave-xcode-10.2
 
 task:
-  script: make
+  script: |
+    git submodule update --init --force
+    make
