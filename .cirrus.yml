@@ -6,3 +6,8 @@ task:
     git submodule update --init --force
     make -C Dependencies/Libmacgpg
     make
+    mkdir -p artifacts
+    cp Dependencies/Libmacgpg/build/Release/Libmacgpg.framework artifacts/
+    cp build/Releases/GPGMail.mailbundle artifacts/
+  binaries_artifacts:
+    path: "artifacts/*"
