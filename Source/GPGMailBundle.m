@@ -837,11 +837,7 @@ static BOOL gpgMailWorks = NO;
 }
 
 - (NSNumber *)remainingTrialDays {
-    NSDictionary *contractInformation = [self contractInformation];
-    if(!contractInformation[@"ActivationRemainingTrialDays"]) {
-        return @(30);
-    }
-    return contractInformation[@"ActivationRemainingTrialDays"];
+    return @(30);
 }
 
 - (void)startSupportContractWizard {
